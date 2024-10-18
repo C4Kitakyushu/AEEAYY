@@ -1,24 +1,36 @@
+const axios = require('axios');
 module.exports = {
-  name: 'unsend',
-  description: "unsend bot's message",
-  author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage, api, event) {
-    // Ensure the command is a reply to a bot message
-    if (event.messageReply.senderID !== api.getCurrentUserID()) {
-      return sendMessage(senderId, { text: "I can't unsend from other message." }, pageAccessToken);
-    }
-
-    // Check if the event is a reply
-    if (event.type !== "message_reply") {
-      return sendMessage(senderId, { text: "Reply to bot message" }, pageAccessToken);
-    }
-
+  name: 'gpt4',
+  description: 'aak a question to gpt-4',
+  author: 'Deku (rest api)',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    const prompt = args.join( );
     try {
-      // Attempt to unsend the message
-      await api.unsendMessage(event.messageReply.messageID);
+      const apiUrl = `https://deku-rest-apis.ooguy.com/gpt4?prompt=${encodeURIComponent(prompt)}&uid=100${senderId}`;
+      const response = await axios.get(apiUrl);
+      const text = response.data.gpt4;
+
+      // Split the response into chunks if it exceeds 2000 characters
+      const maxMessageLength = 2000;
+      if (text.length > maxMessageLength) {
+        const messages = splitMessageIntoChunks(text, maxMessageLength);
+        for (const message of messages) {
+          sendMessage(senderId, { text: message }, pageAccessToken);
+        }
+      } else {
+        sendMessage(senderId, { text }, pageAccessToken);
+      }
     } catch (error) {
-      console.error('Error unsending message:', error);
-      return sendMessage(senderId, { text: "Something went wrong." }, pageAccessToken);
+      console.error('Error calling GPT-4 API:', error);
+      sendMessage(senderId, { text: 'Please Enter Your Valid Question?.' }, pageAccessToken);
     }
   }
 };
+
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+}

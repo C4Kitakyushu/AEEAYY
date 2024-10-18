@@ -1,6 +1,6 @@
 module.exports = {
   name: 'unsend',
-  description: "Unsend bot's message",
+  description: "unsend bot's message",
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage, api, event) {
     // Ensure the command is a reply to a bot message

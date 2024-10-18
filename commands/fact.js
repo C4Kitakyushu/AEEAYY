@@ -2,8 +2,8 @@ const axios = require('axios');
 
 module.exports = {
   name: 'fact',
-  description: 'Fetches a random fact.',
-  author: 'chan',
+  description: 'fetches a random fact.',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     if (args.length > 0) {
       return sendMessage(senderId, { text: "‼️ This command does not require additional arguments." }, pageAccessToken);

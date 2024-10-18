@@ -15,7 +15,7 @@ module.exports = {
     });
 
     const totalCommands = commandFiles.length;
-    const helpMessage = `𝗠𝗜𝗚𝗢 𝗔𝗜 𝗖𝗠𝗗 𝗟𝗜𝗦𝗧: \➜𝘁𝗼𝘁𝗮𝗹 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀: ${totalCommands} \n\n${commands.join('\n\n')}`;
+    const helpMessage = `𝗠𝗜𝗚𝗢 𝗔𝗜 𝗖𝗠𝗗 𝗟𝗜𝗦𝗧:\n➜𝘁𝗼𝘁𝗮𝗹 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀: ${totalCommands} \n\n${commands.join('\n\n')}`;
     
     sendMessage(senderId, { text: helpMessage }, pageAccessToken);
   }

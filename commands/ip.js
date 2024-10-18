@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'ipInfo',
-  description: 'Get information about an IP address',
+  description: 'get information about an ip address',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     // Check if the user provided an IP address

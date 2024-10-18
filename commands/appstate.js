@@ -1,27 +1,21 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'appstate',
-  description: 'Get cookie using email and password',
+  name: 'ashley',
+  description: 'talk to ashley masarap',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    // Expecting args to have email and password
-    const [email, password] = args;
-
-    if (!email || !password) {
-      return sendMessage(senderId, { text: 'Please provide both email and password.' }, pageAccessToken);
-    }
-
+    const query = args.join(' ');
     try {
-      const apiUrl = `https://deku-rest-apis.ooguy.com/getcookie?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+      const apiUrl = `https://markdevs-last-api-2epw.onrender.com/api/ashley?query=${encodeURIComponent(query)}`;
       const response = await axios.get(apiUrl);
-      const cookieData = response.data;
+      const text = response.data.result; // Adjust based on the actual response structure
 
-      // Send the cookie data back to the user
-      sendMessage(senderId, { text: JSON.stringify(cookieData) }, pageAccessToken);
+      // Send the response back to the user
+      sendMessage(senderId, { text }, pageAccessToken);
     } catch (error) {
-      console.error('Error calling GetCookie API:', error);
-      sendMessage(senderId, { text: 'Failed to retrieve cookie. ' + error.message }, pageAccessToken);
+      console.error('Error calling Ashley API:', error);
+      sendMessage(senderId, { text: error.message }, pageAccessToken);
     }
   }
 };

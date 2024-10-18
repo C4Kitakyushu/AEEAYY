@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'advice',
-  description: 'Fetches a random piece of advice.',
+  description: 'fetches a random piece of advice.',
   author: 'dev',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     if (args.length > 0) {

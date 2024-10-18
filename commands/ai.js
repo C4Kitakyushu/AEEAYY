@@ -3,7 +3,7 @@ const axios = require('axios');
 module.exports = {
   name: 'ai',
   description: 'ask to ai',
-  author: 'dev',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     let userInput = args.join(" ").trim();
 

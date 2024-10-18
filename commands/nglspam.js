@@ -2,8 +2,8 @@ const axios = require('axios');
 
 module.exports = {
   name: 'nglspam',
-  description: 'Sends a specified message multiple times to a given username using NGL API.',
-  author: 'tukmol',
+  description: 'nglspam <usn> <mess> <amount>.',
+  author: 'dev',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const username = args[0];
     const amount = parseInt(args[args.length - 1], 10);

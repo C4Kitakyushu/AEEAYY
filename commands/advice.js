@@ -20,7 +20,7 @@ module.exports = {
         return sendMessage(senderId, { text: "☹ Sorry, I couldn't fetch any advice at the moment." }, pageAccessToken);
       }
 
-      const message = `🫂 Here's a random piece of advice for you:\n\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n➜ ${advice.advice}\n━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      const message = `🫂 Here's a random piece of advice for you:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n➜ ${advice.advice}\n━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 
       // Send the advice
       sendMessage(senderId, { text: message }, pageAccessToken);

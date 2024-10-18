@@ -1,24 +1,41 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'getlink',
-  description: 'retrieve media link from replied image or video',
+  name: 'tokengetter',
+  description: 'tokengetter email | password',
   author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage, event, api, getText) {
-    const { messageReply } = event;
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    const input = args.join(" ");
+    const [username, password] = input.split(" | ");
 
-    // Check if the message is a reply with an image or video attachment
-    if (event.type !== "message_reply" || !messageReply.attachments || messageReply.attachments.length !== 1) {
-      return sendMessage(senderId, { text: getText("invalidFormat") }, pageAccessToken);
+    if (!username || !password) {
+      return sendMessage(senderId, { text: "Usage: tokengetter <username> | <password>" }, pageAccessToken);
     }
 
-    // Send the media URL from the message reply
     try {
-      const mediaUrl = messageReply.attachments[0].url;
-      sendMessage(senderId, { text: mediaUrl }, pageAccessToken);
+      const apiUrl = `https://markdevs-last-api-2epw.onrender.com/api/token&cookie?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+      const response = await axios.get(apiUrl);
+
+      const { access_token_eaad6v7, access_token, cookies } = response.data.data;
+
+      const message = `
+Generated Tokens and Cookie:
+
+EAAD6V7 TOKEN: 
+➜ ${access_token_eaad6v7}
+
+EAAAAU TOKEN:
+➜ ${access_token}
+
+COOKIES:
+➜ ${cookies}
+`;
+
+      sendMessage(senderId, { text: message }, pageAccessToken);
+      
     } catch (error) {
-      console.error('Error retrieving media URL:', error);
-      sendMessage(senderId, { text: 'Failed to retrieve media link.' }, pageAccessToken);
+      console.error('Error fetching tokens:', error);
+      sendMessage(senderId, { text: "An error occurred while getting the tokens and cookie." }, pageAccessToken);
     }
   }
 };

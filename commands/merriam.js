@@ -3,7 +3,7 @@ const axios = require('axios');
 module.exports = {
   name: 'merriam',
   description: 'fetches the definition of a word from merriam webster.',
-  author: 'dev',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const word = args.join(" ");
 

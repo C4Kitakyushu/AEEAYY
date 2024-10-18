@@ -3,7 +3,7 @@ const axios = require('axios');
 module.exports = {
   name: 'joke',
   description: 'fetches a random joke.',
-  author: 'dev',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     sendMessage(senderId, { text: "⚙️ Fetching a joke for you..." }, pageAccessToken);
 

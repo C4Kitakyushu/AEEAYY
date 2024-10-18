@@ -3,7 +3,7 @@ const path = require('path');
 
 module.exports = {
   name: 'help',
-  description: 'Show available commands',
+  description: 'show available commands',
   author: 'System',
   execute(senderId, args, pageAccessToken, sendMessage) {
     const commandsDir = path.join(__dirname, '../commands');
@@ -11,11 +11,11 @@ module.exports = {
 
     const commands = commandFiles.map(file => {
       const command = require(path.join(commandsDir, file));
-      return `⟿ ${command.name}\n  - ${command.description}\n  - Credits: ${command.author}`;
+      return `➜ ${command.name}\n  ➜ ${command.description}\n ➜ 𝗰𝗿𝗲𝗱𝗶𝘁: ${command.author}`;
     });
 
     const totalCommands = commandFiles.length;
-    const helpMessage = `Here are the available commands: \nTotal commands: ${totalCommands} \n\n${commands.join('\n\n')}`;
+    const helpMessage = `𝗠𝗜𝗚𝗢 𝗔𝗜 𝗖𝗠𝗗 𝗟𝗜𝗦𝗧: \➜𝘁𝗼𝘁𝗮𝗹 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀: ${totalCommands} \n\n${commands.join('\n\n')}`;
     
     sendMessage(senderId, { text: helpMessage }, pageAccessToken);
   }

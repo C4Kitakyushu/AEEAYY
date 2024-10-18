@@ -3,7 +3,7 @@ const axios = require('axios');
 module.exports = {
   name: 'bible',
   description: 'fetches a random Bible verse.',
-  author: 'dev',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     sendMessage(senderId, { text: '🙏 Fetching a random Bible verse, please wait...' }, pageAccessToken);
 

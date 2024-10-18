@@ -5,7 +5,7 @@ const path = require('path');
 module.exports = {
   name: 'pastecode',
   description: 'upload code snippets to pastecode and send the link.',
-  author: 'Romeo & Juliet kantotan',  // if you change credit you are a gay
+  author: 'developer',  // if you change credit you are a gay
 
   async execute(senderId, args, pageAccessToken, sendMessage, event, api) {
     try {

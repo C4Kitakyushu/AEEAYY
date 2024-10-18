@@ -6,7 +6,7 @@ const INBOX_API_URL = "https://www.samirxpikachu.run.place/tempmail/inbox/";
 module.exports = {
   name: 'tempmail',
   description: 'generate temporary email or check inbox',
-  author: 'coffee',
+  author: 'dev',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     try {
       if (args.length === 0) {

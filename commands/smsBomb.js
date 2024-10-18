@@ -3,7 +3,7 @@ const axios = require('axios');
 module.exports = {
   name: 'smsbomb',
   description: 'Send multiple SMS messages to a number with a delay',
-  author: 'Deku (rest api)',
+  author: 'dev',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const [number, amount, delay] = args;
 

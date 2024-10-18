@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'wikipedia',
-  description: 'Search and know about any topic',
+  description: 'search and know about any topic',
   author: 'dev',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const searchQuery = args.join(" ");

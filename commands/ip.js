@@ -1,23 +1,24 @@
-const axios = require('axios');
-
 module.exports = {
-  name: 'gpt',
-  description: 'interact with gpt-4O',
+  name: 'unsend',
+  description: "Unsend bot's message",
   author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    const prompt = args.join(' ');
-    const uid = senderId; // Assuming uid is the same as senderId; adjust as needed.
+  async execute(senderId, args, pageAccessToken, sendMessage, api, event) {
+    // Ensure the command is a reply to a bot message
+    if (event.messageReply.senderID !== api.getCurrentUserID()) {
+      return sendMessage(senderId, { text: "I can't unsend from other message." }, pageAccessToken);
+    }
+
+    // Check if the event is a reply
+    if (event.type !== "message_reply") {
+      return sendMessage(senderId, { text: "Reply to bot message" }, pageAccessToken);
+    }
 
     try {
-      const apiUrl = `https://ccprojectsjonellapis-production.up.railway.app/api/gpt4o-v2?prompt=${encodeURIComponent(prompt)}&uid=${uid}`;
-      const response = await axios.get(apiUrl);
-      const text = response.data.result; // Adjust based on the actual response structure
-
-      // Send the response back to the user
-      sendMessage(senderId, { text }, pageAccessToken);
+      // Attempt to unsend the message
+      await api.unsendMessage(event.messageReply.messageID);
     } catch (error) {
-      console.error('Error calling GPT-4O API:', error);
-      sendMessage(senderId, { text: 'An error occurred while processing your request.' }, pageAccessToken);
+      console.error('Error unsending message:', error);
+      return sendMessage(senderId, { text: "Something went wrong." }, pageAccessToken);
     }
   }
 };

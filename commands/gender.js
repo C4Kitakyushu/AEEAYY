@@ -2,8 +2,8 @@ const axios = require('axios');
 
 module.exports = {
   name: 'gender',
-  description: 'Fetches the gender based on the provided name.',
-  author: 'Apollo Quiboloy',
+  description: 'fetches the gender based on the provided name.',
+  author: 'dev',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const name = args.join(" ");
 

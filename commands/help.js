@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
   name: 'help',
   description: 'show available commands',
-  author: 'System',
+  author: 'system developer',
   execute(senderId, args, pageAccessToken, sendMessage) {
     const commandsDir = path.join(__dirname, '../commands');
     const commandFiles = fs.readdirSync(commandsDir).filter(file => file.endsWith('.js'));

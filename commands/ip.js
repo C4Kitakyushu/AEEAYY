@@ -17,8 +17,7 @@ module.exports = {
       sendMessage(senderId, { text }, pageAccessToken);
     } catch (error) {
       console.error('Error calling GPT4 API:', error);
-      sendMessage(senderId, { text: 'An error occurred while processing your request.' }, pageAccessTo
-ken);
+      sendMessage(senderId, { text: 'An error occurred while processing your request.' }, pageAccessToken);
     }
   }
 };

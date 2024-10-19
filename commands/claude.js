@@ -1,6 +1,6 @@
 module.exports = {
   name: 'claude',
-  description: 'ask to Claude Sonnet 3.5',
+  description: 'ask to claude sonnet 3.5',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const prompt = args.join(' ');

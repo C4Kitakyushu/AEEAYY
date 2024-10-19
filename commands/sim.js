@@ -2,7 +2,7 @@ const axios = require("axios");
 
 module.exports = {
   name: "sim",
-  description: "Talk to SimSimi",
+  description: "talk to simsimi",
   author: "developer",
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const content = encodeURIComponent(args.join(" "));

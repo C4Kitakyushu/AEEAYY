@@ -1,5 +1,3 @@
-const axios = require('axios');
-
 module.exports = {
   name: 'claude',
   description: 'ask to Claude Sonnet 3.5',
@@ -14,10 +12,15 @@ module.exports = {
 
     try {
       const apiUrl = `https://rest-api.joshuaapostol.site/blackbox/model/claude-sonnet-3.5?prompt=${encodeURIComponent(prompt)}`;
-      const response = await axios.get(apiUrl);
+      const response = await fetch(apiUrl);
 
-      // Check if the response is valid and contains the necessary data
-      const answer = response?.data?.response;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const answer = data?.response;
+
       if (!answer) {
         throw new Error('No valid response received from the API');
       }

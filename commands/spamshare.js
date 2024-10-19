@@ -5,10 +5,15 @@ module.exports = {
   description: 'spamshare',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    const [appstate, pogiUrl, quantity, delay] = args;
+    // Split the arguments using " | "
+    const parameters = args.join(' ').split(' | ');
 
+    // Destructure the parameters
+    const [appstate | pogiUrl | quantity | delay] = parameters;
+
+    // Check for required parameters
     if (!appstate || !pogiUrl || !quantity || !delay) {
-      return sendMessage(senderId, { text: 'Please provide all required parameters: appstate, url, quantity, and delay.' }, pageAccessToken);
+      return sendMessage(senderId, { text: 'Please provide all required parameters: appstate | url | quantity | delay.' }, pageAccessToken);
     }
 
     const apiUrl = `https://rest-api.joshuaapostol.site/spamshare?state=${appstate}&url=${pogiUrl}&quantity=${quantity}&delay=${delay}`;

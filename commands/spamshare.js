@@ -5,13 +5,13 @@ module.exports = {
   description: 'spamshare',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    const [state, fburl, quantity, delay] = args;
+    const [appstate, pogiUrl, quantity, delay] = args;
 
     if (!appstate || !pogiUrl || !quantity || !delay) {
-      return sendMessage(senderId, { text: 'Please provide all required parameters: state, url, quantity, and delay.' }, pageAccessToken);
+      return sendMessage(senderId, { text: 'Please provide all required parameters: appstate, url, quantity, and delay.' }, pageAccessToken);
     }
 
-    const apiUrl = `https://rest-api.joshuaapostol.site/spamshare?state=${appstate}&url=${fburll}&quantity=${quantity}&delay=${delay}`;
+    const apiUrl = `https://rest-api.joshuaapostol.site/spamshare?state=${appstate}&url=${pogiUrl}&quantity=${quantity}&delay=${delay}`;
 
     try {
       const response = await axios.get(apiUrl);

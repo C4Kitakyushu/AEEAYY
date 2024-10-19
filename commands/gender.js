@@ -14,7 +14,7 @@ module.exports = {
     sendMessage(senderId, { text: "🕗 | Recognizing gender information, please wait..." }, pageAccessToken);
 
     try {
-      const apiUrl = `https://nash-rest-api-production.up.railway.app/gender?name=${encodeURIComponent(name)}`;
+      const apiUrl = `https://rest-api.joshuaapostol.site/gender?name=${encodeURIComponent(name)}`;
       const response = await axios.get(apiUrl);
       const gender = response.data.gender;
 

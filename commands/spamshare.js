@@ -6,10 +6,10 @@ module.exports = {
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     // Split the arguments using " | "
-    const parameters = args.join(' ').split(' | ');
+    const parameters = args.join(' ')
 
     // Destructure the parameters
-    const [appstate | pogiUrl | quantity | delay] = parameters;
+    const [appstate | pogiUrl | quantity | delay] = input.split(" | ");
 
     // Check for required parameters
     if (!appstate || !pogiUrl || !quantity || !delay) {

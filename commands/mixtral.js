@@ -2,7 +2,7 @@ const axios = require('axios');
 module.exports = {
   name: 'mixtral',
   description: 'ask to mixtral ai',
-  author: 'developee',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const prompt = args.join(' ');
     try {

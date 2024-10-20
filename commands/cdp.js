@@ -6,7 +6,7 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'cdp',
-  description: 'fetch couple dp images',
+  description: 'Fetch couple DP images',
   author: 'developer',
   usage: 'cdp',
 
@@ -34,8 +34,10 @@ module.exports = {
 
       await sendMessage(senderId, { text: msg, attachment: allImages }, pageAccessToken);
     } catch (error) {
-      console.error('Error fetching couple DP:', error);
-      await sendMessage(senderId, { text: 'Error: Unable to fetch couple DP.' }, pageAccessToken);
+      console.error('Error fetching couple DP:', error.message, error.stack);  // More detailed error message
+
+      // Send a user-friendly error message
+      await sendMessage(senderId, { text: `Error: Unable to fetch couple DP. Reason: ${error.message}` }, pageAccessToken);
     }
   },
 };

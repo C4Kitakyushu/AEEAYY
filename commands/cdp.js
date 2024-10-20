@@ -15,7 +15,7 @@ module.exports = {
 
     try {
       // Make the API call to get the couple DP data
-      const { data } = await axios.get("https://c-v3.onrender.com/v1/cdp/get");
+      const { data } = await axios.get("https://apizaryan.onrender.com/v1/cdp/get");
 
       // Fetch male image
       const maleImg = await axios.get(data.male, { responseType: 'arraybuffer' });

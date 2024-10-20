@@ -1,36 +1,26 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'smsbomb',
-  description: 'initiates sms bombing by sending multiple sms messages.',
+  name: 'imagine',
+  description: 'generates an image based on prompt',
   author: 'developer',
-  
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    const [phone, amount, cooldown] = args;
-
-    if (!phone || !amount || !cooldown) {
-      sendMessage(senderId, { text: 'Usage: smsbomb [phone] [amount] [cooldown]' }, pageAccessToken);
+  async execute(senderId, args, pageAccessToken) {
+    if (!args || !Array.isArray(args) || args.length === 0) {
+      await sendMessage(senderId, { text: 'Please provide a prompt for image generation.' }, pageAccessToken);
       return;
     }
 
-    sendMessage(senderId, { text: '⚙️ Starting SMS Bombing...' }, pageAccessToken);
+    const prompt = args.join(' ');
 
     try {
-      const response = await axios.get('https://deku-rest-apis.ooguy.com/smsb', {
-        params: {
-          number: phone,
-          amount: amount,
-          delay: cooldown
-        }
-      });
+      const apiUrl = `https://ccprojectsjonellapis-production.up.railway.app/api/generate-art?prompt=${encodeURIComponent(prompt)}`;
 
-      const data = response.data;
-      console.log('Response:', data);
+      await sendMessage(senderId, { attachment: { type: 'image', payload: { url: apiUrl } } }, pageAccessToken);
 
-      sendMessage(senderId, { text: 'Success! All messages have been sent 💣' }, pageAccessToken);
     } catch (error) {
       console.error('Error:', error);
-      sendMessage(senderId, { text: '🔥 An error occurred while sending messages.' }, pageAccessToken);
+      await sendMessage(senderId, { text: 'Error: Could not generate image.' }, pageAccessToken);
     }
   }
 };

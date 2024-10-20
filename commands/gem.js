@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'gemini',
-  description: 'interact with gemini to describe a photo.',
+  description: 'Interact with Gemini to describe a photo.',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage, event) {
     const prompt = args.join(" ");
@@ -18,13 +18,13 @@ module.exports = {
     const url = encodeURIComponent(event.messageReply.attachments[0].url);
 
     try {
-      sendMessage(senderId, { text: "GEMINI\n━━━━━━━━━━━━━━━━━━\nGemini recognizing picture, please wait...\n━━━━━━━━━━━━━━━━━━" }, pageAccessToken);
+      sendMessage(senderId, { text: "🤖 GEMINI ✨\n━━━━━━━━━━━━━━━━━━\nGemini recognizing picture, please wait...\n━━━━━━━━━━━━━━━━━━" }, pageAccessToken);
 
-      const apiUrl = `https://joshweb.click/gemini?prompt=${encodeURIComponent('describe this photo')}&url=${url}`;
+      const apiUrl = `https://joshweb.click/gemini?prompt=${encodeURIComponent(prompt)}&url=${url}`;
       const response = await axios.get(apiUrl);
       const description = response.data.gemini;
 
-      return sendMessage(senderId, { text: `🤖 GEMINI\n━━━━━━━━━━━━━━━━━━\n${description}\n━━━━━━━━━━━━━━━━━━` }, pageAccessToken);
+      return sendMessage(senderId, { text: `🤖 GEMINI ✨\n━━━━━━━━━━━━━━━━━━\n${description}\n━━━━━━━━━━━━━━━━━━` }, pageAccessToken);
     } catch (error) {
       console.error('Error processing the photo:', error);
       return sendMessage(senderId, { text: "❌ | An error occurred while processing your request." }, pageAccessToken);

@@ -1,43 +1,35 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: 'cdp',
-  description: 'Fetch couple DP images',
+  name: 'gpt4o',
+  description: 'aak to gpt4o',
   author: 'developer',
-  usage: 'cdp',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    const prompt = args.join(' ');
 
-  async execute(senderId) {
-    const pageAccessToken = token;
+    if (!prompt) {
+      sendMessage(senderId, { text: "Usage: /gpt4o <question>" }, pageAccessToken);
+      return;
+    }
+
+    sendMessage(senderId, { text: 'Generating content... Please wait.' }, pageAccessToken);
 
     try {
-      // Make the API call to get the couple DP data
-      const { data } = await axios.get("https://apizaryan.onrender.com/v1/cdp/get");
+      const apiUrl = `https://joshweb.click/api/gpt-4o?q=${encodeURIComponent(prompt)}&uid=${senderId}`;
+      const response = await axios.get(apiUrl);
 
-      // Fetch male image
-      const maleImg = await axios.get(data.male, { responseType: 'arraybuffer' });
-      fs.writeFileSync(__dirname + '/tmp/img1.png', Buffer.from(maleImg.data, 'utf-8'));
+      // Assuming the API returns the result in the response.data.result
+      const result = response.data.result;
 
-      // Fetch female image
-      const femaleImg = await axios.get(data.female, { responseType: 'arraybuffer' });
-      fs.writeFileSync(__dirname + '/tmp/img2.png', Buffer.from(femaleImg.data, 'utf-8'));
+      if (result) {
+        sendMessage(senderId, { text: `GPT4o Response:\n\n${result}` }, pageAccessToken);
+      } else {
+        sendMessage(senderId, { text: 'No result was returned from the API.' }, pageAccessToken);
+      }
 
-      // Send message with both images
-      const msg = 'Here is your couple dp 💜(◕ᴗ◕✿)';
-      const allImages = [
-        fs.createReadStream(__dirname + '/tmp/img1.png'),
-        fs.createReadStream(__dirname + '/tmp/img2.png')
-      ];
-
-      await sendMessage(senderId, { text: msg, attachment: allImages }, pageAccessToken);
     } catch (error) {
-      console.error('Error fetching couple DP:', error.message, error.stack);  // More detailed error message
-
-      // Send a user-friendly error message
-      await sendMessage(senderId, { text: `Error: Unable to fetch couple DP. Reason: ${error.message}` }, pageAccessToken);
+      console.error('Error calling GPT-4o API:', error.message);
+      sendMessage(senderId, { text: 'An error occurred while generating the content. Please try again later.' }, pageAccessToken);
     }
-  },
+  }
 };

@@ -1,36 +1,35 @@
 const axios = require('axios');
+
 module.exports = {
-  name: 'gpt4',
-  description: 'ask a question to gpt-4',
+  name: 'gpt',
+  description: 'aak to gpt4o model ',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    const prompt = args.join( );
-    try {
-      const apiUrl = `https://deku-rest-apis.ooguy.com/gpt4?prompt=${encodeURIComponent(prompt)}&uid=100${senderId}`;
-      const response = await axios.get(apiUrl);
-      const text = response.data.gpt4;
+    const prompt = args.join(' ');
 
-      // Split the response into chunks if it exceeds 2000 characters
-      const maxMessageLength = 2000;
-      if (text.length > maxMessageLength) {
-        const messages = splitMessageIntoChunks(text, maxMessageLength);
-        for (const message of messages) {
-          sendMessage(senderId, { text: message }, pageAccessToken);
-        }
+    if (!prompt) {
+      sendMessage(senderId, { text: "Usage: gpt <question>" }, pageAccessToken);
+      return;
+    }
+
+    sendMessage(senderId, { text: '🕜 | Answering your question... Please wait.' }, pageAccessToken);
+
+    try {
+      const apiUrl = `https://joshweb.click/api/gpt-4o?q=${encodeURIComponent(prompt)}&uid=${senderId}`;
+      const response = await axios.get(apiUrl);
+
+      // Assuming the API returns the result in the response.data.result
+      const result = response.data.result;
+
+      if (result) {
+        sendMessage(senderId, { text: `MIGO ASSISTANT 🤖✨\n\n${result}` }, pageAccessToken);
       } else {
-        sendMessage(senderId, { text }, pageAccessToken);
+        sendMessage(senderId, { text: 'No result was returned from the API.' }, pageAccessToken);
       }
+
     } catch (error) {
-      console.error('Error calling GPT-4 API:', error);
-      sendMessage(senderId, { text: 'Please Enter Your Valid Question?.' }, pageAccessToken);
+      console.error('Error calling GPT-4o API:', error.message);
+      sendMessage(senderId, { text: 'An error occurred while generating the content. Please try again later.' }, pageAccessToken);
     }
   }
 };
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}

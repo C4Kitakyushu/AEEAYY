@@ -1,13 +1,13 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'ai2',
-  description: 'ask to ai',
+  name: 'ai',
+  description: 'ask to claude sonnet 3.5',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    let userInput = args.join(" ").trim();
+    const prompt = args.join(' ').trim();
 
-    if (!userInput) {
+    if (!prompt) {
       return sendMessage(senderId, { text: '𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝗮 𝘃𝗮𝗹𝗶𝗱 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻.' }, pageAccessToken);
     }
 
@@ -16,27 +16,27 @@ module.exports = {
     // Delay for 2 seconds
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const gpt4_api = `https://personal-ai-phi.vercel.app/kshitiz?prompt=${encodeURIComponent(userInput)}&content=${encodeURIComponent("you are an AI assistant")}`;
+    const apiUrl = `https://rest-api.joshuaapostol.site/blackbox/model/claude-sonnet-3.5?prompt=${encodeURIComponent(prompt)}`;
 
     try {
-      const response = await axios.get(gpt4_api);
+      const response = await axios.get(apiUrl);
 
-      if (response.data && response.data.code === 2 && response.data.message === "success") {
-        const generatedText = response.data.answer;
+      if (response.data && response.data.response) {
+        const answer = response.data.response;
         const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
-        // For simplicity, we're not fetching the user info in this structure, but if needed, you can implement it.
-        const message = `𝗠𝗜𝗚𝗢 𝗔𝗦𝗦𝗜𝗦𝗧𝗔𝗡𝗧 🤖\n━━━━━━━━━━━━━━━\n${generatedText}\n━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
-
+        const message = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${answer}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
         sendMessage(senderId, { text: message }, pageAccessToken);
       } else {
         console.error('API response did not contain expected data:', response.data);
-        sendMessage(senderId, { text: '❌ An error occurred while generating the text response. Please try again later.' }, pageAccessToken);
+        sendMessage(senderId, { text: '❌ | An error occurred while generating the text response. Please try again later.' }, pageAccessToken);
       }
     } catch (error) {
-      console.error('Error:', error);
-      sendMessage(senderId, { text: `❌ An error occurred while generating the text response. Please try again later. Error details: ${error.message}` }, pageAccessToken);
+      console.error('Error calling Claude Sonnet API:', error.message || error);
+      sendMessage(senderId, { 
+        text: `❌ | An error occurred while processing your request. Please try again later. Error details: ${error.message}` 
+      }, pageAccessToken);
     }
   }
 };

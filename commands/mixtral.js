@@ -5,7 +5,7 @@ module.exports = {
   description: 'ask to ai using Claude-Sonnet 3.5',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    let userInput = args.join(" ").trim();
+    let prompt = args.join(" ").trim();
 
     if (!prompt) {
       return sendMessage(senderId, { text: 'Usage: ai [your question]' }, pageAccessToken);

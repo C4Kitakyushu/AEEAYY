@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'ai',
+  name: 'ai2',
   description: 'ask to claude sonnet 3.5',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {

@@ -2,12 +2,12 @@ const axios = require('axios');
 
 module.exports = {
   name: 'llama',
-  description: 'talk to llama ',
+  description: 'talk to llama 3.2-11b',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const prompt = args.join(' ');
     try {
-      const apiUrl = `https://deku-rest-apis.ooguy.com/api/llama-3-70b?q=${encodeURIComponent(prompt)}&uid=100${senderId}`;
+      const apiUrl = `https://joshweb.click/ai/llama-3.2-11b-vision-instruct?q=${encodeURIComponent(prompt)}&uid=${senderId}`;
       const response = await axios.get(apiUrl);
       const text = response.data.result;
 

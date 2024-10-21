@@ -8,7 +8,7 @@ module.exports = {
   author: 'developer',
   async execute(senderId, args, pageAccessToken) {
     if (!args || !Array.isArray(args) || args.length === 0) {
-      await sendMessage(senderId, { text: 'Please provide the text ✨' }, pageAccessToken);
+      await sendMessage(senderId, { text: '❌ Please provide the text ' }, pageAccessToken);
       return;
     }
 

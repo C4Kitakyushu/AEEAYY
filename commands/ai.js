@@ -26,7 +26,7 @@ module.exports = {
         const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
         // For simplicity, we're not fetching the user info in this structure, but if needed, you can implement it.
-        const message = `𝗠𝗜𝗚𝗢 𝗔𝗦𝗦𝗜𝗦𝗧𝗔𝗡𝗧 🤖\n━━━━━━━━━━━━━━━\n${generatedText}\n━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
+        const message = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━\n${generatedText}\n━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
 
         sendMessage(senderId, { text: message }, pageAccessToken);

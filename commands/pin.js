@@ -1,44 +1,51 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: 'pinterest',
-  description: 'fetch images from pinterest',
-  author: 'developer',
-  usage: 'pinterest <search term> <number of images (1-10)>',
+  name: "pinterest",
+  description: "searching pics from pinterest",
+  author: "developer",
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
-
-    if (!args || args.length < 1) {
-      return await sendMessage(senderId, { text: ' 🖼️ | Please use this format:\npinterest Llama - 5' }, pageAccessToken);
-    }
-
-    const searchTerm = args[0];
-    let numImages = parseInt(args[1]) || 1;
-    numImages = Math.abs(numImages);
-    numImages = Math.min(numImages, 10);
-    numImages = Math.max(numImages, 1);
-
-    const apiUrl = `https://pin-kshitiz.vercel.app/pin?search=${encodeURIComponent(searchTerm)}`;
-
+  async execute(senderId, args, pageAccessToken, sendMessage) {
     try {
-      const { data } = await axios.get(apiUrl);
-      const images = data.result.slice(0, numImages);
+      if (args.length === 0) {
+        return sendMessage(senderId, {
+          text: `🖼️•Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest Llama - 10`
+        }, pageAccessToken);
+      }
 
-      if (images.length > 0) {
-        for (const imageUrl of images) {
-          await sendMessage(senderId, { attachment: { type: 'image', payload: { url: imageUrl } } }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, { text: '❌ No images found for your search.' }, pageAccessToken);
+      const [searchTerm, count] = args.join(" ").split(" - ");
+      if (!searchTerm) {
+        return sendMessage(senderId, {
+          text: `Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest cat - 10`
+        }, pageAccessToken);
+      }
+
+      const numOfImages = parseInt(count) || 5;
+      const response = await axios.get(`https://api.kenliejugarap.com/pinterestbymarjhun/?search=${encodeURIComponent(searchTerm)}`);
+
+      if (!response.data.status) {
+        return sendMessage(senderId, { text: `No results found for "${searchTerm}".` }, pageAccessToken);
+      }
+
+      const imageUrls = response.data.data.slice(0, numOfImages);
+      if (imageUrls.length === 0) {
+        return sendMessage(senderId, { text: `No available images for "${searchTerm}".` }, pageAccessToken);
+      }
+
+      // Send each image URL as an attachment
+      for (const url of imageUrls) {
+        await sendMessage(senderId, {
+          attachment: {
+            type: "image",
+            payload: {
+              url: url
+            }
+          }
+        }, pageAccessToken);
       }
     } catch (error) {
-      console.error('❌ Error fetching images:', error);
-      await sendMessage(senderId, { text: 'Error: Unable to fetch images from Pinterest.' }, pageAccessToken);
+      console.error("Failed to retrieve images from Pinterest:", error);
+      sendMessage(senderId, { text: `❌ Failed to retrieve images from Pinterest. Error: ${error.message || error}` }, pageAccessToken);
     }
-  },
+  }
 };

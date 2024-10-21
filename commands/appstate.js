@@ -14,7 +14,7 @@ module.exports = {
       return sendMessage(senderId, { text: 'hello baby nigga😼' }, pageAccessToken);
     }
 
-    const typingNotification = await sendMessage(senderId, { text: '⏳ Ashley is typing, please wait...' }, pageAccessToken);
+    const typingNotification = await sendMessage(senderId, { text: 'ۦۦ' }, pageAccessToken);
 
     const apiUrl = `https://markdevs-last-api-t48o.onrender.com/api/ashley?query=${encodeURIComponent(ashley)}`;
 

@@ -16,7 +16,7 @@ module.exports = {
       const [searchTerm, count] = args.join(" ").split(" - ");
       if (!searchTerm) {
         return sendMessage(senderId, {
-          text: `Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest cat - 10`
+          text: `🖼️•Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest Llama - 10`
         }, pageAccessToken);
       }
 

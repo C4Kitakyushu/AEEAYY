@@ -7,7 +7,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, sendMessage) {
     let userInput = args.join(" ").trim();
 
-    if (!userInput) {
+    if (!prompt) {
       return sendMessage(senderId, { text: 'Usage: ai [your question]' }, pageAccessToken);
     }
 
@@ -16,7 +16,7 @@ module.exports = {
     // Delay for 2 seconds
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const apiUrl = `https://rest-api.joshuaapostol.site/blackbox/model/claude-sonnet-3.5?prompt=${encodeURIComponent(userInput)}`;
+    const apiUrl = `https://rest-api.joshuaapostol.site/blackbox/model/claude-sonnet-3.5?prompt=${encodeURIComponent(prompt)}`;
 
     try {
       const response = await axios.get(apiUrl);

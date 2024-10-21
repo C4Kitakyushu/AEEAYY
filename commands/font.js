@@ -384,9 +384,9 @@ map: {
 
 module.exports = {
   name: 'font',
-  description: 'Convert text to different fonts',
+  description: 'font list',
   usage: '-font',
-  author: 'Coffee',
+  author: 'developer',
   async execute(senderId, args) {
   const pageAccessToken = token;
 

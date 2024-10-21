@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'mark',
-  description: 'generate a mark image with text',
+  description: 'mark <text>',
   usage: 'mark <text>',
   author: 'developer',
   async execute(senderId, args, pageAccessToken) {

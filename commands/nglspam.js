@@ -4,7 +4,7 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   name: "nglspam",
   description: "send to ngl usn.",
-  author: "Churchill",
+  author: "developer",
 
   async execute(senderId, args, pageAccessToken) {
     const input = args.join(" ").split("|").map(item => item.trim());

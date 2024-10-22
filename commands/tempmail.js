@@ -2,18 +2,18 @@ const axios = require('axios');
 
 module.exports = {
   name: 'tempmail',
-  description: 'generates a temporary email address and optionally checks the inbox.',
-  author: 'Developer',
+  description: 'Generates a temporary email address and optionally checks the inbox.',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const command = args[0]; // 'create' or 'inbox'
-    
+
     if (!command || command === 'create') {
       // Generate a new temporary email address
       try {
-        const response = await axios.get('https://markdevs-last-api-2epw.onrender.com/api/gen');
+        const response = await axios.get('https://apizaryan.onrender.com/tempmail/gen');
         const email = response.data.email;
 
-        sendMessage(senderId, { text: `📩 Your generated email: ${email}` }, pageAccessToken);
+        sendMessage(senderId, { text: `📩 your generated email: ${email}` }, pageAccessToken);
       } catch (error) {
         console.error('Error generating email:', error);
         sendMessage(senderId, { text: 'An error occurred while generating the temporary email.' }, pageAccessToken);
@@ -27,7 +27,7 @@ module.exports = {
 
       // Check the inbox for the provided temporary email address
       try {
-        const response = await axios.get(`https://markdevs-last-api-2epw.onrender.com/api/getmessage/${encodeURIComponent(email)}`);
+        const response = await axios.get(`https://apizaryan.onrender.com/tempmail/inbox?email=${encodeURIComponent(email)}`);
         const messages = response.data;
 
         if (messages.length > 0) {

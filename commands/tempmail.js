@@ -1,87 +1,47 @@
 const axios = require('axios');
 
-const EMAIL_API_URL = "https://markdevs-last-api-2epw.onrender.com/api/gen";
-const INBOX_API_URL = "https://markdevs-last-api-2epw.onrender.com/api/getmessage/:email";
-
 module.exports = {
   name: 'tempmail',
-  description: 'Generate a temporary email or check the inbox',
-  author: 'developer',
+  description: 'generates a temporary email address and optionally checks the inbox.',
+  author: 'Developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    try {
-      if (args.length === 0) {
-        return sendMessage(senderId, {
-          text: "Use 'tempmail create' to generate a temporary email or 'tempmail inbox (email)' to retrieve inbox messages."
-        }, pageAccessToken);
+    const command = args[0]; // 'create' or 'inbox'
+    
+    if (!command || command === 'create') {
+      // Generate a new temporary email address
+      try {
+        const response = await axios.get('https://markdevs-last-api-2epw.onrender.com/api/gen');
+        const email = response.data.email;
+
+        sendMessage(senderId, { text: `📩 Your generated email: ${email}` }, pageAccessToken);
+      } catch (error) {
+        console.error('Error generating email:', error);
+        sendMessage(senderId, { text: 'An error occurred while generating the temporary email.' }, pageAccessToken);
+      }
+    } else if (command === 'inbox') {
+      const email = args[1]; // Email to check
+
+      if (!email) {
+        return sendMessage(senderId, { text: 'Please provide the temporary email address to check.' }, pageAccessToken);
       }
 
-      const command = args[0].toLowerCase();
+      // Check the inbox for the provided temporary email address
+      try {
+        const response = await axios.get(`https://markdevs-last-api-2epw.onrender.com/api/getmessage/${encodeURIComponent(email)}`);
+        const messages = response.data;
 
-      if (command === 'create') {
-        let email;
-        try {
-          // Generate a random temporary email
-          const response = await axios.get(EMAIL_API_URL);
-          email = response.data.email;
-
-          if (!email) {
-            throw new Error("Failed to generate email");
-          }
-        } catch (error) {
-          console.error("❌ | Failed to generate email", error.message);
-          return sendMessage(senderId, {
-            text: `❌ | Failed to generate email. Error: ${error.message}`
-          }, pageAccessToken);
+        if (messages.length > 0) {
+          let messageList = messages.map((msg, index) => `#${index + 1} From: ${msg.from}\nSubject: ${msg.subject}\nDate: ${msg.date}`).join('\n\n');
+          sendMessage(senderId, { text: `📬 Checked Inbox for ${email}:\n\n${messageList}` }, pageAccessToken);
+        } else {
+          sendMessage(senderId, { text: 'Your inbox is empty.' }, pageAccessToken);
         }
-        return sendMessage(senderId, { text: `✉️ Generated email: ${email}` }, pageAccessToken);
-      } else if (command === 'inbox' && args.length === 2) {
-        const email = args[1];
-        if (!email) {
-          return sendMessage(senderId, {
-            text: "❌ | Please provide an email address to check the inbox."
-          }, pageAccessToken);
-        }
-
-        let inboxMessages;
-        try {
-          // Retrieve messages from the specified email
-          const inboxResponse = await axios.get(`${INBOX_API_URL}${email}`);
-          inboxMessages = inboxResponse.data;
-
-          if (!Array.isArray(inboxMessages)) {
-            throw new Error("Unexpected response format");
-          }
-        } catch (error) {
-          console.error("❌ | Failed to retrieve inbox messages", error.message);
-          return sendMessage(senderId, {
-            text: `❌ | Failed to retrieve inbox messages. Error: ${error.message}`
-          }, pageAccessToken);
-        }
-
-        if (inboxMessages.length === 0) {
-          return sendMessage(senderId, {
-            text: "❌ | No messages found in the inbox."
-          }, pageAccessToken);
-        }
-
-        // Get the most recent message
-        const latestMessage = inboxMessages[0];
-        const { date, from, subject } = latestMessage;
-
-        const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;
-        return sendMessage(senderId, {
-          text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}`
-        }, pageAccessToken);
-      } else {
-        return sendMessage(senderId, {
-          text: `❌ | Invalid command. Use 'tempmail create' to generate a temporary email or 'tempmail inbox (email)' to retrieve inbox messages.`
-        }, pageAccessToken);
+      } catch (error) {
+        console.error('Error checking inbox:', error);
+        sendMessage(senderId, { text: 'An error occurred while checking the inbox.' }, pageAccessToken);
       }
-    } catch (error) {
-      console.error("Unexpected error:", error.message);
-      return sendMessage(senderId, {
-        text: `❌ | An unexpected error occurred: ${error.message}`
-      }, pageAccessToken);
+    } else {
+      sendMessage(senderId, { text: 'Invalid command. Use "create" to generate a new email or "inbox <email>" to check the inbox.' }, pageAccessToken);
     }
   }
 };

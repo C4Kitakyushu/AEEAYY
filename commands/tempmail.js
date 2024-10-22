@@ -1,12 +1,12 @@
 const axios = require('axios');
 
-const EMAIL_API_URL = "https://apizaryan.onrender.com/tempmail/gen";
-const INBOX_API_URL = "https://apizaryan.onrender.com/tempmail/inbox?email=kefvqaqpi7j8@rteet.com";
+const EMAIL_API_URL = "https://markdevs-last-api-2epw.onrender.com/api/gen";
+const INBOX_API_URL = "https://markdevs-last-api-2epw.onrender.com/api/getmessage/:email";
 
 module.exports = {
   name: 'tempmail',
   description: 'Generate a temporary email or check the inbox',
-  author: 'coffee',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     try {
       if (args.length === 0) {

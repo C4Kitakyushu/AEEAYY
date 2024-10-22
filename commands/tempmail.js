@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const EMAIL_API_URL = "https://apizaryan.onrender.com/tempmail/gen";
-const INBOX_API_URL = "https://apizaryan.onrender.com/tempmail/inbox?email=";
+const INBOX_API_URL = "https://apizaryan.onrender.com/tempmail/inbox?email=kefvqaqpi7j8@rteet.com";
 
 module.exports = {
   name: 'tempmail',

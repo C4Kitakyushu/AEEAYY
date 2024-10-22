@@ -13,7 +13,7 @@ module.exports = {
     }
 
     try {
-      const apiUrl = `https://nash-rest-api-production.up.railway.app/wikipedia?search=${encodeURIComponent(searchQuery)}`;
+      const apiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchQuery)}`;
       const response = await axios.get(apiUrl);
 
       if (response.data.title && response.data.extract) {

@@ -11,12 +11,14 @@ module.exports = {
     if (!command || command === "create") {
       // Generate a new temporary email address
       try {
-        const response = await axios.get('https://c-v1.onrender.com/tempmail/gen');
+        const response = await axios.get('https://c-v1.onrender.com/tempmail/gen', {
+          timeout: 5000  // Set a 5-second timeout
+        });
         const email = response.data.email;
 
         sendMessage(senderId, { text: `📩 your generated email: ${email}` }, pageAccessToken);
       } catch (error) {
-        console.error("Error generating temporary email:", error);
+        console.error("Error generating temporary email:", error.message);
         sendMessage(senderId, { text: 'An error occurred while generating the temporary email.' }, pageAccessToken);
       }
     } else if (command === "inbox") {
@@ -28,7 +30,9 @@ module.exports = {
 
       // Check the inbox for the provided temporary email address
       try {
-        const response = await axios.get(`https://c-v1.onrender.com/tempmail/inbox?email=${encodeURIComponent(email)}`);
+        const response = await axios.get(`https://c-v1.onrender.com/tempmail/inbox?email=${encodeURIComponent(email)}`, {
+          timeout: 5000  // Set a 5-second timeout
+        });
         const messages = response.data;
 
         if (messages.length > 0) {
@@ -38,7 +42,7 @@ module.exports = {
           sendMessage(senderId, { text: 'Your inbox is empty.' }, pageAccessToken);
         }
       } catch (error) {
-        console.error("Error checking inbox:", error);
+        console.error("Error checking inbox:", error.message);
         sendMessage(senderId, { text: '❌ An error occurred while checking the inbox.' }, pageAccessToken);
       }
     } else {

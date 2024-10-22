@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: "⚙️ Fetching a joke for you..." }, pageAccessToken);
 
     try {
-      const apiUrl = 'https://nash-rest-api-production.up.railway.app/joke';
+      const apiUrl = 'https://apizaryan.onrender.com/api/joke';
       const response = await axios.get(apiUrl);
       const joke = response.data.joke;
 

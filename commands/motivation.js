@@ -17,7 +17,7 @@ module.exports = {
 
     try {
       // Make the API call to fetch couple DP URLs
-      const { data } = await axios.get("https://c-v3.onrender.com/v1/cdp/get");
+      const { data } = await axios.get("https://apizaryan.onrender.com/v1/cdp/get");
 
       // Fetch the images using axios
       const maleImg = await axios.get(data.male, { responseType: 'arraybuffer' });

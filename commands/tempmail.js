@@ -1,7 +1,7 @@
 const axios = require('axios');
 
-const EMAIL_API_URL = "https://www.samirxpikachu.run.place/tempmail/get";
-const INBOX_API_URL = "https://www.samirxpikachu.run.place/tempmail/inbox/";
+const EMAIL_API_URL = "https://apizaryan.onrender.com/tempmail/gen";
+const INBOX_API_URL = "https://apizaryan.onrender.com/tempmail/inbox?email=";
 
 module.exports = {
   name: 'tempmail',
@@ -29,7 +29,7 @@ module.exports = {
           console.error("❌ | Failed to generate email", error.message);
           return sendMessage(senderId, { text: `❌ | Failed to generate email. Error: ${error.message}` }, pageAccessToken);
         }
-        return sendMessage(senderId, { text: `✉️: ${email}` }, pageAccessToken);
+        return sendMessage(senderId, { text: `✉️ generated email: ${email}` }, pageAccessToken);
       } else if (command === 'inbox' && args.length === 2) {
         const email = args[1];
         if (!email) {
@@ -61,7 +61,7 @@ module.exports = {
         const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;
         return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
       } else {
-        return sendMessage(senderId, { text: `❌ | Invalid command. Use '-tempmail create' to generate a temporary email or '-tempmail inbox (email)' to retrieve inbox messages.` }, pageAccessToken);
+        return sendMessage(senderId, { text: `❌ | Invalid command. Use '-tempmail create' to generate a temporary email or 'tempmail inbox (email)' to retrieve inbox messages.` }, pageAccessToken);
       }
     } catch (error) {
       console.error("Unexpected error:", error.message);

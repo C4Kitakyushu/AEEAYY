@@ -8,7 +8,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const command = args[0]; // 'check' or empty
 
-    if (!command || command === "gen") {
+    if (!command || command === "create") {
       // Generate a new temporary email address
       try {
         const response = await axios.get('https://c-v1.onrender.com/tempmail/gen');

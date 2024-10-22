@@ -1,38 +1,43 @@
-const axios = require('axios');
+const axios = require("axios");
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'nglspam',
-  description: 'nglspam <usn> <mess> <amount>.',
-  author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    const username = args[0];
-    const amount = parseInt(args[args.length - 1], 10);
-    const message = args.slice(1, args.length - 1).join(' ');
+  name: "nglspam",
+  description: "send to ngl usn.",
+  author: "Churchill",
 
-    if (!username || !message || isNaN(amount) || amount <= 0) {
-      return sendMessage(senderId, { text: 'Usage: nglspam [username] [message] [amount]' }, pageAccessToken);
+  async execute(senderId, args, pageAccessToken) {
+    const input = args.join(" ").split("|").map(item => item.trim());
+
+    if (input.length !== 3) {
+      return sendMessage(senderId, { text: "Invalid format. Usage: nglspam username | message | count" }, pageAccessToken);
     }
 
-    sendMessage(senderId, { text: '⚙️ Processing your request to send messages to NGL username...' }, pageAccessToken);
+    const [username, message, count] = input;
+    const total = parseInt(count, 10);
 
-    for (let i = 0; i < amount; i++) {
-      try {
-        const response = await axios.get('https://nash-rest-api-production.up.railway.app/ngl', {
-          params: {
-            username,
-            message,
-            deviceId: 'myDevice',
-            amount: 1
-          }
-        });
-        console.log('Response:', response.data);
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between requests
+    if (isNaN(total) || total <= 0) {
+      return sendMessage(senderId, { text: "The count must be a positive integer." }, pageAccessToken);
+    }
+
+    sendMessage(senderId, { text: `sending ${total} messages to ${username}...` }, pageAccessToken);
+
+    try {
+      // Encode message to handle spaces and special characters
+      const apiUrl = `https://markdevs69v2-679r.onrender.com/api/other/nglspam?username=${encodeURIComponent(username)}&message=${encodeURIComponent(message)}&total=${total}`;
+
+      // Perform the API request
+      const response = await axios.get(apiUrl);
+
+      if (response.data && response.data.status === true) {
+        const result = response.data.result;
+        sendMessage(senderId, { text: result }, pageAccessToken);
+      } else {
+        sendMessage(senderId, { text: "Failed to send messages. Please check the details and try again." }, pageAccessToken);
       }
+    } catch (error) {
+      console.error("Error in NGL Spam command:", error);
+      sendMessage(senderId, { text: "An error occurred while sending the messages. Please try again." }, pageAccessToken);
     }
-
-    sendMessage(senderId, { text: 'All messages successfully sent ✅.' }, pageAccessToken);
   }
 };

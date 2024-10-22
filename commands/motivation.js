@@ -2,7 +2,6 @@ const axios = require('axios');
 const fs = require('fs-extra');
 const { sendMessage } = require('../handles/sendMessage');
 
-const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'cdp',

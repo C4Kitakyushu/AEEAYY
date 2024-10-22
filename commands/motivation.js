@@ -1,4 +1,3 @@
-
 const axios = require('axios');
 
 module.exports = {
@@ -10,18 +9,18 @@ module.exports = {
       return sendMessage(senderId, { text: "‼️ This command does not require additional arguments." }, pageAccessToken);
     }
 
-    sendMessage(senderId, { text: "⚙ Fetching a motivational quote for you..." }, pageAccessToken);
+    sendMessage(senderId, { text: "⚙ Fetching a random motivational quote for you..." }, pageAccessToken);
 
     try {
       const apiUrl = 'https://apizaryan.onrender.com/api/motivation';
       const response = await axios.get(apiUrl);
-      const quote = response.data;
+      const motivation = response.data;
 
-      if (!quote || !quote.message) {
+      if (!motivation || !motivation.quote) {
         return sendMessage(senderId, { text: "☹ Sorry, I couldn't fetch a motivational quote at the moment." }, pageAccessToken);
       }
 
-      const message = `💪 Here's your motivational quote:\\━━━━━━━━━━━━━━━━━━━━━━━\n➜ ${quote.message}\n━━━━━━━━━━━━━━━━━━━━━━━`;
+      const message = `💪 Here's a random motivational quote for you:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n➜ "${motivation.quote}"\n━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 
       // Send the motivational quote
       sendMessage(senderId, { text: message }, pageAccessToken);

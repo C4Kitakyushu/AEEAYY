@@ -12,7 +12,7 @@ module.exports = {
       // Generate a new temporary email address
       try {
         const response = await axios.get('https://c-v1.onrender.com/tempmail/gen', {
-          timeout: 5000  // Set a 5-second timeout
+          timeout: 3000  // Set a 3-second timeout
         });
         const email = response.data.email;
 

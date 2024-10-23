@@ -21,7 +21,7 @@ module.exports = {
         console.error("Error generating email:", error);
         sendMessage(senderId, { text: "An error occurred while generating the email." }, pageAccessToken);
       }
-    } else if (args[0].toLowerCase() === "inbox" && args.length === 2) {
+    } else if (args[0].toLowerCase() === "check" && args.length === 2) {
       const email = args[1];
       try {
         const apiUrl = `https://c-v1.onrender.com/tempmail/inbox?email=${encodeURIComponent(email)}`;

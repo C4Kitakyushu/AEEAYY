@@ -3,7 +3,7 @@ const axios = require('axios');
 module.exports = {
   name: 'quote',
   description: 'Get a random inspirational quote.',
-  author: 'Developer',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     sendMessage(senderId, { text: "🕗 | Fetching a random quote, please wait..." }, pageAccessToken);
 

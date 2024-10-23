@@ -8,14 +8,14 @@ module.exports = {
     sendMessage(senderId, { text: "🕗 | Fetching a random quote, please wait..." }, pageAccessToken);
 
     try {
-      const response = await axios.get('https://api.quotable.io/random');
+      const response = await axios.get('https://rest-api.joshuaapostol.site/quote');
       const { content, author } = response.data;
 
       if (!content || !author) {
         return sendMessage(senderId, { text: '☹ Sorry, I couldn’t fetch a quote at the moment.' }, pageAccessToken);
       }
 
-      const message = `"${content}"/n// - ${author}`;
+      const message = `"${content}"\n\n - ${author}`;
       sendMessage(senderId, { text: message }, pageAccessToken);
     } catch (error) {
       console.error('Error fetching quote:', error);

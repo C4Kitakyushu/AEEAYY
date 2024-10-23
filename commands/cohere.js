@@ -1,11 +1,11 @@
-const axios = require("axios");
+const axios = require('axios');
 
 module.exports = {
   name: 'cohere',
-  description: 'ask to Cohere ai',
+  description: 'Ask Cohere AI',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    let userInput = args.join(" ").trim();
+    let userInput = args.join(' ').trim();
 
     if (!userInput) {
       return sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝗿𝘆' }, pageAccessToken);
@@ -25,7 +25,7 @@ module.exports = {
         const cohereResponse = response.data.answer;
         const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
-        const message = `✨ 𝗖𝗼𝗵𝗲𝗿𝗲 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━\n${cohereResponse}\n━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
+        const message = `🤖 𝗖𝗼𝗵𝗲𝗿𝗲 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━\n${cohereResponse}\n━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
         sendMessage(senderId, { text: message }, pageAccessToken);
       } else {

@@ -25,7 +25,7 @@ module.exports = {
 ━━━━━━━━━━━━━━━━━━
 ${responseString}
 ━━━━━━━━━━━━━━━━━━
-◉ -,-
+
       `;
 
       sendMessage(senderId, { text: formattedResponse.trim() }, pageAccessToken);

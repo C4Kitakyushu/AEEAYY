@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'gpt',
+  name: 'gpt4',
   description: 'ask to gpt4o model ',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {

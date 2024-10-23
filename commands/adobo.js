@@ -2,7 +2,7 @@ const axios = require("axios");
 
 module.exports = {
   name: 'adobo',
-  description: 'manok',
+  description: 'ask to adobo gpt',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     let userInput = args.join(" ").trim();

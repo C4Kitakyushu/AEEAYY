@@ -10,8 +10,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, sendMessage) {
     try {
       if (args.length === 0) {
-        return sendMessage(senderId, { text: "tempmail create (generate email)
-\ntempmail inbox <email>." }, pageAccessToken);
+        return sendMessage(senderId, { text: "tempmail create and tempmail inbox <email>" }, pageAccessToken);
       }
 
       const command = args[0].toLowerCase();

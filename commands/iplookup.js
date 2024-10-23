@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'iplookup',
-  description: 'fetch and send IP lookup details',
+  description: 'fetch and send iplookup details',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const ip = args.join(" ").trim();

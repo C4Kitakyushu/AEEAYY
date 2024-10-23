@@ -1,40 +1,41 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+const token = fs.readFileSync('token.txt', 'utf8');
+const MAX_MESSAGE_LENGTH = 2000;
 
 module.exports = {
   name: 'cohere',
-  description: 'Ask Cohere AI',
+  description: 'interact with cohere ai',
   author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    let userInput = args.join(' ').trim();
+  usage: 'cohere [question/message]',
 
-    if (!userInput) {
-      return sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝗿𝘆' }, pageAccessToken);
-    }
-
-    sendMessage(senderId, { text: '🕧 | 𝗦𝗲𝗮𝗿𝗰𝗵𝗶𝗻𝗴 𝗳𝗼𝗿 𝗖𝗼𝗵𝗲𝗿𝗲 𝗔𝗜, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
-
-    // Delay for 2 seconds
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const apiUrl = `https://hiroshi-api.onrender.com/ai/cohere?ask=${encodeURIComponent(userInput)}`;
+  async execute(senderId, args) {
+    const pageAccessToken = token;
+    const input = (args.join(' ') || 'hello').trim();
 
     try {
+      const response = await axios.get(`https://hiroshi-api.onrender.com/ai/cohere?ask=${encodeURIComponent(input)}`);
+
+try {
       const response = await axios.get(apiUrl);
 
       if (response.data && response.data.answer) {
         const cohereResponse = response.data.answer;
         const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
-        const message = `🤖 𝗖𝗼𝗵𝗲𝗿𝗲 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━\n${cohereResponse}\n━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
+      const data = response.data;
+      const responseText = data.response || 'No response available.';
+      const formattedMessage = `❄️ 𝗖𝗼𝗵𝗲𝗿𝗲 𝗔𝗜 🤖\n━━━━━━━━━━━━━━\n${responseText}\n━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
-        sendMessage(senderId, { text: message }, pageAccessToken);
-      } else {
-        console.error('API response did not contain expected data:', response.data);
-        sendMessage(senderId, { text: '❌ An error occurred while fetching the Cohere AI response. Please try again later.' }, pageAccessToken);
-      }
+      // Truncate the message if it exceeds the maximum allowed length
+      const truncatedMessage = formattedMessage.substring(0, MAX_MESSAGE_LENGTH);
+
+      await sendMessage(senderId, { text: truncatedMessage }, pageAccessToken);
     } catch (error) {
-      console.error('Error calling Cohere API:', error);
-      sendMessage(senderId, { text: `❌ An error occurred while fetching the data. Error details: ${error.message}` }, pageAccessToken);
+      console.error('Error:', error);
+      await sendMessage(senderId, { text: 'Error: Unexpected error.' }, pageAccessToken);
     }
   }
 };

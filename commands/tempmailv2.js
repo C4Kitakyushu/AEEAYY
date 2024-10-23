@@ -1,0 +1,53 @@
+const axios = require("axios");
+
+module.exports = {
+  name: "tempmail",
+  description: "generate random email and fetch inbox",
+  author: "developer",
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+
+    if (!args[0]) {
+      return sendMessage(senderId, { text: "Please provide a valid command: 'gen' or 'inbox {email}'." }, pageAccessToken);
+    }
+
+    if (args[0] === "create") {
+      try {
+        const apiUrl = "https://markdevs69v2-679r.onrender.com/new/api/gen";
+        const response = await axios.get(apiUrl);
+        const email = response.data.email;
+
+        sendMessage(senderId, { text: `✅ Here is your generated email:\n\n✉️ Email: ${email}` }, pageAccessToken);
+      } catch (error) {
+        console.error("Error generating email:", error);
+        sendMessage(senderId, { text: "An error occurred while generating the email." }, pageAccessToken);
+      }
+    } else if (args[0].toLowerCase() === "inbox" && args.length === 2) {
+      const email = args[1];
+      try {
+        const apiUrl = `https://markdevs69v2-679r.onrender.com/new/api/getmessage/${email}`;
+        const response = await axios.get(apiUrl);
+        const messages = response.data;
+
+        if (messages.length > 0) {
+          const inboxFrom = messages[0].from;
+          const inboxSubject = messages[0].subject;
+          const inboxBody = messages[0].body;
+          const inboxDate = messages[0].date;
+
+          sendMessage(
+            senderId,
+            { text: `•=====[Inbox]=====•\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n📅 Date: ${inboxDate}\n\n💌 Message: ${inboxBody}` },
+            pageAccessToken
+          );
+        } else {
+          sendMessage(senderId, { text: "🔴 No messages found in the inbox for this email." }, pageAccessToken);
+        }
+      } catch (error) {
+        console.error("Error fetching inbox:", error);
+        sendMessage(senderId, { text: "An error occurred while fetching the inbox." }, pageAccessToken);
+      }
+    } else {
+      sendMessage(senderId, { text: "Please provide a valid command: 'gen' or 'inbox {email}'." }, pageAccessToken);
+    }
+  }
+};

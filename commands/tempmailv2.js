@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 module.exports = {
-  name: "tempmail",
+  name: "tempmailv2",
   description: "generate random email and fetch inbox",
   author: "developer",
   async execute(senderId, args, pageAccessToken, sendMessage) {

@@ -11,7 +11,7 @@ module.exports = {
       return sendMessage(senderId, { text: '❌ Please provide an IP address. Example: iplookup <ip>' }, pageAccessToken);
     }
 
-    sendMessage(senderId, { text: '🔍 LOOKING UP IP...' }, pageAccessToken);
+    sendMessage(senderId, { text: '🔍 LOOKING UP IP PLEASE WAIT...' }, pageAccessToken);
 
     const apiUrl = `https://joshweb.click/iplu?ip=${encodeURIComponent(ip)}`;
 

@@ -7,13 +7,13 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, sendMessage) {
 
     if (!args[0]) {
-      return sendMessage(senderId, { text: "Please provide a valid command: 'gen' or 'inbox {email}'." }, pageAccessToken);
+      return sendMessage(senderId, { text: "Please provide a valid command: 'create' or 'inbox {email}'." }, pageAccessToken);
     }
 
     if (args[0] === "create") {
       try {
-        const apiUrl = "https://markdevs69v2-679r.onrender.com/new/api/gen";
-        const response = await axios.get(apiUrl);
+        const apiUrl = "https://c-v1.onrender.com/tempmail/gen";
+        const response = await axios.get(apiUrl, { timeout: 2000 });
         const email = response.data.email;
 
         sendMessage(senderId, { text: `✅ Here is your generated email:\n\n✉️ Email: ${email}` }, pageAccessToken);
@@ -24,19 +24,18 @@ module.exports = {
     } else if (args[0].toLowerCase() === "inbox" && args.length === 2) {
       const email = args[1];
       try {
-        const apiUrl = `https://markdevs69v2-679r.onrender.com/new/api/getmessage/${email}`;
-        const response = await axios.get(apiUrl);
+        const apiUrl = `https://c-v1.onrender.com/tempmail/inbox?email=${encodeURIComponent(email)}`;
+        const response = await axios.get(apiUrl, { timeout: 2000 });
         const messages = response.data;
 
         if (messages.length > 0) {
-          const inboxFrom = messages[0].from;
-          const inboxSubject = messages[0].subject;
-          const inboxBody = messages[0].body;
-          const inboxDate = messages[0].date;
-
+          const messageList = messages.map((msg, index) => 
+            `#${index + 1} From: ${msg.from}\nSubject: ${msg.subject}\nDate: ${msg.date}`
+          ).join('\n\n');
+          
           sendMessage(
             senderId,
-            { text: `•=====[Inbox]=====•\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n📅 Date: ${inboxDate}\n\n💌 Message: ${inboxBody}` },
+            { text: `📬 Checked Inbox for ${email}:\n\n${messageList}` },
             pageAccessToken
           );
         } else {
@@ -47,7 +46,7 @@ module.exports = {
         sendMessage(senderId, { text: "An error occurred while fetching the inbox." }, pageAccessToken);
       }
     } else {
-      sendMessage(senderId, { text: "Please provide a valid command: 'gen' or 'inbox {email}'." }, pageAccessToken);
+      sendMessage(senderId, { text: "Please provide a valid command: 'create' or 'inbox {email}'." }, pageAccessToken);
     }
   }
 };

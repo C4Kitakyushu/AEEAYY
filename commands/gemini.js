@@ -16,7 +16,7 @@ module.exports = {
     // Delay for 2 seconds
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const apiUrl = `https://joshweb.click/new/gemini?prompt=${encodeURIComponent(userInput)}`;
+    const apiUrl = `https://rest-api.joshuaapostol.site/gemini?prompt=${encodeURIComponent(userInput)}`;
 
     try {
       const response = await axios.get(apiUrl);
@@ -34,7 +34,8 @@ module.exports = {
       }
     } catch (error) {
       console.error('Error:', error);
-      sendMessage(senderId, { text: `❌ An error occurred while generating the text response. Please try again later. Error details: ${error.message}` }, pageAccessToken);
+      sendMessage(senderId, { text: `❌ An error occurred while generating the text response. Please try again later. Error details: ${error.message
+}` }, pageAccessToken);
     }
   }
 };

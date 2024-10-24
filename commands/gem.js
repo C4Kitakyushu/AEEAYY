@@ -4,16 +4,17 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   name: "gemini",
   description: "Get description of an image using the Gemini API.",
-  author: "Churchill",
+  author: "developer",
 
   async execute(metallic, bot, version, event) {
     const versionPrompt = bot.join(" ");
 
     if (!versionPrompt) {
-      return sendMessage(metallic, { text: `Please provide an image and reply to it using messenger or ask a question!\n\nExample: gemini what is AI?` }, version);
+      return sendMessage(metallic, { text: `❌ Use messenger to reply phto \n\nWxample : Gemnini what is Cat?` }, version);
     }
 
-    sendMessage(metallic, { text: "Please wait... 🔎" }, version);
+    sendMessage(metallic, { text: "⌛ Answering please wait
+..." }, version);
 
     try {
       let imageUrl = "";

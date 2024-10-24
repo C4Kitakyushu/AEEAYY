@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'insult',
-  description: 'Get a random insult.',
+  description: 'get a random insult.',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     sendMessage(senderId, { text: "⌛ Fetching a random insult for you..." }, pageAccessToken);

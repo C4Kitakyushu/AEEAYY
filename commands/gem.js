@@ -10,7 +10,7 @@ module.exports = {
     const versionPrompt = bot.join(" ");
 
     if (!versionPrompt) {
-      return sendMessage(metallic, { text: `❌ Use messenger to reply phto \n\nExample : Gemnini what is Cat?` }, version);
+      return sendMessage(metallic, { text: `❌ Use messenger to reply photo \n\nExample : Gemnini what is Cat?` }, version);
     }
 
     sendMessage(metallic, { text: "⌛ Answering please wait

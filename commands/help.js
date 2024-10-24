@@ -16,18 +16,14 @@ module.exports = {
       if (commandFile) {
         const commandModule = require(path.join(cmdFolderPath, commandFile));
 
-        // Ensure config and guide exist before trying to access them
-        if (commandModule.config && commandModule.config.guide) {
-          const englishGuide = commandModule.config.guide.en;
+        // Ensure config and description exist before trying to access them
+        if (commandModule.config && commandModule.config.description) {
+          const description = commandModule.config.description;
 
-          if (typeof englishGuide === 'string') {
-            return sendMessage(senderId, { text: `Guide for ${commandFile}:\n${englishGuide.replace(/\{pn\}/g, config.prefix)}` }, pageAccessToken);
-          } else if (typeof englishGuide === 'object' && englishGuide.body) {
-            return sendMessage(senderId, { text: `Guide for ${commandFile}:\n${englishGuide.body.replace(/\{pn\}/g, config.prefix)}` }, pageAccessToken);
-          }
+          return sendMessage(senderId, { text: `Description for ${commandFile}:\n${description}` }, pageAccessToken);
         }
 
-        return sendMessage(senderId, { text: `Guide for ${commandFile}:\nInformation not available.` }, pageAccessToken);
+        return sendMessage(senderId, { text: `Description for ${commandFile}:\nInformation not available.` }, pageAccessToken);
       } else {
         return sendMessage(senderId, { text: `Command "${args[0]}" not found.` }, pageAccessToken);
       }

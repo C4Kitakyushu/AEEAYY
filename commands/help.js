@@ -1,61 +1,62 @@
 const fs = require('fs');
 const path = require('path');
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'help',
-  description: 'show available commands',
-  author: 'Cruizex',
-  execute(senderId, args, pageAccessToken, sendMessage) {
-    const cmdFolderPath = path.join(__dirname);
-    const files = fs.readdirSync(cmdFolderPath);
+  description: 'Show available commands',
+  author: 'developer',
+  execute(senderId, args, pageAccessToken) {
+    const commandsDir = path.join(__dirname, '../commands');
+    const commandFiles = fs.readdirSync(commandsDir).filter(file => file.endsWith('.js'));
 
-    if (args[0] && isNaN(args[0])) {
-      const commandName = args[0].toLowerCase() + '.js';
-      const commandFile = files.find(file => file.toLowerCase() === commandName);
+    const commands = commandFiles.map((file, index) => {
+      const command = require(path.join(commandsDir, file));
+      return {
+        title: command.name,
+        description: command.description,
+        payload: `${command.name.toUpperCase()}_PAYLOAD`
+      };
+    });
 
-      if (commandFile) {
-        const commandModule = require(path.join(cmdFolderPath, commandFile));
+    const totalCommands = commandFiles.length;
+    const commandsPerPage = 5;
+    const totalPages = Math.ceil(totalCommands / commandsPerPage);
+    let page = parseInt(args[0], 10);
 
-        // Ensure config and description exist before trying to access them
-        if (commandModule.config && commandModule.config.description) {
-          const description = commandModule.config.description;
-
-          return sendMessage(senderId, { text: `Description for ${commandFile}:\n${description}` }, pageAccessToken);
-        }
-
-        return sendMessage(senderId, { text: `Description for ${commandFile}:\nInformation not available.` }, pageAccessToken);
-      } else {
-        return sendMessage(senderId, { text: `Command "${args[0]}" not found.` }, pageAccessToken);
-      }
+    if (isNaN(page) || page < 1) {
+      page = 1;
     }
 
-    const pageSize = 25;
-    const pageIndex = args[0] ? parseInt(args[0], 10) : 1;
+    if (args[0] && args[0].toLowerCase() === 'all') {
+      const helpTextMessage = `🤖 𝗠𝗲𝘁𝗮𝗹𝗹𝗶𝗰 𝗖𝗵𝗿𝗼𝗺𝗲 𝗩2
+ 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀 𝗟𝗶𝘀𝘁\n𝗧𝗵𝗲 𝗧𝗼𝘁𝗮𝗹 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀: ${totalCommands}\n\n${commands.map((cmd, index) => `${index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}`;
 
-    if (isNaN(pageIndex) || pageIndex < 1) {
-      return sendMessage(senderId, { text: 'Invalid page number.' }, pageAccessToken);
+      return sendMessage(senderId, {
+        text: helpTextMessage
+      }, pageAccessToken);
     }
 
-    const startIdx = (pageIndex - 1) * pageSize;
-    const endIdx = startIdx + pageSize;
-    const pageFiles = files.filter(file => file.endsWith('.js') && file !== 'help.js').slice(startIdx, endIdx);
+    const startIndex = (page - 1) * commandsPerPage;
+    const endIndex = startIndex + commandsPerPage;
+    const commandsForPage = commands.slice(startIndex, endIndex);
 
-    if (pageFiles.length === 0) {
-      return sendMessage(senderId, { text: 'No commands to display on this page.' }, pageAccessToken);
+    if (commandsForPage.length === 0) {
+      return sendMessage(senderId, { text: `Invalid page number. There are only ${totalPages} pages.` }, pageAccessToken);
     }
 
-    const formattedCommands = pageFiles.map(file => `\u2022 ${path.parse(file).name}`).join('\n');
-    const totalPages = Math.ceil((files.length - 1) / pageSize);
-    const currentPage = Math.min(Math.ceil(endIdx / pageSize), totalPages);
+    const helpTextMessage = `🤖 𝗠𝗲𝘁𝗮𝗹𝗹𝗶𝗰 𝗖𝗵𝗿𝗼𝗺𝗲 𝗩2
+ 𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗟𝗶𝘀𝘁 (Page ${page} of ${totalPages}):\n𝗧𝗵𝗲 𝗧𝗼𝘁𝗮𝗹 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀: ${totalCommands}\n\n${commandsForPage.map((cmd, index) => `${startIndex + index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}\n\n𝗧𝘆𝗽𝗲 "𝗵𝗲𝗹𝗽 [𝗽𝗮𝗴𝗲 𝗻𝘂𝗺𝗯𝗲𝗿] " 𝘁𝗼 𝘀𝗲𝗲 𝗮𝗻𝗼𝘁𝗵𝗲𝗿 𝗽𝗮𝗴𝗲, 𝗼𝗿 "𝗵𝗲𝗹𝗽 𝗮𝗹𝗹" 𝘁𝗼 𝘀𝗵𝗼𝘄 𝗮𝗹𝗹 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀 𝗮𝘃𝗮𝗶𝗹𝗮𝗯𝗹𝗲..`;
 
-    let helpMessage = `🪪 : 🤖 𝖠𝖲𝖲𝖨𝖲𝖳𝖠𝖭𝖳 
-  🤖 𝖠𝖵𝖠𝖨𝖫 𝖢𝖮𝖬𝖬𝖠𝖭𝖣𝖲 𝖫𝖨𝖲𝖳
-(𝖯𝖠𝖦𝖤 ${currentPage}/${totalPages}):\n${formattedCommands}`;
+    const quickRepliesPage = commandsForPage.map((cmd) => ({
+      content_type: "text",
+      title: cmd.title,
+      payload: cmd.payload
+    }));
 
-    if (endIdx < files.length) {
-      helpMessage += `\n\n🗯️ 𝖳𝖮 𝖵𝖨𝖤𝖶 𝖳𝖧𝖤 𝖭𝖤𝖷𝖳 𝖯𝖠𝖦𝖤, 𝖴𝖲𝖤: 𝖧𝖤𝖫𝖯 ${currentPage + 1}`;
-    }
-
-    sendMessage(senderId, { text: helpMessage }, pageAccessToken);
+    sendMessage(senderId, {
+      text: helpTextMessage,
+      quick_replies: quickRepliesPage
+    }, pageAccessToken);
   }
 };

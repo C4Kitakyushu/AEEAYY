@@ -1,8 +1,8 @@
 const axios = require("axios");
 
 module.exports = {
-  name: 'lyrics',
-  description: 'slsearch lyrics based on api',
+  name: 'lyricsv2',
+  description: 'search lyrics based on api',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const query = args.join(" ");

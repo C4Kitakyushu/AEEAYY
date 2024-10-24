@@ -15,9 +15,11 @@ module.exports = {
 
       if (commandFile) {
         const commandModule = require(path.join(cmdFolderPath, commandFile));
-        const englishGuide = commandModule.config.guide && commandModule.config.guide.en;
 
-        if (englishGuide) {
+        // Ensure config and guide exist before trying to access them
+        if (commandModule.config && commandModule.config.guide) {
+          const englishGuide = commandModule.config.guide.en;
+
           if (typeof englishGuide === 'string') {
             return sendMessage(senderId, { text: `Guide for ${commandFile}:\n${englishGuide.replace(/\{pn\}/g, config.prefix)}` }, pageAccessToken);
           } else if (typeof englishGuide === 'object' && englishGuide.body) {

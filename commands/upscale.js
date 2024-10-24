@@ -19,7 +19,7 @@ module.exports = {
       const findingMessage = await sendMessage(senderId, { text: '🕟 | Upscaling Image, Please wait for a moment...' }, pageAccessToken);
 
       // Call the upscale API
-      const response = await axios.get(`https://hiroshi-rest-api.replit.app/tools/upscale?url=${encodeURIComponent(photoUrl)}`);
+      const response = await axios.get(`https://hiroshi-api.onrender.com/image/upscale?url=${encodeURIComponent(photoUrl)}`);
       const processedImageURL = response.data;
 
       // Download the processed image

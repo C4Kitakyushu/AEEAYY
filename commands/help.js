@@ -29,7 +29,7 @@ module.exports = {
     }
 
     if (args[0] && args[0].toLowerCase() === 'all') {
-      const helpTextMessage = `🤖 𝗠𝗲𝘁𝗮𝗹𝗹𝗶𝗰 𝗖𝗵𝗿𝗼𝗺𝗲 𝗩2
+      const helpTextMessage = `𝗠𝗲𝘁𝗮𝗹𝗹𝗶𝗰 𝗖𝗵𝗿𝗼𝗺𝗲 𝗩2
  𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀 𝗟𝗶𝘀𝘁\n𝗧𝗵𝗲 𝗧𝗼𝘁𝗮𝗹 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀: ${totalCommands}\n\n${commands.map((cmd, index) => `${index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}`;
 
       return sendMessage(senderId, {
@@ -45,7 +45,7 @@ module.exports = {
       return sendMessage(senderId, { text: `Invalid page number. There are only ${totalPages} pages.` }, pageAccessToken);
     }
 
-    const helpTextMessage = `🤖 𝗠𝗲𝘁𝗮𝗹𝗹𝗶𝗰 𝗖𝗵𝗿𝗼𝗺𝗲 𝗩2
+    const helpTextMessage = `𝗠𝗲𝘁𝗮𝗹𝗹𝗶𝗰 𝗖𝗵𝗿𝗼𝗺𝗲 𝗩2
  𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗟𝗶𝘀𝘁 (Page ${page} of ${totalPages}):\n𝗧𝗵𝗲 𝗧𝗼𝘁𝗮𝗹 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀: ${totalCommands}\n\n${commandsForPage.map((cmd, index) => `${startIndex + index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}\n\n𝗧𝘆𝗽𝗲 "𝗵𝗲𝗹𝗽 [𝗽𝗮𝗴𝗲 𝗻𝘂𝗺𝗯𝗲𝗿] " 𝘁𝗼 𝘀𝗲𝗲 𝗮𝗻𝗼𝘁𝗵𝗲𝗿 𝗽𝗮𝗴𝗲, 𝗼𝗿 "𝗵𝗲𝗹𝗽 𝗮𝗹𝗹" 𝘁𝗼 𝘀𝗵𝗼𝘄 𝗮𝗹𝗹 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀 𝗮𝘃𝗮𝗶𝗹𝗮𝗯𝗹𝗲..`;
 
     const quickRepliesPage = commandsForPage.map((cmd) => ({

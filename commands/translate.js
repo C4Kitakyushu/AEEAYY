@@ -78,7 +78,7 @@ module.exports = {
 
         // Check if no arguments were provided
         if (args.length === 0) {
-            const tutorialMessage = `${header}\nHow to use the gtranslate command:\n\n1. Specify a target language code (e.g., 'es' for Spanish).\n2. Enter the text you want to translate.\n\n𝐄𝐱𝐚𝐦𝐩𝐥𝐞: -gtranslate es Hello, how are you?\n𝐑𝐞𝐬𝐮𝐥𝐭: Hola, ¿cómo estás?\n\nTo view other supported languages\ntype -𝐠𝐭𝐫𝐚𝐧𝐬𝐥𝐚𝐭𝐞 𝐥𝐚𝐧𝐠𝐮𝐚𝐠𝐞 𝐥𝐢𝐬𝐭.\n${footer}`;
+            const tutorialMessage = `${header}\nHow to use the translate command:\n\n1. Specify a target language code (e.g., 'es' for Spanish).\n2. Enter the text you want to translate.\n\n𝐄𝐱𝐚𝐦𝐩𝐥𝐞: translate es Hello, how are you?\n𝐑𝐞𝐬𝐮𝐥𝐭: Hola, ¿cómo estás?\n\nTo view other supported languages\ntype -𝐠𝐭𝐫𝐚𝐧𝐬𝐥𝐚𝐭𝐞 𝐥𝐚𝐧𝐠𝐮𝐚𝐠𝐞 𝐥𝐢𝐬𝐭.\n${footer}`;
             return await sendMessage(senderId, { text: tutorialMessage }, pageAccessToken);
         }
 

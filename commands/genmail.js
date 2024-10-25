@@ -66,7 +66,7 @@ module.exports = {
 
         // Assuming 'date' is in a valid format, otherwise we need to format it
         const dateRaw = latestMessage.date || null;
-        const date = dateRaw ? new Date(dateRaw).toLocaleString("en-US", { timeZone: "UTC", dateStyle: "short", timeStyle: "short" }) : "Unknown date";
+        const date = dateRaw ? new Date(dateRaw).toLocaleString("en-US", { timeZone: "UTC", dateStyle: "short", timeStyle: "short" }) :            <div id="datetime"></div>;
 
         const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n✨━━━━━━━━━━━━━━━━✨`;
         return sendMessage(senderId, { text: `✨━━━━━━━━━━━━━━━━✨\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
@@ -79,3 +79,16 @@ module.exports = {
     }
   }
 };
+// timezone
+                     <body>    
+                       <script>
+        function updateDateTime() {
+            const now = new Date();
+            const dateTimeStr = now.toLocaleString('en-US', { hour12: false });
+            document.getElementById('datetime').innerHTML = dateTimeStr;
+
+        }
+        setInterval(updateDateTime, 1000);
+           <div id="datetime"></div>
+    </script>
+</body>

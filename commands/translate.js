@@ -69,7 +69,7 @@ const supportedLangs = Object.keys(langNames);
 
 module.exports = {
     name: 'translate',
-    description: 'Translate text with google granslate.',
+    description: 'translate text with google granslate.',
     usage: 'translate language',
     author: 'developer',
 

@@ -9,7 +9,7 @@ const alternativeApiKey = "AIzaSyCCBHy1B1-vdGpiNCEYfwxkmVnPUviYd4U";
 
 module.exports = {
   name: 'gemini',
-  description: 'Interact with Gemini AI',
+  description: 'interact with gemini ai',
   author: 'developer',
 
   async execute(senderId, args) {

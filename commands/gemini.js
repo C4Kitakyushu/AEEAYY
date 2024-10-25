@@ -10,7 +10,7 @@ const alternativeApiKey = "AIzaSyCCBHy1B1-vdGpiNCEYfwxkmVnPUviYd4U";
 module.exports = {
   name: 'gemini',
   description: 'Interact with Gemini AI',
-  author: 'Coffee',
+  author: 'developer',
 
   async execute(senderId, args) {
     const pageAccessToken = token;
@@ -33,7 +33,7 @@ module.exports = {
         throw new Error("No valid response from primary API, switching to alternative API.");
       }
 
-      const formattedMessage = `ᯓ★ | 𝙶𝚎𝚖𝚒𝚗𝚒\n・───────────・\n${text}\n・──── >ᴗ< ────・`;
+      const formattedMessage = ` 𝙶𝚎𝚖𝚒𝚗𝚒\n・───────────・\n${text}\n・──── >ᴗ< ────・`;
       await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
     } catch (error) {
       console.error('Error with primary API:', error.message);
@@ -51,7 +51,7 @@ module.exports = {
           throw new Error("No valid response from alternative API.");
         }
 
-        const formattedMessage = `ᯓ★ | 𝙶𝚎𝚖𝚒𝚗𝚒\n・───────────・\n${altText}\n・──── >ᴗ< ────・`;
+        const formattedMessage = `| 𝙶𝚎𝚖𝚒𝚗𝚒\n・───────────・\n${altText}\n・──── >ᴗ< ────・`;
         await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
       } catch (altError) {
         console.error('Error with alternative API:', altError.message);

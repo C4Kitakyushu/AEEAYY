@@ -13,7 +13,7 @@ module.exports = {
     }
 
     try {
-      const apiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchQuery)}`;
+      const apiUrl = `https://appjonellccapis.zapto.org/api/wiki?q=${encodeURIComponent(searchQuery)}`;
       const response = await axios.get(apiUrl);
 
       if (response.data.title && response.data.extract) {

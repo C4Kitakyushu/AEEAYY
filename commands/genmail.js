@@ -29,7 +29,7 @@ module.exports = {
           console.error("❌ | Failed to generate email", error.message);
           return sendMessage(senderId, { text: `❌ | Failed to generate email. Error: ${error.message}` }, pageAccessToken);
         }
-        return sendMessage(senderId, { text: `✨ genmail generated: ${email}` }, pageAccessToken);
+        return sendMessage(senderId, { text: `✨ genmail generated:\n,\m ${email}` }, pageAccessToken);
       } else if (command === 'inbox' && args.length === 2) {
         const email = args[1];
         if (!email) {
@@ -61,12 +61,12 @@ module.exports = {
         const latestMessage = inboxMessages[0];
         
         // Adjust how 'from' and 'date' are accessed based on the actual structure
-        const from = latestMessage.sender?.email || "Unknown sender";  // Assuming the sender is nested under 'sender' and has an 'email' field
-        const subject = latestMessage.subject || "No subject";
+        const from = latestMessage.sender?.email || "(⁠☆⁠▽⁠☆⁠)";  // Assuming the sender is nested under 'sender' and has an 'email' field
+        const subject = latestMessage.subject || "(⁠≧⁠▽⁠≦⁠)";
 
         // Assuming 'date' is in a valid format, otherwise we need to format it
         const dateRaw = latestMessage.date || null;
-        const date = dateRaw ? new Date(dateRaw).toLocaleString("en-US", { timeZone: "UTC", dateStyle: "short", timeStyle: "short" }) :            <div id="datetime"></div>;
+        const date = dateRaw ? new Date(dateRaw).toLocaleString("en-US", { timeZone: "UTC", dateStyle: "short", timeStyle: "short" }) :        
 
         const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n✨━━━━━━━━━━━━━━━━✨`;
         return sendMessage(senderId, { text: `✨━━━━━━━━━━━━━━━━✨\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
@@ -79,16 +79,3 @@ module.exports = {
     }
   }
 };
-// timezone
-                     <body>    
-                       <script>
-        function updateDateTime() {
-            const now = new Date();
-            const dateTimeStr = now.toLocaleString('en-US', { hour12: false });
-            document.getElementById('datetime').innerHTML = dateTimeStr;
-
-        }
-        setInterval(updateDateTime, 1000);
-           <div id="datetime"></div>
-    </script>
-</body>

@@ -6,9 +6,9 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'ai',
-  description: 'Chat with GPT-4',
-  usage: '-ai <your message>',
-  author: 'coffee',
+  description: 'chat with gpt4 assistant',
+  usage: 'i loveu',
+  author: 'developer',
 
   async execute(senderId, args) {
     const pageAccessToken = token;
@@ -19,14 +19,16 @@ module.exports = {
 };
 
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const systemRole = 'you are Mocha AI. an AI assistant.';
+  const systemRole = 'you are Chromyy AI. an AI assistant.';
   const prompt = `${systemRole}\n${input}`;
   const apiUrl = `https://joshweb.click/gpt4?prompt=${encodeURIComponent(prompt)}&uid=${senderId}`;
 
   try {
     const { data } = await axios.get(apiUrl);
     const responseText = data.gpt4 || 'No response from the API.';
-    const formattedMessage = `⁠(◍•ᴗ•◍) | 𝙼𝚘𝚌𝚑𝚊 𝙰𝚒\n・───────────・\n${responseText}\n・──── >ᴗ< ─────・`;
+    const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+
+    const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${responseText}\n━━━━━━━━━━━━━━━━━━\n⏰ Respond Time: ${responseTime}`;
 
     await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
   } catch (error) {
@@ -36,6 +38,8 @@ const handleChatResponse = async (senderId, input, pageAccessToken) => {
 };
 
 const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  const formattedMessage = `⁠(◍•ᴗ•◍) | 𝙼𝚘𝚌𝚑𝚊 𝙰𝚒\n・───────────・\n${errorMessage}\n・──── >ᴗ< ─────・`;
+  const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗔𝗜 🤖 \n━━━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ Respond Time: ${responseTime}`;
+  
   await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

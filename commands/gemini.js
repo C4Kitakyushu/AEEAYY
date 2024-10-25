@@ -33,7 +33,7 @@ module.exports = {
         throw new Error("No valid response from primary API, switching to alternative API.");
       }
 
-      const formattedMessage = ` 𝗚𝗲𝗺𝗶𝗻𝗶 ♊\n━━━━━━━━━━━━━━━━━━\n${text}\n━━━━━━━━━━━━━━━━━━`;
+      const formattedMessage = ` 𝗚𝗲𝗺𝗶𝗻𝗶 ♊\n━━━━━━━━━━━━━━━━━━\n${text}━━━━━━━━━━━━━━━━━━`;
       await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
     } catch (error) {
       console.error('Error with primary API:', error.message);
@@ -51,7 +51,7 @@ module.exports = {
           throw new Error("No valid response from alternative API.");
         }
 
-        const formattedMessage = `𝗚𝗲𝗺𝗶𝗻𝗶 ♊\n━━━━━━━━━━━━━━━━━━\n${altText}\n━━━━━━━━━━━━━━━━━━`;
+        const formattedMessage = `𝗚𝗲𝗺𝗶𝗻𝗶 ♊\n━━━━━━━━━━━━━━━━━━\n${altText}━━━━━━━━━━━━━━━━━━`;
         await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
       } catch (altError) {
         console.error('Error with alternative API:', altError.message);

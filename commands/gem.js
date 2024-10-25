@@ -3,38 +3,38 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "gemini",
-  description: "get description an image provided.",
+  description: "reply question the image provided..",
   author: "developer",
 
-  async execute(metallic, bot, version, event) {
-    const versionPrompt = bot.join(" ");
+  async execute(chilli, pogi, kalamansi, event) {
+    const kalamansiPrompt = pogi.join(" ");
 
-    if (!versionPrompt) {
-      return sendMessage(metallic, { text: `❌ Please provide an image and reply to it using messenger or ask a question!\n\nExample: gemini what is wave?` }, version);
+    if (!kalamansiPrompt) {
+      return sendMessage(chilli, { text: `❌ Please reply the image to use this command` }, kalamansi);
     }
 
-    sendMessage(metallic, { text: "⌛ Searching your question please wait.." }, version);
+    sendMessage(chilli, { text: "⌛ Searching please wait a moment..
+" }, kalamansi);
 
     try {
       let imageUrl = "";
 
-      // Ensure event.message is defined before accessing its properties
-      if (event.message && event.message.reply_to && event.message.reply_to.mid) {
-        imageUrl = await getRepliedImage(event.message.reply_to.mid, version);
-      } else if (event.message && event.message.attachments && event.message.attachments[0]?.type === 'image') {
+      if (event.message.reply_to && event.message.reply_to.mid) {
+        imageUrl = await getRepliedImage(event.message.reply_to.mid, kalamansi);
+      } else if (event.message?.attachments && event.message.attachments[0]?.type === 'image') {
         imageUrl = event.message.attachments[0].payload.url;
       }
 
       const apiUrl = `https://joshweb.click/gemini`;
 
-      const geminiResponse = await handleImageRecognition(apiUrl, versionPrompt, imageUrl);
-      const result = geminiResponse.gemini;
+      const chilliResponse = await handleImageRecognition(apiUrl, kalamansiPrompt, imageUrl);
+      const result = chilliResponse.gemini;
 
-      sendConcatenatedMessage(metallic, result, version);
+      sendConcatenatedMessage(chilli, result, kalamansi);
 
     } catch (error) {
       console.error("Error in Gemini command:", error);
-      sendMessage(metallic, { text: `Error: ${error.message || "Something went wrong."}` }, version);
+      sendMessage(chilli, { text: `Error: ${error.message || "Something went wrong."}` }, kalamansi);
     }
   }
 };
@@ -50,9 +50,9 @@ async function handleImageRecognition(apiUrl, prompt, imageUrl) {
   return data;
 }
 
-async function getRepliedImage(mid, version) {
+async function getRepliedImage(mid, kalamansi) {
   const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
-    params: { access_token: version }
+    params: { access_token: kalamansi }
   });
 
   if (data && data.data.length > 0 && data.data[0].image_data) {
@@ -62,22 +62,26 @@ async function getRepliedImage(mid, version) {
   }
 }
 
-async function sendConcatenatedMessage(metallic, text, version) {
+async function sendConcatenatedMessage(chilli, text, kalamansi) {
   const maxMessageLength = 2000;
 
   if (text.length > maxMessageLength) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
 
-    for (let i = 0; i < messages.length; i++) {
+    // Send each message with a 1-second delay
+    for (const message of messages) {
       await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
-      await sendMessage(metallic, { text: messages[i] }, version);
+      await sendMessage(chilli, { text: message }, kalamansi);
     }
   } else {
-    await sendMessage(metallic, { text }, version);
+    await sendMessage(chilli, { text }, kalamansi);
   }
 }
 
 function splitMessageIntoChunks(message, chunkSize) {
-  const regex = new RegExp(`.{1,${chunkSize}}`, 'g');
-  return message.match(regex);
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
 }

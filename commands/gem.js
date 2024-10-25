@@ -3,18 +3,17 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "gemini",
-  description: "reply question the image provided..",
-  author: "developer",
+  description: "Interact with Google Gemini for image recognition and text queries.",
+  author: "Churchill",
 
   async execute(chilli, pogi, kalamansi, event) {
     const kalamansiPrompt = pogi.join(" ");
 
     if (!kalamansiPrompt) {
-      return sendMessage(chilli, { text: `❌ Please reply the image to use this command` }, kalamansi);
+      return sendMessage(chilli, { text: `Please provide an image and reply to it using Messenger or ask a question!\n\nExample: gemini what is AI?` }, kalamansi);
     }
 
-    sendMessage(chilli, { text: "⌛ Searching please wait a moment..
-" }, kalamansi);
+    sendMessage(chilli, { text: "Please wait... 🔎" }, kalamansi);
 
     try {
       let imageUrl = "";

@@ -1,7 +1,7 @@
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'billboard',
+  name: 'board',
   description: 'board <text>',
   usage: 'board <text>',
   author: 'developer',

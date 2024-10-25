@@ -1,7 +1,7 @@
 const axios = require('axios');
 
-const EMAIL_API_URL = "https://joshweb.click/tempmail/create";
-const INBOX_API_URL = "https://joshweb.click/tempmail/inbox?email=";
+const EMAIL_API_URL = "https://markdevs-last-api.onrender.com/api/gen";
+const INBOX_API_URL = "https://c-v1.onrender.com/tempmail/inbox?email=";
 
 module.exports = {
   name: 'genmail',
@@ -29,7 +29,7 @@ module.exports = {
           console.error("❌ | Failed to generate email", error.message);
           return sendMessage(senderId, { text: `❌ | Failed to generate email. Error: ${error.message}` }, pageAccessToken);
         }
-        return sendMessage(senderId, { text: `✨ genmail generated email: ${email}` }, pageAccessToken);
+        return sendMessage(senderId, { text: `✨ genmail generated: ${email}` }, pageAccessToken);
       } else if (command === 'inbox' && args.length === 2) {
         const email = args[1];
         if (!email) {

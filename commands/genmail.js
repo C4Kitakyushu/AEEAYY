@@ -10,7 +10,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, sendMessage) {
     try {
       if (args.length === 0) {
-        return sendMessage(senderId, { text: "tempmail create and tempmail inbox <email>" }, pageAccessToken);
+        return sendMessage(senderId, { text: "genmail create and tempmail inbox <email>" }, pageAccessToken);
       }
 
       const command = args[0].toLowerCase();
@@ -29,7 +29,7 @@ module.exports = {
           console.error("❌ | Failed to generate email", error.message);
           return sendMessage(senderId, { text: `❌ | Failed to generate email. Error: ${error.message}` }, pageAccessToken);
         }
-        return sendMessage(senderId, { text: `✨ genmail generated: ${email}` }, pageAccessToken);
+        return sendMessage(senderId, { text: `✨ genmail generated:\n\n✉️: ${email}` }, pageAccessToken);
       } else if (command === 'inbox' && args.length === 2) {
         const email = args[1];
         if (!email) {
@@ -54,9 +54,16 @@ module.exports = {
           return sendMessage(senderId, { text: "❌ | No messages found in the inbox." }, pageAccessToken);
         }
 
+        // Log the entire response to check the structure
+        console.log("Inbox Response:", inboxMessages);
+
         // Get the most recent message
         const latestMessage = inboxMessages[0];
-        const { date, from, subject } = latestMessage;
+        
+        // Assuming the message structure has fields like "from", "subject", and "date" 
+        const from = latestMessage.from || "Unknown sender";
+        const subject = latestMessage.subject || "No subject";
+        const date = latestMessage.date || "Unknown date";
 
         const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n✨━━━━━━━━━━━━━━━━✨`;
         return sendMessage(senderId, { text: `✨━━━━━━━━━━━━━━━━✨\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);

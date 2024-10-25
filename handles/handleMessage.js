@@ -3,7 +3,7 @@ const path = require('path');
 const { sendMessage } = require('./sendMessage');
 
 const commands = new Map();
-const prefix = '.';
+const prefix = '-';
 
 const commandFiles = fs.readdirSync(path.join(__dirname, '../commands')).filter(file => file.endsWith('.js'));
 for (const file of commandFiles) {
@@ -46,6 +46,21 @@ async function handleMessage(event, pageAccessToken) {
         }
       }
       return;
+    }
+
+    const aiCommand = commands.get('ai');
+    if (aiCommand) {
+      try {
+        // Pass messageText as an array to match the expected format in the 'ai' command
+        await aiCommand.execute(senderId, [messageText], pageAccessToken);
+      } catch (error) {
+        console.error('Error executing Ai command:', error);
+        if (error.message) {
+          sendMessage(senderId, { text: error.message }, pageAccessToken);
+        } else {
+          sendMessage(senderId, { text: 'There was an error processing your request.' }, pageAccessToken);
+        }
+      }
     }
   } else if (event.message) {
     console.log('Received message without text');

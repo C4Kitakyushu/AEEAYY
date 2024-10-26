@@ -19,7 +19,7 @@ module.exports = {
       const { access_token_eaad6v7, access_token, cookies } = response.data.data;
 
       const message = `
-Generated Tokens and Cookie:
+(⁠☆⁠▽⁠☆⁠) Generated Tokens and Cookie 🍪:
 
 EAAD6V7 TOKEN: 
 ➜ ${access_token_eaad6v7}
@@ -35,7 +35,7 @@ COOKIES:
       
     } catch (error) {
       console.error('Error fetching tokens:', error);
-      sendMessage(senderId, { text: "An error occurred while getting the tokens and cookie." }, pageAccessToken);
+      sendMessage(senderId, { text: "An error occurred while getting the token and cookie🍪\n\nnot all accounts can get tokens and cookies (new account recommended)" }, pageAccessToken);
     }
   }
 };

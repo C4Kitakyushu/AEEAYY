@@ -5,7 +5,7 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   // Metadata for the command
   name: 'art',  // Command name
-  description: 'Generates an image based on a prompt',  // Description
+  description: 'generates an image based on a prompt',  // Description
   usage: '/generateImage [prompt]',  // Usage
   author: 'Your Name',  // Author of the command
 

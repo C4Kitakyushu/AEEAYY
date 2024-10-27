@@ -20,9 +20,9 @@ module.exports = {
     });
 
     const totalCommands = commandFiles.length;
-    const commandsPerPage = 5;
+    const commandsPerPage = 10;
     const totalPages = Math.ceil(totalCommands / commandsPerPage);
-    let page = parseInt(args[0], 10);
+    let page = parseInt(args[0], 20);
 
     if (isNaN(page) || page < 1) {
       page = 1;

@@ -2,7 +2,7 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'tempmail',
+  name: 'genmail',
   description: 'get 1secmail & automatically send code.',
   author: 'developer',
 

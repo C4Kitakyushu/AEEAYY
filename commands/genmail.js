@@ -3,19 +3,19 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'genmail',
-  description: 'get 1secmail & automatically send code.',
+  description: 'generate a 1secemail and retrieve confirmation codes automatically.',
   author: 'developer',
 
-  async execute(puta, args, yawa) { // Changed parameters here
+  async execute(mainteam, args, messerschmidt) { // Changed parameters here
     try {
       const { data: createResponse } = await axios.get('https://nethwieginedev.vercel.app/tempmail/create');
       if (!createResponse.status || !createResponse.address) {
-        return sendMessage(puta, { text: 'Failed to generate a temporary email. Please try again.' }, yawa); // Updated variables here
+        return sendMessage(mainteam, { text: '❌ Failed to generate a temporary email. Please try again.' }, messerschmidt); // Updated variables here
       }
 
       const tempEmail = createResponse.address;
 
-      await sendMessage(puta, { text: tempEmail }, yawa); // Updated variables here
+      await sendMessage(mainteam, { text: tempEmail }, messerschmidt); // Updated variables here
 
       const checkInterval = setInterval(async () => {
         try {
@@ -24,9 +24,9 @@ module.exports = {
             const latestMessage = checkResponse.messages[0];
 
             if (latestMessage) {
-              const fullMessage = `From: ${latestMessage.from}\nSubject: ${latestMessage.subject}\nDate: ${latestMessage.date}\n\nMessage:\n${latestMessage.message}`;
+              const fullMessage = `📧 From: ${latestMessage.from}\n📩 Subject: ${latestMessage.subject}\n📅 Date: ${latestMessage.date}\n\n🗳️ Message:\n${latestMessage.message}`;
 
-              await sendMessage(puta, { text: fullMessage }, yawa); // Updated variables here
+              await sendMessage(mainteam, { text: fullMessage }, messerschmidt); // Updated variables here
               clearInterval(checkInterval);
             }
           }
@@ -36,8 +36,8 @@ module.exports = {
       }, 10000);
 
     } catch (error) {
-      console.error('Error generating temp email:', error);
-      await sendMessage(puta, { text: 'An error occurred while creating the temporary email. Please try again.' }, yawa); // Updated variables here
+      console.error('❌ Error generating email:', error);
+      await sendMessage(mainteam, { text: 'An error occurred while creating the temporary email. Please try again.' }, messerschmidt); // Updated variables here
     }
   }
 };

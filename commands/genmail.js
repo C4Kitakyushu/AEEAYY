@@ -1,7 +1,7 @@
 const axios = require('axios');
 
-const EMAIL_API_URL = "https://markdevs-last-api.onrender.com/api/gen";
-const INBOX_API_URL = "https://c-v1.onrender.com/tempmail/inbox?email=";
+const EMAIL_API_URL = "https://nethwieginedev.vercel.app/tempmail/create";
+const INBOX_API_URL = "https://nethwieginedev.vercel.app/tempmail/get?email=";
 
 module.exports = {
   name: 'genmail',

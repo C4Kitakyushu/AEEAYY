@@ -15,7 +15,7 @@ module.exports = {
     if (!args || args.length === 0) {
       // Send message requesting a prompt if missing
       await sendMessage(senderId, {
-        text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗽𝗿𝗼𝗺𝗽𝘁\n\n𝗘𝘅𝗮𝗺𝗽𝗹𝗲: 𝗮𝗿𝘁 𝗱𝗼𝗴'
+        text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗽𝗿𝗼𝗺𝗽𝘁\n\n𝗘𝘅𝗮𝗺𝗽𝗹𝗲: 𝗳𝗹𝘂𝘅 𝗱𝗼𝗴'
       }, pageAccessToken);
       return;  // Exit the function if no prompt is provided
     }

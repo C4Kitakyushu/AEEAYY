@@ -1,71 +1,43 @@
 const axios = require('axios');
-
-const EMAIL_API_URL = "https://nethwieginedev.vercel.app/tempmail/create";
-const INBOX_API_URL = "https://nethwieginedev.vercel.app/tempmail/get?email=";
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'genmail',
-  description: 'generate temporary email or check inbox',
+  name: 'tempmail',
+  description: 'get 1secmail & automatically send code.',
   author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
+
+  async execute(puta, args, yawa) { // Changed parameters here
     try {
-      if (args.length === 0) {
-        return sendMessage(senderId, { text: "genmail create and genmail inbox <email>" }, pageAccessToken);
+      const { data: createResponse } = await axios.get('https://nethwieginedev.vercel.app/tempmail/create');
+      if (!createResponse.status || !createResponse.address) {
+        return sendMessage(puta, { text: 'Failed to generate a temporary email. Please try again.' }, yawa); // Updated variables here
       }
 
-      const command = args[0].toLowerCase();
+      const tempEmail = createResponse.address;
 
-      if (command === 'create') {
-        let email;
+      await sendMessage(puta, { text: tempEmail }, yawa); // Updated variables here
+
+      const checkInterval = setInterval(async () => {
         try {
-          // Generate a random temporary email
-          const response = await axios.get(EMAIL_API_URL);
-          email = response.data.email;
+          const { data: checkResponse } = await axios.get(`https://nethwieginedev.vercel.app/tempmail/get/?email=${encodeURIComponent(tempEmail)}`);
+          if (checkResponse.status && checkResponse.messages.length > 0) {
+            const latestMessage = checkResponse.messages[0];
 
-          if (!email) {
-            throw new Error("Failed to generate email");
+            if (latestMessage) {
+              const fullMessage = `From: ${latestMessage.from}\nSubject: ${latestMessage.subject}\nDate: ${latestMessage.date}\n\nMessage:\n${latestMessage.message}`;
+
+              await sendMessage(puta, { text: fullMessage }, yawa); // Updated variables here
+              clearInterval(checkInterval);
+            }
           }
         } catch (error) {
-          console.error("❌ | Failed to generate email", error.message);
-          return sendMessage(senderId, { text: `❌ | Failed to generate email. Error: ${error.message}` }, pageAccessToken);
+          console.error('Error checking email:', error);
         }
-        return sendMessage(senderId, { text: `✨ genmail generated: ${email}` }, pageAccessToken);
-      } else if (command === 'inbox' && args.length === 2) {
-        const email = args[1];
-        if (!email) {
-          return sendMessage(senderId, { text: "❌ | Please provide an email address to check the inbox." }, pageAccessToken);
-        }
+      }, 10000);
 
-        let inboxMessages;
-        try {
-          // Retrieve messages from the specified email
-          const inboxResponse = await axios.get(`${INBOX_API_URL}${email}`);
-          inboxMessages = inboxResponse.data;
-
-          if (!Array.isArray(inboxMessages)) {
-            throw new Error("Unexpected response format");
-          }
-        } catch (error) {
-          console.error(`❌ | Failed to retrieve inbox messages`, error.message);
-          return sendMessage(senderId, { text: `❌ | Failed to retrieve inbox messages. Error: ${error.message}` }, pageAccessToken);
-        }
-
-        if (inboxMessages.length === 0) {
-          return sendMessage(senderId, { text: "❌ | No messages found in the inbox." }, pageAccessToken);
-        }
-
-        // Get the most recent message
-        const latestMessage = inboxMessages[0];
-        const { date, from, subject } = latestMessage;
-
-        const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n✨━━━━━━━━━━━━━━━━✨`;
-        return sendMessage(senderId, { text: `✨━━━━━━━━━━━━━━━━✨\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
-      } else {
-        return sendMessage(senderId, { text: `❌ | Invalid command. Use 'genmail create (generate email)\ntempmail inbox <email>. (to inbox code)` }, pageAccessToken);
-      }
     } catch (error) {
-      console.error("Unexpected error:", error.message);
-      return sendMessage(senderId, { text: `❌ | An unexpected error occurred: ${error.message}` }, pageAccessToken);
+      console.error('Error generating temp email:', error);
+      await sendMessage(puta, { text: 'An error occurred while creating the temporary email. Please try again.' }, yawa); // Updated variables here
     }
   }
 };

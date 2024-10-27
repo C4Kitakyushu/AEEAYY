@@ -20,7 +20,7 @@ module.exports = {
     });
 
     const totalCommands = commandFiles.length;
-    const commandsPerPage = 10;
+    const commandsPerPage = 25;
     const totalPages = Math.ceil(totalCommands / commandsPerPage);
     let page = parseInt(args[0], 20);
 

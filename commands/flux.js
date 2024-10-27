@@ -5,9 +5,9 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   // Metadata for the command
   name: 'flux',  // Command name
-  description: 'Generates an image based on a prompt using an external API.',  // Description
+  description: 'generate image based on your prompt.',  // Description
   usage: '!generateImage <prompt>',  // Usage
-  author: 'Your Name',  // Author of the command
+  author: 'developer',  // Author of the command
 
   // Main function that executes the command
   async execute(senderId, args, pageAccessToken) {
@@ -15,7 +15,7 @@ module.exports = {
     if (!args || args.length === 0) {
       // Send message requesting a prompt if missing
       await sendMessage(senderId, {
-        text: 'Please provide a prompt to generate an image.'
+        text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗽𝗿𝗼𝗺𝗽𝘁\n\n𝗘𝘅𝗮𝗺𝗽𝗹𝗲: 𝗮𝗿𝘁 𝗱𝗼𝗴'
       }, pageAccessToken);
       return;  // Exit the function if no prompt is provided
     }
@@ -25,7 +25,7 @@ module.exports = {
     const apiUrl = `https://joshweb.click/api/flux?prompt=${encodeURIComponent(prompt)}&model=4`;  // API endpoint with the prompt
 
     // Notify user that the image is being generated
-    await sendMessage(senderId, { text: 'Generating image... Please wait.' }, pageAccessToken);
+    await sendMessage(senderId, { text: '⌛ 𝗚𝗲𝗻𝗲𝗿𝗮𝘁𝗶𝗻𝗴 𝗶𝗺𝗮𝗴𝗲 𝗯𝗮𝘀𝗲𝗱 𝗼𝗻 𝘆𝗼𝘂𝗿 𝗽𝗿𝗼𝗺𝗽𝘁, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁....' }, pageAccessToken);
 
     try {
       // Send the generated image to the user as an attachment

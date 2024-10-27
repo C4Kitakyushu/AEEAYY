@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: "⚙️ Fetching a joke for you..." }, pageAccessToken);
 
     try {
-      const apiUrl = 'https://random-api-pcoe.onrender.com/api/joke';
+      const apiUrl = 'https://c-v5.onrender.com/api/joke';
       const response = await axios.get(apiUrl);
       const joke = response.data.joke;
 

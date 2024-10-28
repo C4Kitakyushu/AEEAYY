@@ -1,43 +1,35 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
+const domains = ["rteet.com", "1secmail.com", "1secmail.org", "1secmail.net", "wwjmp.com", "esiix.com", "xojxe.com", "yoggm.com"];
+
 module.exports = {
   name: 'genmail',
-  description: 'generate a 1secemail and retrieve confirmation codes automatically.',
+  description: 'genmail gen (generate email) & genmail inbox <email>',
+  usage: 'genmail gen or genmail inbox <email>',
   author: 'developer',
 
-  async execute(mainteam, args, messerschmidt) { // Changed parameters here
-    try {
-      const { data: createResponse } = await axios.get('https://nethwieginedev.vercel.app/tempmail/create');
-      if (!createResponse.status || !createResponse.address) {
-        return sendMessage(mainteam, { text: '❌ Failed to generate a temporary email. Please try again.' }, messerschmidt); // Updated variables here
-      }
-
-      const tempEmail = createResponse.address;
-
-      await sendMessage(mainteam, { text: tempEmail }, messerschmidt); // Updated variables here
-
-      const checkInterval = setInterval(async () => {
-        try {
-          const { data: checkResponse } = await axios.get(`https://nethwieginedev.vercel.app/tempmail/get/?email=${encodeURIComponent(tempEmail)}`);
-          if (checkResponse.status && checkResponse.messages.length > 0) {
-            const latestMessage = checkResponse.messages[0];
-
-            if (latestMessage) {
-              const fullMessage = `📧 From: ${latestMessage.from}\n📩 Subject: ${latestMessage.subject}\n📅 Date: ${latestMessage.date}\n\n🗳️ Message:\n${latestMessage.message}`;
-
-              await sendMessage(mainteam, { text: fullMessage }, messerschmidt); // Updated variables here
-              clearInterval(checkInterval);
-            }
-          }
-        } catch (error) {
-          console.error('Error checking email:', error);
-        }
-      }, 10000);
-
-    } catch (error) {
-      console.error('❌ Error generating email:', error);
-      await sendMessage(mainteam, { text: 'An error occurred while creating the temporary email. Please try again.' }, messerschmidt); // Updated variables here
+  async execute(senderId, args, pageAccessToken) {
+    const [cmd, email] = args;
+    if (cmd === 'gen') {
+      const domain = domains[Math.floor(Math.random() * domains.length)];
+      return sendMessage(senderId, { text: `✨ generated email: ${Math.random().toString(36).slice(2, 10)}@${domain}` }, pageAccessToken);
     }
-  }
+
+    if (cmd === 'inbox' && email && domains.some(d => email.endsWith(`@${d}`))) {
+      try {
+        const [username, domain] = email.split('@');
+        const inbox = (await axios.get(`https://www.1secmail.com/api/v1/?action=getMessages&login=${username}&domain=${domain}`)).data;
+        if (!inbox.length) return sendMessage(senderId, { text: 'Inbox is empty.' }, pageAccessToken);
+
+        const { id, from, subject, date } = inbox[0];
+        const { textBody } = (await axios.get(`https://www.1secmail.com/api/v1/?action=readMessage&login=${username}&domain=${domain}&id=${id}`)).data;
+        return sendMessage(senderId, { text: `📬 | Latest Email:\nFrom: ${from}\nSubject: ${subject}\nDate: ${date}\n\nContent:\n${textBody}` }, pageAccessToken);
+      } catch {
+        return sendMessage(senderId, { text: 'Error: Unable to fetch inbox or email content.' }, pageAccessToken);
+      }
+    }
+
+    sendMessage(senderId, { text: 'Invalid usage. Use genmail gen or genmail inbox <email>' }, pageAccessToken);
+  },
 };

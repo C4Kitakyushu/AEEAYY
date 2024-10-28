@@ -21,7 +21,7 @@ module.exports = {
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
   const systemRole = 'you are Chromyy AI. an AI assistant.';
   const prompt = `${systemRole}\n${input}`;
-  const apiUrl = `https://joshweb.click/gpt4?prompt=${encodeURIComponent(prompt)}&uid=${senderId}`;
+  const apiUrl = `https://rest-api.joshuaapostol.site/gpt4o?prompt=${encodeURIComponent(prompt)}&uid=${senderId}`;
 
   try {
     const { data } = await axios.get(apiUrl);

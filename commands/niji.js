@@ -19,7 +19,7 @@ module.exports = {
     // Concatenate arguments to form the prompt
     const prompt = args.join(' ');
     const apiUrl = `https://c-v5.onrender.com/v1/niji?prompt=${encodeURIComponent(prompt)}`;
-    const usageUrl = 'https://apizaryan.onrender.com/api/usage';
+    const usageUrl = 'https://c-v5.onrender.com/api/usage';
 
     // Notify user that the image is being generated
     await sendMessage(senderId, { text: 'Generating image... Please wait.' }, pageAccessToken);

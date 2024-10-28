@@ -16,7 +16,7 @@ module.exports = {
     // Delay for 2 seconds
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const apiUrl = `https://api.ruii.site/api/gpt4o?q=${encodeURIComponent(userInput)}&uid=${senderId}`;
+    const apiUrl = `https://joshweb.click/api/gpt-4o?q=${encodeURIComponent(userInput)}&uid=${senderId}`;
 
     try {
       const response = await axios.get(apiUrl);

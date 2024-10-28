@@ -6,7 +6,7 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'ai',
-  description: 'Chat with GPT4 assistant',
+  description: 'Chat with Gemma-7B assistant',
   usage: 'ai [your question]',
   author: 'developer',
 
@@ -19,16 +19,15 @@ module.exports = {
 };
 
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const systemRole = 'You are Chromyy AI, an AI assistant.';
-  const prompt = `${systemRole}\n${input}`;
-  const apiUrl = `https://gpt4withcustommodel.onrender.com/gpt?query=${encodeURIComponent(prompt)}&model=gpt-4-32k`;
+  const systemRole = 'You are Gemma-7B, an AI assistant.';
+  const apiUrl = `https://joshweb.click/api/gemma-7b?q=${encodeURIComponent(input)}`;
 
   try {
     const { data } = await axios.get(apiUrl);
     const responseText = data.response || 'No response from the API.';
     const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
-    const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${responseText}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
+    const formattedMessage = `𝗚𝗘𝗠𝗠𝗔-𝟳𝗕 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${responseText}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
     await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
   } catch (error) {
@@ -39,7 +38,7 @@ const handleChatResponse = async (senderId, input, pageAccessToken) => {
 
 const sendError = async (senderId, errorMessage, pageAccessToken) => {
   const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
+  const formattedMessage = `𝗚𝗘𝗠𝗠𝗔-𝟳𝗕 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
   await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

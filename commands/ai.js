@@ -25,7 +25,7 @@ module.exports = {
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
   const systemRole = 'you are Chromyy AI. an AI assistant.';  // Define system role
   const prompt = `${systemRole}\n${input}`;                   // Format prompt for API
-  const apiUrl = `https://rest-api.joshuaapostol.site/gpt4o?prompt=${encodeURIComponent(prompt)}&uid=${senderId}`; // Construct API URL
+  const apiUrl = `https://joshweb.click/gpt4?prompt=${encodeURIComponent(prompt)}&uid=${senderId}`; // Construct API URL
 
   try {
     const { data } = await axios.get(apiUrl);                 // Make GET request to API

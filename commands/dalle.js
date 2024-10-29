@@ -2,7 +2,7 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'generateImage',  // Command name
+  name: 'dalle',  // Command name
   description: 'Generates an image based on a prompt',  // description
   usage: '!generateImage <prompt>',  // usage
   author: 'Your Name',  // Author of the command

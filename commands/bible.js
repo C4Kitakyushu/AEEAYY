@@ -13,7 +13,7 @@ module.exports = {
       const reference = response.data.reference;
 
       const message = {
-        text: `📖 Here is a random nible verse for you:\n\n*${verse}*\n\n— _${reference}_`,
+        text: `📖 Here is a random bible verse for you:\n\n*${verse}*\n\n— _${reference}_`,
         mentions: [
           {
             tag: `@${senderId}`,

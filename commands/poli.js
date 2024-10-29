@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'poli',
-  description: 'Generates an image based on a text prompt',
+  description: 'gnerates an image based on a text prompt',
   author: 'YourName',
 
   async execute(senderId, args, pageAccessToken) {
@@ -13,7 +13,7 @@ module.exports = {
     }
 
     const prompt = args.join(" ");
-    await sendMessage(senderId, { text: `Generating image for: "${prompt}"...` }, pageAccessToken);
+    await sendMessage(senderId, { text: `⌛ 𝗚𝗲𝗻𝗲𝗿𝗮𝘁𝗶𝗻𝗴 𝗶𝗺𝗮𝗴𝗲 𝗳𝗼𝗿 𝘆𝗼𝘂𝗿 𝗽𝗿𝗼𝗺𝗽𝘁:"${prompt}" 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁..` }, pageAccessToken);
 
     try {
       const apiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;

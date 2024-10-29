@@ -16,7 +16,7 @@ module.exports = {
     await sendMessage(senderId, { text: `Generating image for: "${prompt}"...` }, pageAccessToken);
 
     try {
-      const apiUrl = `https://appjonellccapis.zapto.org/api/imgen?prompt=${encodeURIComponent(prompt)}`;
+      const apiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
 
       await sendMessage(senderId, {
         attachment: {

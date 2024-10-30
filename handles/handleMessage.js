@@ -4,11 +4,11 @@ const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 
 const commands = new Map();
+const prefix = '-';
 const lastImageByUser = new Map();
 const lastVideoByUser = new Map();
 
 const commandFiles = fs.readdirSync(path.join(__dirname, '../commands')).filter(file => file.endsWith('.js'));
-
 for (const file of commandFiles) {
   const command = require(`../commands/${file}`);
   if (command.name && typeof command.name === 'string') {
@@ -17,7 +17,10 @@ for (const file of commandFiles) {
 }
 
 async function handleMessage(event, pageAccessToken) {
-  if (!event || !event.sender || !event.sender.id) return;
+  if (!event || !event.sender || !event.sender.id) {
+    console.error('Invalid event object');
+    return;
+  }
 
   const senderId = event.sender.id;
 
@@ -85,12 +88,12 @@ async function handleMessage(event, pageAccessToken) {
     }
 
     let commandName, args;
-    if (messageText.startsWith('-')) {
-      const argsArray = messageText.slice(1).trim().split(/\s+/);
+    if (messageText.startsWith(prefix)) {
+      const argsArray = messageText.slice(prefix.length).split(' ');
       commandName = argsArray.shift().toLowerCase();
       args = argsArray;
     } else {
-      const words = messageText.trim().split(/\s+/);
+      const words = messageText.split(' ');
       commandName = words.shift().toLowerCase();
       args = words;
     }
@@ -113,6 +116,21 @@ async function handleMessage(event, pageAccessToken) {
         await command.execute(senderId, args, pageAccessToken, event, imageUrl);
       } catch (error) {
         sendMessage(senderId, { text: `There was an error executing the command "${commandName}". Please try again later.` }, pageAccessToken);
+      }
+      return;
+    }
+
+    const aiCommand = commands.get('ai');
+    if (aiCommand) {
+      try {
+        await aiCommand.execute(senderId, [messageText], pageAccessToken);
+      } catch (error) {
+        console.error('Error executing AI command:', error);
+        if (error.message) {
+          sendMessage(senderId, { text: error.message }, pageAccessToken);
+        } else {
+          sendMessage(senderId, { text: 'There was an error processing your request.' }, pageAccessToken);
+        }
       }
     } else {
       sendMessage(senderId, {

@@ -3,6 +3,8 @@ const path = require('path');
 const { sendMessage } = require('./sendMessage');
 
 const commands = new Map();
+const lastImageByUser = new Map();
+const lastVideoByUser = new Map();
 const prefix = '-';
 
 const commandFiles = fs.readdirSync(path.join(__dirname, '../commands')).filter(file => file.endsWith('.js'));
@@ -16,6 +18,25 @@ async function handleMessage(event, pageAccessToken) {
     console.error('Invalid event object');
     return;
   }
+
+    // Command handling
+    if (messageText === 'removebg') {
+      const lastImage = lastImageByUser.get(senderId);
+
+      if (lastImage) {
+        try {
+          await commands.get('removebg').execute(senderId, [], pageAccessToken, lastImage);
+          lastImageByUser.delete(senderId);
+        } catch (error) {
+          await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
+        }
+      } else {
+        await sendMessage(senderId, {
+          text: 'Please send an image first, then type "removebg" to remove its background.'
+        }, pageAccessToken);
+      }
+      return;
+    }
 
   const senderId = event.sender.id;
 

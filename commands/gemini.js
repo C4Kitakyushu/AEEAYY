@@ -11,20 +11,11 @@ module.exports = {
 
     if (!userPrompt && !imageUrl) {
       return sendMessage(senderId, { 
-        text: `Usage Instructions:
-To use the Gemini command, you can either:
-1. Send an image with the message "gemini" followed by your question or description, and Gemini will analyze the image.
-2. Reply to an image with "gemini" and your question, and Gemini will analyze the replied image.
-3. Send only "gemini" followed by your question for text-only queries without image analysis.
-
-Examples:
-- gemini what is AI?
-- [After sending an image:] gemini what do u see in picture.
-- [Replying to an image with:] gemini describe this.` 
+        text: `❌ 𝗣𝗿𝗼𝘃𝗶𝗱𝗲𝗱 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻 𝗼𝗿 𝗶𝗺𝗮𝗴𝗲 𝗮𝗻𝗱 𝘁𝘆𝗽𝗲 𝘆𝗼𝘂𝗿 𝗱𝗲𝘀𝗰𝗿𝗶𝗽𝘁𝗶𝗼𝗻 𝘁𝗼 𝗿𝗲𝗰𝗼𝗴𝗻𝗶𝘇𝗲...` 
       }, pageAccessToken);
     }
 
-    sendMessage(senderId, { text: "Please wait... 🔎" }, pageAccessToken);
+    sendMessage(senderId, { text: "⌛ 𝗔𝗻𝘀𝘄𝗲𝗿𝗶𝗻𝗴 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁 𝗮 𝗺𝗼𝗺𝗲𝗻𝘁.." }, pageAccessToken);
 
     try {
       if (!imageUrl) {
@@ -43,7 +34,7 @@ Examples:
       const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
       // Format the response message
-      const message = `n🤖\n━━━━━━━━━━━━━━━━━━\n${result}
+      const message = `𝗚𝗲𝗺𝗶𝗻𝗶 1.5 𝗙𝗹𝗮𝘀𝗵 𝗩𝗶𝘀𝗶𝗼𝗻 ♊\n━━━━━━━━━━━━━━━━━━\n${result}
 ━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
       await sendConcatenatedMessage(senderId, message, pageAccessToken);

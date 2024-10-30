@@ -1,62 +1,101 @@
-const axios = require('axios');
-const fs = require('fs');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const axios = require("axios");
 const { sendMessage } = require('../handles/sendMessage');
 
-const token = fs.readFileSync('token.txt', 'utf8');
-const primaryApiKey = "AIzaSyDMIUoKCQ_NRrc4tz-JKGZFh8CA1iCJLq8";
-const alternativeApiKey = "AIzaSyCCBHy1B1-vdGpiNCEYfwxkmVnPUviYd4U";
-
 module.exports = {
-  name: 'gemini',
-  description: 'interact with gemini ai',
-  author: 'developer',
+  name: "gemini",
+  description: "Interact with Google Gemini for image recognition and text queries.",
+  author: "developer",
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
+  async execute(senderId, args, pageAccessToken, event, imageUrl) {
+    const userPrompt = args.join(" ");
 
-    // Set a default query if none is provided
-    const input = (args.join(' ') || 'hi').trim();
-    const modifiedPrompt = `${input}, direct answer.`;
+    if (!userPrompt && !imageUrl) {
+      return sendMessage(senderId, { 
+        text: `Usage Instructions:
+To use the Gemini command, you can either:
+1. Send an image with the message "gemini" followed by your question or description, and Gemini will analyze the image.
+2. Reply to an image with "gemini" and your question, and Gemini will analyze the replied image.
+3. Send only "gemini" followed by your question for text-only queries without image analysis.
 
-    // Initialize Google Generative AI with the primary API key
-    const genAI = new GoogleGenerativeAI(primaryApiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+Examples:
+- gemini what is AI?
+- [After sending an image:] gemini what do u see in picture.
+- [Replying to an image with:] gemini describe this.` 
+      }, pageAccessToken);
+    }
+
+    sendMessage(senderId, { text: "Please wait... 🔎" }, pageAccessToken);
 
     try {
-      // Generate AI response using Google Generative AI
-      const result = await model.generateContent(modifiedPrompt);
-      const response = await result.response;
-      const text = await response.text();
-
-      if (!text) {
-        throw new Error("No valid response from primary API, switching to alternative API.");
-      }
-
-      const formattedMessage = ` 𝗚𝗲𝗺𝗶𝗻𝗶 ♊\n━━━━━━━━━━━━━━━━━━\n${text}━━━━━━━━━━━━━━━━━━`;
-      await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
-    } catch (error) {
-      console.error('Error with primary API:', error.message);
-
-      try {
-        // If the primary API fails, try the alternative API
-        const alternativeGenAI = new GoogleGenerativeAI(alternativeApiKey);
-        const alternativeModel = alternativeGenAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        const altResult = await alternativeModel.generateContent(modifiedPrompt);
-        const altResponse = await altResult.response;
-        const altText = await altResponse.text();
-
-        if (!altText) {
-          throw new Error("No valid response from alternative API.");
+      if (!imageUrl) {
+        if (event.message.reply_to && event.message.reply_to.mid) {
+          imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
+        } else if (event.message?.attachments && event.message.attachments[0]?.type === 'image') {
+          imageUrl = event.message.attachments[0].payload.url;
         }
-
-        const formattedMessage = `𝗚𝗲𝗺𝗶𝗻𝗶 ♊\n━━━━━━━━━━━━━━━━━━\n${altText}━━━━━━━━━━━━━━━━━━`;
-        await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
-      } catch (altError) {
-        console.error('Error with alternative API:', altError.message);
-        await sendMessage(senderId, { text: 'Error: Unable to get a valid response from both APIs.' }, pageAccessToken);
       }
+
+      const apiUrl = `https://joshweb.click/gemini`;
+      const response = await handleImageRecognition(apiUrl, userPrompt, imageUrl);
+      const result = response.gemini;
+
+      // Get the current response time in Manila timezone
+      const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+
+      // Format the response message
+      const message = `GEMINI  🤖\n━━━━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
+
+      await sendConcatenatedMessage(senderId, message, pageAccessToken);
+
+    } catch (error) {
+      console.error("Error in Gemini command:", error);
+      sendMessage(senderId, { text: `Error: ${error.message || "Something went wrong."}` }, pageAccessToken);
     }
   }
 };
+
+async function handleImageRecognition(apiUrl, prompt, imageUrl) {
+  const { data } = await axios.get(apiUrl, {
+    params: {
+      prompt,
+      url: imageUrl || ""
+    }
+  });
+
+  return data;
+}
+
+async function getRepliedImage(mid, pageAccessToken) {
+  const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
+    params: { access_token: pageAccessToken }
+  });
+
+  if (data && data.data.length > 0 && data.data[0].image_data) {
+    return data.data[0].image_data.url;
+  } else {
+    return "";
+  }
+}
+
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+  const maxMessageLength = 2000;
+
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
+  }
+}
+
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+}

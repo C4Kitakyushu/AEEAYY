@@ -3,13 +3,13 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'removebg',
-  description: 'Remove background from an image using the RemoveBG API.',
+  description: 'remove background image.',
   author: 'chi',
 
   async execute(senderId, args, pageAccessToken, imageUrl) {
     if (!imageUrl) {
       return sendMessage(senderId, {
-        text: `Please send an image first, then type "removebg" to remove its background.`
+        text: `𝗣𝗿𝗼𝘃𝗶𝗱𝗲 𝗶𝗺𝗮𝗴𝗲 𝗮𝗻𝗱 𝘁𝘆𝗽𝗲 "𝗿𝗲𝗺𝗼𝘃𝗲𝗯𝗴"`
       }, pageAccessToken);
     }
 

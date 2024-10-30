@@ -13,7 +13,7 @@ module.exports = {
       }, pageAccessToken);
     }
 
-    await sendMessage(senderId, { text: 'Removing background from the image, please wait... 🖼️' }, pageAccessToken);
+    await sendMessage(senderId, { text: '⌛ 𝗥𝗲𝗺𝗼𝘃𝗶𝗻𝗴 𝗯𝗮𝗰𝗸𝗴𝗿𝗼𝘂𝗻𝗱 𝗶𝗺𝗮𝗴𝗲 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
 
     try {
       const removeBgUrl = `https://appjonellccapis.zapto.org/api/removebg?url=${encodeURIComponent(imageUrl)}`;

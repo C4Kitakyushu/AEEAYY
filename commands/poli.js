@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'poli',
-  description: 'gnerates an image based on a text prompt',
+  description: 'generates an image based on a text prompt',
   author: 'YourName',
 
   async execute(senderId, args, pageAccessToken) {

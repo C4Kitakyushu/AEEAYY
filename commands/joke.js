@@ -5,7 +5,7 @@ module.exports = {
   description: 'fetches a random joke.',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    sendMessage(senderId, { text: "⚙️ Fetching a corny joke for you..." }, pageAccessToken);
+    sendMessage(senderId, { text: "⌛ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗿𝗮𝗻𝗱𝗼𝗺 𝗰𝗼𝗿𝗻𝘆 𝗷𝗼𝗸𝗲𝘀 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁..." }, pageAccessToken);
 
     try {
       const apiUrl = 'https://c-v5.onrender.com/api/joke';
@@ -13,7 +13,7 @@ module.exports = {
       const joke = response.data.joke;
 
       if (joke) {
-        const message = `🤣 Here's a corny joke for you: \n\n 😁 ${joke}\n\nhahaha tanginaka🫵😹`;
+        const message = `😁 𝗛𝗲𝗿𝗲 𝘆𝗼𝘂𝗿 𝗿𝗮𝗻𝗱𝗼𝗺 𝗰𝗼𝗿𝗻𝘆 𝗷𝗼𝗸𝗲𝘀: \n\n 😁 ${joke}\n\nhahaha kinginaka🫵😹`;
         sendMessage(senderId, { text: message }, pageAccessToken);
       } else {
         sendMessage(senderId, { text: "☹️ Sorry, I couldn't fetch a joke at the moment." }, pageAccessToken);

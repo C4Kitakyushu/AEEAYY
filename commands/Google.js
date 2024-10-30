@@ -9,7 +9,7 @@ const alternativeApiKey = "AIzaSyCCBHy1B1-vdGpiNCEYfwxkmVnPUviYd4U";
 
 module.exports = {
   name: 'google',
-  description: 'interact with gemini ai',
+  description: 'interact with google assistant ',
   author: 'developer',
 
   async execute(senderId, args) {
@@ -33,7 +33,7 @@ module.exports = {
         throw new Error("No valid response from primary API, switching to alternative API.");
       }
 
-      const formattedMessage = ` 𝗚𝗲𝗺𝗶𝗻𝗶 ♊\n━━━━━━━━━━━━━━━━━━\n${text}━━━━━━━━━━━━━━━━━━`;
+      const formattedMessage = ` 𝗚𝗼𝗼𝗴𝗹𝗲 𝗔𝘀𝘀𝗶𝘀𝘁𝗮𝗻𝘁 🤖\n━━━━━━━━━━━━━━━━━━\n${text}━━━━━━━━━━━━━━━━━━`;
       await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
     } catch (error) {
       console.error('Error with primary API:', error.message);

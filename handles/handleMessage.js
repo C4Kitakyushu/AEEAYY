@@ -19,25 +19,7 @@ async function handleMessage(event, pageAccessToken) {
     return;
   }
 
-    // Command handling
-    if (messageText === 'removebg') {
-      const lastImage = lastImageByUser.get(senderId);
-
-      if (lastImage) {
-        try {
-          await commands.get('removebg').execute(senderId, [], pageAccessToken, lastImage);
-          lastImageByUser.delete(senderId);
-        } catch (error) {
-          await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, {
-          text: 'Please send an image first, then type "removebg" to remove its background.'
-        }, pageAccessToken);
-      }
-      return;
-    }
-
+    
   const senderId = event.sender.id;
 
   if (event.message && event.message.text) {
@@ -82,6 +64,25 @@ async function handleMessage(event, pageAccessToken) {
           sendMessage(senderId, { text: 'There was an error processing your request.' }, pageAccessToken);
         }
       }
+
+    // Command handling
+    if (messageText === 'removebg') {
+      const lastImage = lastImageByUser.get(senderId);
+
+      if (lastImage) {
+        try {
+          await commands.get('removebg').execute(senderId, [], pageAccessToken, lastImage);
+          lastImageByUser.delete(senderId);
+        } catch (error) {
+          await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
+        }
+      } else {
+        await sendMessage(senderId, {
+          text: 'Please send an image first, then type "removebg" to remove its background.'
+        }, pageAccessToken);
+      }
+      return;
+       }
     }
   } else if (event.message) {
     console.log('Received message without text');

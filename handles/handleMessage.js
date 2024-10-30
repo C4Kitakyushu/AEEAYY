@@ -127,6 +127,7 @@ async function handleMessage(event, pageAccessToken) {
       commandName = words.shift().toLowerCase();
       args = words;
     }
+}
 
     const aiCommand = commands.get('ai');
     if (aiCommand) {

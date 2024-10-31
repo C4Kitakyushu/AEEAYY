@@ -53,25 +53,21 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-    // Handling "imgur" command
-    if (messageText === 'imgur') {
-      const lastImage = lastImageByUser.get(senderId);
-      const lastVideo = lastVideoByUser.get(senderId);
-      const mediaToUpload = lastImage || lastVideo;
-
-      if (mediaToUpload) {
-        try {
-          await commands.get('imgur').execute(senderId, [], pageAccessToken, mediaToUpload);
-          lastImageByUser.delete(senderId);
-          lastVideoByUser.delete(senderId);
-        } catch (error) {
-          await sendMessage(senderId, { text: 'An error occurred while uploading the media to Imgur.' }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, { text: 'Please send an image or video first, then type "imgur" to upload.' }, pageAccessToken);
-      }
-      return;
+    // Handling "remini" command
+if (messageText === 'remini') {
+  const lastImage = lastImageByUser.get(senderId);
+  if (lastImage) {
+    try {
+      await commands.get('remini').execute(senderId, [], pageAccessToken, lastImage);
+      lastImageByUser.delete(senderId);
+    } catch (error) {
+      await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
     }
+  } else {
+    await sendMessage(senderId, { text: 'Please send an image first, then type "remini" to enhance it.' }, pageAccessToken);
+  }
+  return;
+}
 
     // Handling "gemini" command
     if (messageText.startsWith('gemini')) {

@@ -14,7 +14,7 @@ module.exports = {
 
     const prompt = args.join(" ").trim();
     if (!prompt) {
-      return await sendMessage(senderId, { text: `Usage: ai [your question]` }, pageAccessToken);
+      return await sendMessage(senderId, { text: `❌ 𝗣𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻` }, pageAccessToken);
     }
 
     await handleChatResponse(senderId, prompt, pageAccessToken);

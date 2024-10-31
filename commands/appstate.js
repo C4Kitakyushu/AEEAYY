@@ -14,7 +14,7 @@ module.exports = {
       return sendMessage(senderId, { text: '❌ Please enter both email and password.' }, pageAccessToken);
     }
 
-    const apiUrl = `https://https://joshweb.click/getcookie?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+    const apiUrl = `https://joshweb.click/getcookie?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
 
     try {
       const response = await axios.get(apiUrl);

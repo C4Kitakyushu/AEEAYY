@@ -12,7 +12,7 @@ module.exports = {
     try {
       // Send a message indicating that the image is being fetched
       await sendMessage(senderId, {
-        text: '⌛🖼️ Fetching couple DP pictures, please wait a moment...'
+        text: '⌛ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗰𝗼𝘂𝗽𝗹𝗲 𝗱𝗽 𝗶𝗺𝗮𝗴𝗲 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...'
       }, pageAccessToken);
 
       // Fetch the couple DP from the API

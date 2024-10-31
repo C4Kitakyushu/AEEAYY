@@ -8,7 +8,7 @@ module.exports = {
     const searchQuery = args.join(" ");
 
     if (!searchQuery) {
-      return sendMessage(senderId, { text: "Please provide a search query (e.g., history Anglo-Nepal war)." }, pageAccessToken);
+      return sendMessage(senderId, { text: "⌛ 𝗣𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻 𝗮𝗯𝗼𝘂𝘁 𝗵𝗶𝘀𝘁𝗼𝗿𝘆" }, pageAccessToken);
     }
 
     try {

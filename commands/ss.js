@@ -24,7 +24,7 @@ module.exports = {
     const apiUrl = `https://rest-api.joshuaapostol.site/screenshot?url=${encodeURIComponent(url)}`;
 
     // Notify user that the screenshot is being taken
-    await sendMessage(senderId, { text: '⌛ 𝗧𝗮𝗸𝗶𝗻𝗴 𝗮 𝘀𝗰𝗿𝗲𝗲𝗻𝘀𝗵𝗼𝘁, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...\n📸: ${url}' }, pageAccessToken);
+    await sendMessage(senderId, { text: '⌛ 𝗧𝗮𝗸𝗶𝗻𝗴 𝗮 𝘀𝗰𝗿𝗲𝗲𝗻𝘀𝗵𝗼𝘁, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
 
     try {
       const response = await axios.get(apiUrl);

@@ -2,8 +2,8 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'cdpv2',
-  description: 'cdp v2.',
+  name: 'cdp',
+  description: 'get cdp image.',
   usage: 'get cdp pics',
   author: 'developer',
   async execute(senderId, args, pageAccessToken) {

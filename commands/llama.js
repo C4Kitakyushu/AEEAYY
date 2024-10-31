@@ -1,37 +1,41 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'llama',
-  description: 'Fetches response from the Llama 3.2 API based on user input.',
-  author: 'YourName',
+  description: 'Ask LLaMA 3.2 AI with Vision Instruct',
+  author: 'developer',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    let userInput = args.join(" ").trim();
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
-    const input = (args.join(' ') || '').trim();
-
-    if (!input) {
-      await sendMessage(senderId, { text: "Please provide a query." }, pageAccessToken);
-      return;
+    if (!userInput) {
+      return sendMessage(senderId, { text: 'Please provide a valid question.' }, pageAccessToken);
     }
 
+    sendMessage(senderId, { text: '⏳ Searching for an answer, please wait...' }, pageAccessToken);
+
+    // Delay for 2 seconds
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const uid = "your-uid"; // Replace with actual UID
+    const apiEndpoint = `https://joshweb.click/ai/llama-3.2-11b-vision-instruct?q=${encodeURIComponent(userInput)}&uid=${uid}`;
+
     try {
-      const response = await axios.get(`https://joshweb.click/ai/llama-3.2-11b-vision-instruct?q=${encodeURIComponent(input)}&uid=${senderId}`);
-      const data = response.data;
+      const response = await axios.get(apiEndpoint);
 
-      if (!data || !data.success) {
-        throw new Error(data.error || 'An unknown error occurred.');
+      if (response.data && response.data.result) {
+        const generatedText = response.data.result;
+        const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+
+        const message = `🤖 LLaMA 3.2 AI\n━━━━━━━━━━━━━━━\n${generatedText}\n━━━━━━━━━━━━━━━\n⏰ Response Time: ${responseTime}`;
+
+        sendMessage(senderId, { text: message }, pageAccessToken);
+      } else {
+        console.error('API response did not contain expected data:', response.data);
+        sendMessage(senderId, { text: '❌ An error occurred while generating the text response. Please try again later.' }, pageAccessToken);
       }
-
-      const formattedMessage = `${data.result}`;
-
-      await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      await sendMessage(senderId, { text: 'An error occurred while processing your request.' }, pageAccessToken);
+      console.error('Error:', error);
+      sendMessage(senderId, { text: `❌ An error occurred while generating the text response. Please try again later. Error details: ${error.message}` }, pageAccessToken);
     }
   }
 };

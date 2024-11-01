@@ -5,7 +5,7 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   // Metadata for the command
   name: 'emojimix',  // Command name
-  description: 'Mixes two emojis into one image.',  // description 
+  description: 'mixes two emojis into one image.',  // description 
   usage: 'emojimix <emoji1> <emoji2>',  // usage
   author: 'Your Name',  // Author of the command
 
@@ -15,7 +15,7 @@ module.exports = {
     if (!args || args.length < 2) {
       // Send message requesting two emojis if missing
       await sendMessage(senderId, {
-        text: 'Please provide two emojis to mix, like: emojimix 😀 😎'
+        text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘁𝘄𝗼 𝗲𝗺𝗼𝗷𝗶𝘀 𝘁𝗼 𝗺𝗶𝘅,\n\n 𝗘𝘅𝗮𝗺𝗽𝗹𝗲: 𝗲𝗺𝗼𝗷𝗶𝗺𝗶𝘅 😭 🤣'
       }, pageAccessToken);
       return;  // Exit the function if emojis are missing
     }
@@ -25,7 +25,7 @@ module.exports = {
     const apiUrl = `https://betadash-uploader.vercel.app/emojimix?emoji1=${encodeURIComponent(emoji1)}&emoji2=${encodeURIComponent(emoji2)}`;
 
     // Notify user that the image is being generated
-    await sendMessage(senderId, { text: 'Generating emoji mix... Please wait.' }, pageAccessToken);
+    await sendMessage(senderId, { text: '⌛ 𝗚𝗲𝗻𝗲𝗿𝗮𝘁𝗶𝗻𝗴 𝗲𝗺𝗼𝗷𝗶𝗺𝗶𝘅 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁..' }, pageAccessToken);
 
     try {
       // Send the generated emoji mix to the user as an image attachment

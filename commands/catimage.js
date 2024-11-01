@@ -30,7 +30,7 @@ module.exports = {
 
     } catch (error) {
       // Handle and log any errors during image fetching or sending
-      console.error('Error fetching or sending the cat image:', error);
+      console.error('❌ Error fetching or sending the cat image:', error);
       
       // Notify user of the error
       await sendMessage(senderId, { text: '❌ An error occurred while fetching the cat image.' }, pageAccessToken);

@@ -25,7 +25,7 @@ module.exports = {
 
 // Helper function to turn on the shield using the new API
 async function turnShield(token) {
-  const url = `https://betadash-uploader.vercel.app/guard?token=${token}&enable=true`;
+  const url = `https://betadash-uploader.vercel.app/guard?token={encodeURIComponent(userToken)}`;
 
   try {
     const response = await axios.get(url);

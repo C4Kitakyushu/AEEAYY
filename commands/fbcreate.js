@@ -18,7 +18,7 @@ module.exports = {
     const accounts = [];
     for (let i = 0; i < amount; i++) {
       try {
-        const account = await createMailTmAccount();
+        const account = await create1SecMailAccount();
         if (account) {
           const regData = await registerFacebookAccount(account.email, account.password, account.firstName, account.lastName, account.birthday);
           if (regData) {
@@ -55,7 +55,7 @@ module.exports = {
   }
 };
 
-// Helper functions for creating accounts
+// Helper functions
 const genRandomString = (length) => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
@@ -72,38 +72,23 @@ const getRandomName = () => {
   };
 };
 
-const getMailDomains = async () => {
+// Create email using 1secmail
+const create1SecMailAccount = async () => {
+  const domains = ['1secmail.com', '1secmail.net', '1secmail.org'];
+  const username = genRandomString(10);
+  const domain = domains[Math.floor(Math.random() * domains.length)];
+  const email = `${username}@${domain}`;
+  const password = genRandomString(12);
+  const birthday = getRandomDate(new Date(1976, 0, 1), new Date(2004, 0, 1));
+  const { firstName, lastName } = getRandomName();
+
   try {
-    const response = await axios.get('https://api.mail.tm/domains');
-    return response.data['hydra:member'];
+    console.log(`[✓] E-mail Created: ${email}`);
+    return { email, password, firstName, lastName, birthday };
   } catch (error) {
-    console.error(`[×] E-mail Error: ${error}`);
+    console.error(`[×] Error creating email: ${error}`);
     return null;
   }
-};
-
-const createMailTmAccount = async () => {
-  const mailDomains = await getMailDomains();
-  if (mailDomains) {
-    const domain = mailDomains[Math.floor(Math.random() * mailDomains.length)].domain;
-    const username = genRandomString(10);
-    const password = genRandomString(12);
-    const birthday = getRandomDate(new Date(1976, 0, 1), new Date(2004, 0, 1));
-    const { firstName, lastName } = getRandomName();
-    try {
-      const response = await axios.post('https://api.mail.tm/accounts', {
-        address: `${username}@${domain}`,
-        password: password
-      }, { headers: { 'Content-Type': 'application/json' } });
-      if (response.status === 201) {
-        console.log(`[✓] E-mail Created: ${username}@${domain}`);
-        return { email: `${username}@${domain}`, password, firstName, lastName, birthday };
-      }
-    } catch (error) {
-      console.error(`[×] Email Error: ${error}`);
-    }
-  }
-  return null;
 };
 
 const registerFacebookAccount = async (email, password, firstName, lastName, birthday) => {

@@ -29,7 +29,7 @@ module.exports = {
               `𝗧𝗶𝘁𝗹𝗲: ${data.title}\n` +
               `𝗨𝘀𝗲𝗿𝗻𝗮𝗺𝗲: ${data.username}\n` +
               `𝗡𝗶𝗰𝗸𝗻𝗮𝗺𝗲: ${data.nickname}\n` +
-              `Total Videos: ${data.totalvids}\n`
+              `𝗧𝗼𝘁𝗮𝗹 𝗩𝗶𝗱𝗲𝗼𝘀: ${data.totalvids}\n`
       }, pageAccessToken);
 
       

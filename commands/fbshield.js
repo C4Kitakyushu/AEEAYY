@@ -13,33 +13,45 @@ module.exports = {
       return;
     }
 
-    // Prompt to indicate that the process has started
-    sendMessage(senderId, { text: '🔄 𝖠𝖢𝖳𝖨𝖵𝖠𝖳𝖨𝖭𝖦 𝖦𝖴𝖠𝖱𝖣, 𝖯𝖫𝖤𝖠𝖲𝖤 𝖶𝖠𝖨𝖳...' }, pageAccessToken);
-
     try {
       const response = await turnShield(userToken);
       sendMessage(senderId, { text: response }, pageAccessToken);
     } catch (error) {
-      console.error(error.message);
-      sendMessage(senderId, { text: '𝖥𝖠𝖨𝖫𝖤𝖣 𝖳𝖮 𝖳𝖴𝖱𝖭 𝖮𝖭 𝖯𝖫𝖤𝖠𝖲𝖤 𝖳𝖱𝖄 𝖠𝖦𝖠𝖨𝖭 𝖫𝖠𝖳𝖤𝖱.' }, pageAccessToken);
+      console.error('Error response data:', error.response?.data || error.message);
+      sendMessage(senderId, { text: '𝖥𝖠𝖨𝖫𝖤𝖣 𝖳𝖮 𝖳𝖴𝖱𝖭 𝖮𝖭 𝖯𝖫𝖤𝖠𝖲𝖤 𝖳𝖱𝖸 𝖠𝖦𝖠𝖨𝖭 𝖫𝖠𝖳𝖤𝖱.' }, pageAccessToken);
     }
   }
 };
 
-// Helper function to turn on the shield using the new API with additional parameter
+// Helper function to turn on the Facebook avatar shield
 async function turnShield(token) {
-  const mode = 'secure';  // Additional parameter
-  const url = `https://betadash-uploader.vercel.app/guard?token=${token}&enable=true&mode=${mode}`;
+  const data = `variables={"0":{"is_shielded": true,"session_id":"9b78191c-84fd-4ab6-b0aa-19b39f04a6bc","actor_id":"${await getFacebookUserId(token)}","client_mutation_id":"b0316dd6-3fd6-4beb-aed4-bb29c5dc64b0"}}&method=post&doc_id=1477043292367183&query_name=IsShieldedSetMutation&strip_defaults=true&strip_nulls=true&locale=en_US&client_country_code=US&fb_api_req_friendly_name=IsShieldedSetMutation&fb_api_caller_class=IsShieldedSetMutation`;
+
+  const headers = {
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Authorization": `OAuth ${token}`
+  };
+
+  const url = "https://graph.facebook.com/graphql";
+
+  try {
+    await axios.post(url, data, { headers });
+    return '𝖦𝖴𝖠𝖱𝖣 𝖮𝖭 𝖧𝖠𝖲 𝖡𝖤𝖤𝖭 𝖠𝖢𝖳𝖨𝖵𝖠𝖳𝖤𝖣 ✅';
+  } catch (error) {
+    console.error('Error response data:', error.response?.data || error.message);
+    throw new Error('❌ 𝖥𝖠𝖨𝖫𝖤𝖣 𝖳𝖮 𝖳𝖴𝖱𝖭 𝖮𝖭 𝖯𝖫𝖤𝖠𝖲𝖤 𝖳𝖱𝖸 𝖠𝖦𝖠𝖨𝖭 𝖫𝖠𝖳𝖤𝖱.');
+  }
+}
+
+// Helper function to get Facebook user ID using the token
+async function getFacebookUserId(token) {
+  const url = `https://graph.facebook.com/me?access_token=${token}`;
 
   try {
     const response = await axios.get(url);
-    if (response.data.success) {
-      return '𝖦𝖴𝖠𝖱𝖣 𝖮𝖭 𝖧𝖠𝖲 𝖡𝖤𝖤𝖭 𝖠𝖢𝖳𝖨𝖵𝖠𝖳𝖤𝖣 ✅';
-    } else {
-      throw new Error('❌ 𝖥𝖠𝖨𝖫𝖤𝖣 𝖳𝖮 𝖳𝖴𝖱𝖭 𝖮𝖭');
-    }
+    return response.data.id;
   } catch (error) {
-    console.error(error);
-    throw new Error('❌ 𝖥𝖠𝖨𝖫𝖤𝖣 𝖳𝖮 𝖳𝖴𝖱𝖭 𝖮𝖭 𝖯𝖫𝖤𝖠𝖲𝖤 𝖳𝖱𝖄 𝖠𝖦𝖠𝖨𝖭 𝖫𝖠𝖳𝖤𝖱.');
+    console.error('Error fetching Facebook user ID:', error.response?.data || error.message);
+    throw new Error('Failed to retrieve Facebook user ID.');
   }
 }

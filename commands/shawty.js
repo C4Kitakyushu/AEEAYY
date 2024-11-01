@@ -13,7 +13,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     // Notify user that the video is being loaded
     await sendMessage(senderId, {
-      text: '⌛ Searching shawty please wait..'
+      text: '⌛ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗿𝗮𝗻𝗱𝗼𝗺 𝘀𝗵𝗼𝘁𝗶 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁..'
     }, pageAccessToken);
 
     try {
@@ -25,10 +25,10 @@ module.exports = {
 
       
       await sendMessage(senderId, {
-        text: `Video Details:\n` +
-              `Title: ${data.title}\n` +
-              `Username: ${data.username}\n` +
-              `Nickname: ${data.nickname}\n` +
+        text: `𝗩𝗶𝗱𝗲𝗼 𝗗𝗲𝘁𝗮𝗶𝗹𝘀:\n` +
+              `𝗧𝗶𝘁𝗹𝗲: ${data.title}\n` +
+              `𝗨𝘀𝗲𝗿𝗻𝗮𝗺𝗲: ${data.username}\n` +
+              `𝗡𝗶𝗰𝗸𝗻𝗮𝗺𝗲: ${data.nickname}\n` +
               `Total Videos: ${data.totalvids}\n`
       }, pageAccessToken);
 

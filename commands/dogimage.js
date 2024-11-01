@@ -6,7 +6,7 @@ module.exports = {
   // Metadata for the command
   name: 'dogimage',  // Command name
   description: 'random dog image',  // Description 
-  usage: '[nashPrefix]dogimage',  // Usage
+  usage: 'dogimage',  // Usage
   author: 'developer',  // Author of the command
 
   // Main function that executes the command

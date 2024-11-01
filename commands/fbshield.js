@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 module.exports = {
   name: 'fbshield',
@@ -26,28 +26,30 @@ module.exports = {
 
     try {
       // API call
-      const response = await fetch(`https://betadash-uploader.vercel.app/guard?token=${token}&enable=${isEnable}`, {
-        method: 'GET'
+      const response = await axios.get(`https://betadash-uploader.vercel.app/guard`, {
+        params: {
+          token: token,
+          enable: isEnable
+        }
       });
 
-      // Check if the response is successful
-      if (!response.ok) {
-        throw new Error(`Server responded with status ${response.status}`);
-      }
-
-      const data = await response.json();
       sendMessage(
         senderId,
         { text: `Guard successfully ${isEnable ? 'enabled' : 'disabled'} ✅.` },
         pageAccessToken
       );
-      console.log('Response Data:', data);
+      console.log('Response Data:', response.data);
 
     } catch (error) {
       console.error('Error:', error);
+
+      const errorMessage = error.response
+        ? `Server responded with status ${error.response.status}: ${error.response.data}`
+        : 'An error occurred while processing your request. Please try again later.';
+
       sendMessage(
         senderId,
-        { text: 'An error occurred while processing your request. Please try again later.' },
+        { text: errorMessage },
         pageAccessToken
       );
     }

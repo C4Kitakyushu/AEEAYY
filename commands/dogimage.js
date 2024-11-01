@@ -16,7 +16,7 @@ module.exports = {
       const imageUrl = response.data.url;
 
       // Notify user that the image is being generated
-      await sendMessage(senderId, { text: 'Here is a random dog image for you!' }, pageAccessToken);
+      await sendMessage(senderId, { text: '🐶 𝗛𝗲𝗿𝗲 𝗶𝘀 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗱𝗼𝗴 𝗶𝗺𝗮𝗴𝗲 𝗳𝗼𝗿 𝘆𝗼𝘂!' }, pageAccessToken);
 
       // Send the generated image to the user as an attachment
       await sendMessage(senderId, {

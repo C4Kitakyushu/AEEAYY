@@ -16,7 +16,7 @@ module.exports = {
       const imageUrl = response.data.url; // Assuming the API response has a 'url' property
 
       // Notify user that the image is being generated
-      await sendMessage(senderId, { text: 'Here is a random cat image for you!' }, pageAccessToken);
+      await sendMessage(senderId, { text: '🐱 𝗛𝗲𝗿𝗲 𝗶𝘀 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗰𝗮𝘁 𝗶𝗺𝗮𝗴𝗲 𝗳𝗼𝗿 𝘆𝗼𝘂!' }, pageAccessToken);
 
       // Send the generated image to the user as an attachment
       await sendMessage(senderId, {
@@ -33,7 +33,7 @@ module.exports = {
       console.error('Error fetching or sending the cat image:', error);
       
       // Notify user of the error
-      await sendMessage(senderId, { text: 'An error occurred while fetching the cat image.' }, pageAccessToken);
+      await sendMessage(senderId, { text: '❌ An error occurred while fetching the cat image.' }, pageAccessToken);
     }
   }
 };

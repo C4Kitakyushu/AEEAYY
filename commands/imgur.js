@@ -13,7 +13,7 @@ module.exports = {
       }, pageAccessToken);
     }
 
-    await sendMessage(senderId, { text: 'Uploading the image to Imgur, please wait...' }, pageAccessToken);
+    await sendMessage(senderId, { text: '⌛ 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝘁𝗵𝗲 𝗶𝗺𝗮𝗴𝗲 𝘁𝗼 𝗶𝗺𝗴𝘂𝗿 𝗹𝗶𝗻𝗸 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
 
     try {
       const response = await axios.get(`https://betadash-uploader.vercel.app/imgur?link=${encodeURIComponent(imageUrl)}`);
@@ -24,7 +24,7 @@ module.exports = {
       }
 
       await sendMessage(senderId, {
-        text: `Here is the Imgur link for the image you provided:\n\n${imgurLink}`
+        text: `𝗜𝗺𝗴𝘂𝗿 𝘂𝗽𝗹𝗼𝗮𝗱𝗲𝗱 :\n\n🔗: ${imgurLink}`
       }, pageAccessToken);
     } catch (error) {
       console.error('❌ Error uploading image to Imgur:', error.response?.data || error.message);

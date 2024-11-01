@@ -13,19 +13,23 @@ module.exports = {
       return;
     }
 
+    // Prompt to indicate that the process has started
+    sendMessage(senderId, { text: '🔄 𝖠𝖢𝖳𝖨𝖵𝖠𝖳𝖨𝖭𝖦 𝖦𝖴𝖠𝖱𝖣, 𝖯𝖫𝖤𝖠𝖲𝖤 𝖶𝖠𝖨𝖳...' }, pageAccessToken);
+
     try {
       const response = await turnShield(userToken);
       sendMessage(senderId, { text: response }, pageAccessToken);
     } catch (error) {
       console.error(error.message);
-      sendMessage(senderId, { text: '𝖥𝖠𝖨𝖫𝖤𝖣 𝖳𝖮 𝖳𝖴𝖱𝖭 𝖮𝖭 𝖯𝖫𝖤𝖠𝖲𝖤 𝖳𝖱𝖸 𝖠𝖦𝖠𝖨𝖭 𝖫𝖠𝖳𝖤𝖱.' }, pageAccessToken);
+      sendMessage(senderId, { text: '𝖥𝖠𝖨𝖫𝖤𝖣 𝖳𝖮 𝖳𝖴𝖱𝖭 𝖮𝖭 𝖯𝖫𝖤𝖠𝖲𝖤 𝖳𝖱𝖄 𝖠𝖦𝖠𝖨𝖭 𝖫𝖠𝖳𝖤𝖱.' }, pageAccessToken);
     }
   }
 };
 
-// Helper function to turn on the shield using the new API
+// Helper function to turn on the shield using the new API with additional parameter
 async function turnShield(token) {
-  const url = `https://betadash-uploader.vercel.app/guard?token={encodeURIComponent(userToken)}`;
+  const mode = 'secure';  // Additional parameter
+  const url = `https://betadash-uploader.vercel.app/guard?token=${token}&enable=true&mode=${mode}`;
 
   try {
     const response = await axios.get(url);
@@ -36,6 +40,6 @@ async function turnShield(token) {
     }
   } catch (error) {
     console.error(error);
-    throw new Error('❌ 𝖥𝖠𝖨𝖫𝖤𝖣 𝖳𝖮 𝖳𝖴𝖱𝖭 𝖮𝖭 𝖯𝖫𝖤𝖠𝖲𝖤 𝖳𝖱𝖸 𝖠𝖦𝖠𝖨𝖭 𝖫𝖠𝖳𝖤𝖱.');
+    throw new Error('❌ 𝖥𝖠𝖨𝖫𝖤𝖣 𝖳𝖮 𝖳𝖴𝖱𝖭 𝖮𝖭 𝖯𝖫𝖤𝖠𝖲𝖤 𝖳𝖱𝖄 𝖠𝖦𝖠𝖨𝖭 𝖫𝖠𝖳𝖤𝖱.');
   }
 }

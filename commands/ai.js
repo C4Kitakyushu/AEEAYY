@@ -55,7 +55,7 @@ const handleChatResponse = async (senderId, input, pageAccessToken) => {
 };
 
 const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
-  const maxMessageLength = 2000;
+  const maxMessageLength = 5000;
 
   if (text.length > maxMessageLength) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);

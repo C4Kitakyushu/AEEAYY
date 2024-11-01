@@ -16,7 +16,7 @@ module.exports = {
       const memeUrl = response.data.url; // Assuming the API response has a 'url' property
 
       // Notify user that the meme is being generated
-      await sendMessage(senderId, { text: 'Here is a random meme for you!' }, pageAccessToken);
+      await sendMessage(senderId, { text: '😆 𝗛𝗲𝗿𝗲 𝗶𝘀 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗺𝗲𝗺𝗲 𝗳𝗼𝗿 𝘆𝗼𝘂!' }, pageAccessToken);
 
       // Send the generated meme to the user as an attachment
       await sendMessage(senderId, {
@@ -30,10 +30,10 @@ module.exports = {
 
     } catch (error) {
       // Handle and log any errors during meme fetching or sending
-      console.error('Error fetching or sending the meme:', error);
+      console.error('❌ Error fetching or sending the meme:', error);
       
       // Notify user of the error
-      await sendMessage(senderId, { text: 'An error occurred while fetching the meme.' }, pageAccessToken);
+      await sendMessage(senderId, { text: '❌ An error occurred while fetching the meme.' }, pageAccessToken);
     }
   }
 };

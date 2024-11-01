@@ -6,7 +6,7 @@ module.exports = {
   
   name: 'shawty',
   description: 'fetching random shoti',  
-  usage: '',  
+  usage: 'gwapo si makoy',  
   author: 'Mettalic Chrome V2', 
 
   

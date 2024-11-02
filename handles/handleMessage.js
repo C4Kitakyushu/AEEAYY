@@ -68,6 +68,23 @@ if (messageText === 'remini') {
   }
   return;
 }
+// Handling "4k" command
+if (messageText === '4k') {
+  const lastImage = lastImageByUser.get(senderId); // Assuming this map stores the last image URL sent by the user
+  if (lastImage) {
+    try {
+      await commands.get('4k').execute(senderId, [], pageAccessToken, lastImage);
+      lastImageByUser.delete(senderId); // Clear the image after processing
+    } catch (error) {
+      await sendMessage(senderId, { text: 'An error occurred while upscaling the image.' }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, {
+      text: '❌ Please send an image first, then type "4k" to upscale it.'
+    }, pageAccessToken);
+  }
+  return;
+}
 
     // Handling "gemini" command
     if (messageText.startsWith('gemini')) {

@@ -26,9 +26,28 @@ module.exports = {
         }
       }
 
-      const apiUrl = `https://joshweb.click/gemini`;
-      const response = await handleImageRecognition(apiUrl, userPrompt, imageUrl);
-      const result = response.gemini;
+      // Use both APIs
+      const apiUrlGemini = `https://joshweb.click/gemini`;
+      const apiUrlGpt4o = `https://appjonellccapis.zapto.org/api/gpt4o-v2`;
+
+      const responseGemini = await handleImageRecognition(apiUrlGemini, userPrompt, imageUrl);
+      const responseGpt4o = await handleImageRecognition(apiUrlGpt4o, userPrompt, imageUrl);
+
+      const result = responseGpt4o.gemini || responseGemini.gemini; // Prioritize response from the new API
+
+      // Check for image generation
+      if (result.includes('TOOL_CALL: generateImage')) {
+        const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
+        if (imageUrlMatch && imageUrlMatch[1]) {
+          const generatedImageUrl = imageUrlMatch[1];
+          await sendMessage(senderId, {
+            attachment: {
+              type: 'image',
+              payload: { url: generatedImageUrl }
+            }
+          }, pageAccessToken);
+        }
+      }
 
       // Get the current response time in Manila timezone
       const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });

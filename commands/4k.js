@@ -46,9 +46,8 @@ module.exports = {
           throw new Error("Invalid response format from usage API");
         }
 
-        const timeTaken = ((new Date().getTime() - startTime) / 1000).toFixed(2);
         await sendMessage(senderId, {
-          text: `📦| Model: UPSCALE\n🔮| Total Requests: ${usageResponse.data.totalRequests}\n⏰| Time Taken: ${timeTaken} sec.`,
+          text: `📦| Model: UPSCALE\n🔮| Total Requests: ${usageResponse.data.totalRequests}`,
           attachment: { type: 'image', payload: { url: resultUrl } }
         }, pageAccessToken);
 

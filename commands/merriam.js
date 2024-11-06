@@ -14,7 +14,7 @@ module.exports = {
     sendMessage(senderId, { text: `⚙ Merriam Webster is fetching the definition for➜ "${word}"...` }, pageAccessToken);
 
     try {
-      const response = await axios.get(`https://nash-rest-api-production.up.railway.app/merriam-webster/definition?word=${encodeURIComponent(word)}`);
+      const response = await axios.get(`https://jerome-web.onrender.com/service/api/merriam?word=${encodeURIComponent(word)}`);
       const data = response.data;
 
       if (!data || !data.definitions || data.definitions.length === 0) {

@@ -4,49 +4,51 @@ const { sendMessage } = require('../handles/sendMessage');
 // Define and export module
 module.exports = {
   // Metadata for the command
-  name: 'fbcover',  // Command name
-  description: 'Generate Facebook cover image',  // Description 
-  usage: '[name | last name | phone number | country | email | color]',  // Usage
+  name: 'emogif',  // Command name
+  description: 'Converts emoji to GIF.',  // Description
+  usage: '<emoji>',  // Usage
   author: 'Ali',  // Author of the command
 
   // Main function that executes the command
   async execute(senderId, args, pageAccessToken) {
-    // Check if all arguments are provided
-    if (!args || args.length < 6) {
-      // Send message requesting missing information
+    // Check if prompt arguments are provided
+    if (!args || args.length === 0) {
+      // Send message requesting an emoji if missing
       await sendMessage(senderId, {
-        text: 'Please provide your name, last name, phone number, country, email, and preferred color.'
+        text: 'Please provide an emoji to convert to a GIF.'
       }, pageAccessToken);
-      return;  // Exit the function if required information is missing
+      return;  // Exit the function if no emoji is provided
     }
 
-    // Extract the arguments
-    const [name, lastName, phoneNumber, country, email, color] = args;
+    // Concatenate arguments to form the emoji string
+    const emoji = args.join(' ');
+    const apiUrl = `https://joshweb.click/emoji2gif?q=${encodeURIComponent(emoji)}`;  // API endpoint with the emoji
 
-    // Construct the API URL with query parameters
-    const apiUrl = `https://joshweb.click/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(lastName)}&sdt=${encodeURIComponent(phoneNumber)}&address=${encodeURIComponent(country)}&email=${encodeURIComponent(email)}&uid=${encodeURIComponent(senderId)}&color=${encodeURIComponent(color)}`;
-
-    // Notify the user that the image is being generated
-    await sendMessage(senderId, { text: 'Generating your Facebook cover image... Please wait.' }, pageAccessToken);
+    // Notify user that the GIF is being generated
+    await sendMessage(senderId, { text: 'Generating GIF... Please wait.' }, pageAccessToken);
 
     try {
-      // Send the generated image to the user as an attachment
+      // Fetch the GIF URL from the API
+      const response = await axios.get(apiUrl);
+      const gifUrl = response.data.url;  // Assuming the API returns the GIF URL in 'url' field
+
+      // Send the generated GIF to the user as an attachment
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: apiUrl  // URL of the generated image from the API
+            url: gifUrl  // URL of the generated GIF
           }
         }
       }, pageAccessToken);
 
     } catch (error) {
-      // Handle and log any errors during the image generation
-      console.error('Error generating the image:', error);
-
-      // Notify the user about the error
+      // Handle and log any errors during GIF generation
+      console.error('Error generating GIF:', error);
+      
+      // Notify user of the error
       await sendMessage(senderId, {
-        text: 'Sorry, there was an error generating your Facebook cover image.'
+        text: 'Sorry, there was an error generating the GIF. Please try again later.'
       }, pageAccessToken);
     }
   }

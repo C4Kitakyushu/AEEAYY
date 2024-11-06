@@ -1,55 +1,41 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
 
-// Define and export module
 module.exports = {
-  // Metadata for the command
-  name: 'bing',  // Command name
-  description: 'Generates an image using the Bing API based on a given prompt.',  // description 
-  usage: '!bing-image <prompt>',  // usage
-  author: 'Ali',  // Author of the command
-
-  // Main function that executes the command
-  async execute(senderId, args, pageAccessToken) {
-    // Check if prompt arguments are provided
-    if (!args || args.length === 0) {
-      // Send message requesting a prompt if missing
-      await sendMessage(senderId, {
-        text: 'Please provide a prompt to generate an image.'
-      }, pageAccessToken);
-      return;  // Exit the function if no prompt is provided
+  name: 'bing',
+  description: 'Generate and send images directly from Bing based on your prompt.',
+  author: 'developer',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    if (args.length === 0) {
+      return sendMessage(senderId, { text: 'Please provide a prompt. Example: /binggen dog' }, pageAccessToken);
     }
 
-    // Concatenate arguments to form the prompt
     const prompt = args.join(' ');
-    const apiUrl = `https://jerome-web.onrender.com/service/api/bing?prompt=${encodeURIComponent(prompt)}`;  // API endpoint with the prompt
-
-    // Notify user that the image is being generated
-    await sendMessage(senderId, { text: 'Generating image... Please wait.' }, pageAccessToken);
+    const apiUrl = `https://jerome-web.onrender.com/service/api/bing?prompt=${encodeURIComponent(prompt)}`;
 
     try {
-      // Make the API request
       const response = await axios.get(apiUrl);
-      const imageUrl = response.data.imageUrl;  // Assuming the API returns an `imageUrl` in the response
+      const data = response.data;
 
-      // Send the generated image to the user as an attachment
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'image',
-          payload: {
-            url: imageUrl  // URL of the generated image
+      if (data.success && data.result && data.result.length > 0) {
+        const imageMessages = data.result.slice(0, 4).map((imageUrl) => ({
+          attachment: {
+            type: 'image',
+            payload: {
+              url: imageUrl,
+              is_reusable: true
+            }
           }
-        }
-      }, pageAccessToken);
+        }));
 
+        for (const imageMessage of imageMessages) {
+          await sendMessage(senderId, imageMessage, pageAccessToken);
+        }
+      } else {
+        sendMessage(senderId, { text: `Sorry, no images were found for "${prompt}".` }, pageAccessToken);
+      }
     } catch (error) {
-      // Handle and log any errors during image generation
-      console.error('Error generating image:', error);
-      
-      // Notify user of the error
-      await sendMessage(senderId, {
-        text: 'Sorry, there was an error generating the image. Please try again later.'
-      }, pageAccessToken);
+      console.error('Error fetching Bing images:', error);
+      sendMessage(senderId, { text: 'Sorry, there was an error processing your request.' }, pageAccessToken);
     }
   }
 };

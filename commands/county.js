@@ -5,7 +5,7 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   // Metadata for the command
   name: 'countryinfo',  // Command name
-  description: 'het information about a country.',  // Description 
+  description: 'get information about a country.',  // Description 
   usage: 'countryinfo {countryName}',  // Usage
   author: 'developer',  // Author of the command
 

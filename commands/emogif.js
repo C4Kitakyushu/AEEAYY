@@ -2,7 +2,7 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'emigif',  // Command name
+  name: 'emogif',  // Command name
   description: 'convert emoji to gif',  // Description
   usage: '[emoji]',  // Usage
   author: 'developer',  // Author of the command
@@ -24,7 +24,7 @@ module.exports = {
     const encodedEmoji = encodeURIComponent(emoji);
     const apiUrl = `https://joshweb.click/emoji2gif?q=${encodedEmoji}`;
 
-    await sendMessage(senderId, { text: 'Generating GIF... Please wait.' }, pageAccessToken);
+    await sendMessage(senderId, { text: 'Generating ${encodeEmoji} GIF... Please wait.' }, pageAccessToken);
 
     try {
       await sendMessage(senderId, {

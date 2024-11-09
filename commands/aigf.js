@@ -8,10 +8,10 @@ module.exports = {
     const userInput = args.join(' ').trim();
 
     if (!userInput) {
-      return sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗶𝗻𝗽𝘂𝘁.\n\n𝗘𝘅𝗮𝗺𝗽𝗹𝗲: 𝗳𝗹𝗶𝗿𝘁 𝗺𝗲 𝗹𝗼𝘃𝗲😚' }, pageAccessToken);
+      return sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗶𝗻𝗽𝘂𝘁.\n\n𝗘𝘅𝗮𝗺𝗽𝗹𝗲: 𝗳𝗹𝗶𝗿𝘁 𝗺𝗲 𝗹𝗼𝘃𝗲 😚' }, pageAccessToken);
     }
 
-    sendMessage(senderId, { text: '⌛ AI girlfriend is processing your input, please wait...' }, pageAccessToken);
+    sendMessage(senderId, { text: '⌛ 𝗪𝗮𝗶𝘁 𝗹𝗮𝗻𝗴 𝘁𝘆𝗽𝗲 𝗸𝗶𝘁𝗮 🫵😁..' }, pageAccessToken);
 
     try {
       const response = await axios.get('https://joshweb.click/api/ai-gf', {
@@ -21,7 +21,7 @@ module.exports = {
       const responseString = responseData.result ? responseData.result : '❌ No result found.';
 
       const formattedResponse = `
-💬 AI Girlfriend Conversation
+💬 𝗔𝗜 𝗚𝗶𝗿𝗹𝗳𝗿𝗶𝗲𝗻𝗱 𝗖𝗼𝗻𝘃𝗲𝗿𝘀𝗮𝘁𝗶𝗼𝗻
 ━━━━━━━━━━━━━━━━━━
 ${responseString}
 ━━━━━━━━━━━━━━━━━━
@@ -30,8 +30,8 @@ ${responseString}
       sendMessage(senderId, { text: formattedResponse.trim() }, pageAccessToken);
 
     } catch (error) {
-      console.error('Error:', error);
-      sendMessage(senderId, { text: 'An error occurred while fetching the response.' }, pageAccessToken);
+      console.error('❌ Error hahahaha:', error);
+      sendMessage(senderId, { text: '❌ An error occurred while fetching the response hahahaha.' }, pageAccessToken);
     }
   }
 };

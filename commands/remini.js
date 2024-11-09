@@ -18,7 +18,7 @@ module.exports = {
 
     try {
       // Enhance the image in the background
-      const response = await axios.get(`https://markdevs-last-api-2epw.onrender.com/api/remini?inputImage=${encodeURIComponent(imageUrl)}`);
+      const response = await axios.get(`https://markdevs69v2-679r.onrender.com/new/api/remini?inputImage=${encodeURIComponent(imageUrl)}`);
       const processedImageURL = response.data.image_data;
 
       // Send the enhanced image URL

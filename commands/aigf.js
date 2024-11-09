@@ -9,7 +9,7 @@ module.exports = {
 
     if (!userInput) {
       return sendMessage(senderId, { text: '😁uhmm.. hello baby how are you today? I'm glad to meet you again😚🥰' }, pageAccessToken);
-    }
+   
 
     
     try {

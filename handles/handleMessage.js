@@ -68,23 +68,22 @@ if (messageText === 'remini') {
   }
   return;
 }
-// Handling "4k" command
-if (messageText === '4k') {
-  const lastImage = lastImageByUser.get(senderId); // Assuming this map stores the last image URL sent by the user
+// Handling "reminiv2" command
+if (messageText === 'reminiv2') {
+  const lastImage = lastImageByUser.get(senderId);
   if (lastImage) {
     try {
-      await commands.get('4k').execute(senderId, [], pageAccessToken, lastImage);
-      lastImageByUser.delete(senderId); // Clear the image after processing
+      await commands.get('reminiv2').execute(senderId, [], pageAccessToken, lastImage);
+      lastImageByUser.delete(senderId);
     } catch (error) {
-      await sendMessage(senderId, { text: 'An error occurred while upscaling the image.' }, pageAccessToken);
+      await sendMessage(senderId, { text: '⚠️ An error occurred while enhancing the image. Please try again later.' }, pageAccessToken);
     }
   } else {
-    await sendMessage(senderId, {
-      text: '❌ Please send an image first, then type "4k" to upscale it.'
-    }, pageAccessToken);
+    await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗿𝗲𝗺𝗶𝗻𝗶" 𝘁𝗼 𝗲𝗻𝗵𝗮𝗻𝗰𝗲 𝗶𝘁.' }, pageAccessToken);
   }
   return;
 }
+
 
     // Handling "gemini" command
     if (messageText.startsWith('gemini')) {

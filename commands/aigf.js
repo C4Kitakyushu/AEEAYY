@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'aigf',
-  description: 'Talk to virtual AI girlfriend',
+  description: 'talk to virtual ai girlfriend',
   author: 'Deku',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const userInput = args.join(' ').trim();

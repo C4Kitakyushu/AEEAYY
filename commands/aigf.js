@@ -2,16 +2,15 @@ const axios = require('axios');
 
 module.exports = {
   name: 'aigf',
-  description: 'talk to virtual ai girlfriend',
-  author: 'developer',
+  description: 'Talk to virtual AI girlfriend',
+  author: 'Deku',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const userInput = args.join(' ').trim();
 
     if (!userInput) {
       return sendMessage(senderId, { text: '😁uhmm.. hello baby how are you today? I'm glad to meet you again😚🥰' }, pageAccessToken);
-   
+    }
 
-    
     try {
       const response = await axios.get('https://joshweb.click/api/ai-gf', {
         params: { q: userInput }
@@ -20,7 +19,7 @@ module.exports = {
       const responseString = responseData.result ? responseData.result : 'No result found.';
 
       const formattedResponse = `
-💬 AI Girlfriend👥Conversation
+💬 AI Girlfriend Conversation
 ━━━━━━━━━━━━━━━━━━
 ${responseString}
 ━━━━━━━━━━━━━━━━━━

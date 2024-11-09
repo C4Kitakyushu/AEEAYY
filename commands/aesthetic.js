@@ -1,7 +1,7 @@
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'aesthetic.js',
+  name: 'aesthetic',
   description: 'aesthetic <text>',
   usage: 'aesthetic <text>',
   author: 'developer',

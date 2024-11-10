@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'tinyllama',
-  description: 'interact with TinyLlama AI',
+  description: 'interact with tinyplama ai',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const userInput = args.join(' ').trim();

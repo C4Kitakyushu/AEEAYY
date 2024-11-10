@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
-const pageAccessToken = 'YOUR_PAGE_ACCESS_TOKEN'; // Replace this with your actual token
+const pageAccessToken = 'EAAPgsg1U6CABOzMMoAefrZBLXAruDkMh0lg029ZBr84eOaFzRMZAamhoFdjZCJ9ZAbwtVuIsMFUsUaI10zIldyUqeiEsklkjNclYWOGmMsNXcVoDEIdLtSfjalLikGbl4E9oHxU4Cik184ORP2vnjwnlvUcTZB2bEUKKGuX36hHbKXJQNm1ZBdm0ixx8Fg7qVcB'; // Replace this with your actual token
 
 module.exports = {
   name: 'ai3',

@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'liner',
-  description: 'interact with Linerva AI',
+  description: 'interact with linerva ai',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const userInput = args.join(' ').trim();

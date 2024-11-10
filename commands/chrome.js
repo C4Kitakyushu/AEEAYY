@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'ai3',
-  description: 'interact with GPT-4 AI',
+  description: 'interact with gpt-4 ai',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const userInput = args.join(' ').trim();

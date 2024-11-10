@@ -1,81 +1,37 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
-
-const pageAccessToken = 'EAAPgsg1U6CABOzMMoAefrZBLXAruDkMh0lg029ZBr84eOaFzRMZAamhoFdjZCJ9ZAbwtVuIsMFUsUaI10zIldyUqeiEsklkjNclYWOGmMsNXcVoDEIdLtSfjalLikGbl4E9oHxU4Cik184ORP2vnjwnlvUcTZB2bEUKKGuX36hHbKXJQNm1ZBdm0ixx8Fg7qVcB'; // Replace this with your actual token
 
 module.exports = {
-  name: 'ai3',
-  description: 'Ask the GPT-4 assistant.',
+  name: 'morphic',
+  description: 'interact with morphic ai',
   author: 'developer',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    const userInput = args.join(' ').trim();
 
-  async execute(senderId, args) {
-    const prompt = args.join(" ").trim();
-    if (!prompt) {
-      return await sendMessage(senderId, { text: `❌ Provide your question` }, pageAccessToken);
+    if (!userInput) {
+      return sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻𝘀.\n𝗘𝘅𝗮𝗺𝗽𝗹𝗲: 𝗪𝗵𝗮𝘁 𝗶𝘀 𝗠𝗼𝗿𝗽𝗵𝗶𝗰 𝗔𝗜?' }, pageAccessToken);
     }
 
-    await handleChatResponse(senderId, prompt, pageAccessToken);
-  },
-};
+    sendMessage(senderId, { text: '⌛ 𝗠𝗼𝗿𝗽𝗵𝗶𝗰 𝗔𝗜 𝗽𝗿𝗼𝗰𝗲𝘀𝘀𝗶𝗻𝗴 𝘆𝗼𝘂𝗿 𝗿𝗲𝗾𝘂𝗲𝘀𝘁, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
 
-const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = "https://apis-markdevs69v2.onrender.com/new/v2/gpt4";
+    try {
+      const response = await axios.get('https://joshweb.click/api/morphic', {
+        params: { q: userInput }
+      });
+      const morphicResponse = response.data;
+      const responseString = morphicResponse.result ? morphicResponse.result : '𝗡𝗼 𝗿𝗲𝘀𝘂𝗹𝘁 𝗳𝗼𝘂𝗻𝗱.';
 
-  try {
-    const { data } = await axios.get(apiUrl, { params: { ask: input } });
-    const result = data.response;
+      const formattedResponse = `
+🤖 𝗠𝗼𝗿𝗽𝗵𝗶𝗰 𝗔𝗜 𝗖𝗼𝗻𝘃𝗲𝗿𝘀𝗮𝘁𝗶𝗼𝗻𝗮𝗹
+━━━━━━━━━━━━━━━━━━
+${responseString}
+━━━━━━━━━━━━━━━━━━
+      `;
 
-    const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-    const formattedResponse = `🤖 𝗚𝗣𝗧-𝟰 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲🤍\n━━━━━━━━━━━━━━━━━━\n𝗤𝘂𝗲𝘀𝘁𝗶𝗼𝗻: ${input}\n━━━━━━━━━━━━━━━━━━\n𝗔𝗻𝘀𝘄𝗲𝗿: ${result}\n━━━━━━━━━━━━━━━━━━\n⏰ Respond Time: ${responseTime}`;
+      sendMessage(senderId, { text: formattedResponse.trim() }, pageAccessToken);
 
-    if (result.includes('TOOL_CALL: generateImage')) {
-      const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
-
-      if (imageUrlMatch && imageUrlMatch[1]) {
-        const imageUrl = imageUrlMatch[1];
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: { url: imageUrl }
-          }
-        }, pageAccessToken);
-      } else {
-        await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
-      }
-    } else {
-      await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
+    } catch (error) {
+      console.error('Error:', error);
+      sendMessage(senderId, { text: '❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗳𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝘁𝗵𝗲 𝗿𝗲𝘀𝗽𝗼𝗻𝘀𝗲.' }, pageAccessToken);
     }
-  } catch (error) {
-    console.error('Error while processing AI response:', error.message);
-    await sendError(senderId, '❌ Error occurred.', pageAccessToken);
   }
-};
-
-const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-};
-
-const splitMessageIntoChunks = (message, chunkSize) => {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-};
-
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ Respond Time: ${responseTime}`;
-
-  await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

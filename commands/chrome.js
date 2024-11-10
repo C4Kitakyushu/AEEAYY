@@ -1,43 +1,36 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'chrome',
-  description: 'ask to chrome open ai based',
+  name: 'ai3',
+  description: 'interact with GPT-4 AI',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    let userInput = args.join(" ").trim();
+    const userInput = args.join(' ').trim();
 
     if (!userInput) {
-      return sendMessage(senderId, { text: '𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝗮 𝘃𝗮𝗹𝗶𝗱 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻.' }, pageAccessToken);
+      return sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻𝘀\n𝗘𝘅𝗮𝗺𝗽𝗹𝗲: 𝗪𝗵𝗮𝘁 𝗶𝘀 𝗔𝗜?' }, pageAccessToken);
     }
 
-    sendMessage(senderId, { text: '🕧 | 𝗦𝗲𝗮𝗿𝗰𝗵𝗶𝗻𝗴 𝗳𝗼𝗿 𝗮𝗻 𝗮𝗻𝘀𝘄𝗲𝗿, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
-
-    // Delay for 2 seconds
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const gpt4_api = `https://personal-ai-phi.vercel.app/kshitiz?prompt=${encodeURIComponent(userInput)}&content=${encodeURIComponent("you are an AI assistant")}`;
+    sendMessage(senderId, { text: '⌛ 𝗚𝗣𝗧-𝟰 𝘀𝗲𝗮𝗿𝗰𝗵𝗶𝗻𝗴 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻𝘀, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
 
     try {
-      const response = await axios.get(gpt4_api);
+      const response = await axios.get('https://apis-markdevs69v2.onrender.com/new/v2/gpt4', {
+        params: { ask: userInput }
+      });
+      const result = response.data.result ? response.data.result : 'No result found.';
 
-      if (response.data && response.data.code === 2 && response.data.message === "success") {
-        const generatedText = response.data.answer;
-        const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+      const formattedResponse = `
+🤖 𝗚𝗣𝗧-𝟰 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲🤍
+━━━━━━━━━━━━━━━━━━
+${result}
+━━━━━━━━━━━━━━━━━━
+      `;
 
-        // For simplicity, we're not fetching the user info in this structure, but if needed, you can implement it.
-        const message = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━
-${generatedText}\n━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
+      sendMessage(senderId, { text: formattedResponse.trim() }, pageAccessToken);
 
-
-        sendMessage(senderId, { text: message }, pageAccessToken);
-      } else {
-        console.error('API response did not contain expected data:', response.data);
-        sendMessage(senderId, { text: '❌ An error occurred while generating the text response. Please try again later.' }, pageAccessToken);
-      }
     } catch (error) {
       console.error('Error:', error);
-      sendMessage(senderId, { text: `❌ An error occurred while generating the text response. Please try again later. Error details: ${error.message}` }, pageAccessToken);
+      sendMessage(senderId, { text: '❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗳𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝘁𝗵𝗲 𝗿𝗲𝘀𝗽𝗼𝗻𝘀𝗲.' }, pageAccessToken);
     }
   }
 };

@@ -1,36 +1,81 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+
+const pageAccessToken = 'YOUR_PAGE_ACCESS_TOKEN'; // Replace this with your actual token
 
 module.exports = {
   name: 'ai3',
-  description: 'interact with gpt-4 ai',
+  description: 'Ask the GPT-4 assistant.',
   author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    const userInput = args.join(' ').trim();
 
-    if (!userInput) {
-      return sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻𝘀\n𝗘𝘅𝗮𝗺𝗽𝗹𝗲: 𝗪𝗵𝗮𝘁 𝗶𝘀 𝗔𝗜?' }, pageAccessToken);
+  async execute(senderId, args) {
+    const prompt = args.join(" ").trim();
+    if (!prompt) {
+      return await sendMessage(senderId, { text: `❌ Provide your question` }, pageAccessToken);
     }
 
-    sendMessage(senderId, { text: '⌛ 𝗚𝗣𝗧-𝟰 𝘀𝗲𝗮𝗿𝗰𝗵𝗶𝗻𝗴 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻𝘀, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
+    await handleChatResponse(senderId, prompt, pageAccessToken);
+  },
+};
 
-    try {
-      const response = await axios.get('https://apis-markdevs69v2.onrender.com/new/v2/gpt4', {
-        params: { ask: userInput }
-      });
-      const result = response.data.result ? response.data.result : 'No result found.';
+const handleChatResponse = async (senderId, input, pageAccessToken) => {
+  const apiUrl = "https://apis-markdevs69v2.onrender.com/new/v2/gpt4";
 
-      const formattedResponse = `
-🤖 𝗚𝗣𝗧-𝟰 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲🤍
-━━━━━━━━━━━━━━━━━━
-${result}
-━━━━━━━━━━━━━━━━━━
-      `;
+  try {
+    const { data } = await axios.get(apiUrl, { params: { ask: input } });
+    const result = data.response;
 
-      sendMessage(senderId, { text: formattedResponse.trim() }, pageAccessToken);
+    const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+    const formattedResponse = `🤖 𝗚𝗣𝗧-𝟰 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲🤍\n━━━━━━━━━━━━━━━━━━\n𝗤𝘂𝗲𝘀𝘁𝗶𝗼𝗻: ${input}\n━━━━━━━━━━━━━━━━━━\n𝗔𝗻𝘀𝘄𝗲𝗿: ${result}\n━━━━━━━━━━━━━━━━━━\n⏰ Respond Time: ${responseTime}`;
 
-    } catch (error) {
-      console.error('Error:', error);
-      sendMessage(senderId, { text: '❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗳𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝘁𝗵𝗲 𝗿𝗲𝘀𝗽𝗼𝗻𝘀𝗲.' }, pageAccessToken);
+    if (result.includes('TOOL_CALL: generateImage')) {
+      const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
+
+      if (imageUrlMatch && imageUrlMatch[1]) {
+        const imageUrl = imageUrlMatch[1];
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'image',
+            payload: { url: imageUrl }
+          }
+        }, pageAccessToken);
+      } else {
+        await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
+      }
+    } else {
+      await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
     }
+  } catch (error) {
+    console.error('Error while processing AI response:', error.message);
+    await sendError(senderId, '❌ Error occurred.', pageAccessToken);
   }
+};
+
+const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
+  const maxMessageLength = 2000;
+
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
+  }
+};
+
+const splitMessageIntoChunks = (message, chunkSize) => {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+};
+
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ Respond Time: ${responseTime}`;
+
+  await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

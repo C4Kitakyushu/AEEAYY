@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const EMAIL_API_URL = "https://markdevs-last-api-2epw.onrender.com/api/gen";
+const EMAIL_API_URL = "https://apis-markdevs69v2.onrender.com/new/api/gen";
 const INBOX_API_URL = "https://c-v1.onrender.com/tempmail/inbox?email=";
 
 module.exports = {

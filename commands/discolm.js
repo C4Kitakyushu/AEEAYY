@@ -22,7 +22,7 @@ module.exports = {
       const responseString = mapanghi.result ? mapanghi.result : 'No result found.';
 
       const formattedResponse = `
-📦 𝗗𝗶𝘀𝗰𝗼𝗹𝗺 𝗚𝗲𝗿𝗺𝗮𝗻
+🤖 𝗗𝗶𝘀𝗰𝗼𝗹𝗺 𝗚𝗲𝗿𝗺𝗮𝗻
 ━━━━━━━━━━━━━━━━━━
 ${responseString}
 ━━━━━━━━━━━━━━━━━━

@@ -12,7 +12,7 @@ module.exports = {
     }
 
     const text = args.join(' ');
-    const apiUrl = `https://api-canvass.vercel.app/zuck?text=${encodeURIComponent(text)}`;
+    const apiUrl = `https://jerome-web.onrender.com/service/api/zuck?text=${encodeURIComponent(text)}`;
 
     try {
       await sendMessage(senderId, { 

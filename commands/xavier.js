@@ -1,9 +1,9 @@
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'aesthetic',
-  description: 'aesthetic <text>',
-  usage: 'aesthetic <text>',
+  name: 'xavier',
+  description: 'xavier <text>',
+  usage: 'xavier <text>',
   author: 'developer',
   async execute(senderId, args, pageAccessToken) {
     if (!args || !Array.isArray(args) || args.length === 0) {

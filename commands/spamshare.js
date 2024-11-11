@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'spamshare',
-  description: 'submitAppState <appState> <url> <amount> <interval>',
+  description: 'spamshare <appState> | <url> | <amount> | <interval>',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const appState = args[0];
@@ -13,7 +13,7 @@ module.exports = {
 
     // Validation check
     if (!appState || !url || isNaN(amount) || isNaN(interval) || amount <= 0 || interval < 0) {
-      return sendMessage(senderId, { text: 'Usage: submitAppState <appState> <url> <amount> <interval>' }, pageAccessToken);
+      return sendMessage(senderId, { text: 'Usage: submit Appstate <appState> | <url> | <amount> | <interval>' }, pageAccessToken);
     }
 
     sendMessage(senderId, { text: '⚙️ Processing your submission request...' }, pageAccessToken);

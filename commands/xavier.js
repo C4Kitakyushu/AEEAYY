@@ -26,4 +26,4 @@ module.exports = {
       await sendMessage(senderId, { text: 'Error: Could not generate canvas image.' }, pageAccessToken);
     }
   }
-};
+}; //pogi

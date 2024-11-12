@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const EMAIL_API_URL = "https://nethwieginedev.vercel.app/api/tempmail-create?";
+const EMAIL_API_URL = "https://nethwieginedev.vercel.app/api/tempmail-create";
 const INBOX_API_URL = "https://c-v1.onrender.com/tempmail/inbox?email=";
 
 module.exports = {

@@ -53,11 +53,11 @@ module.exports = {
         if (inboxMessages.length === 0) {
           return sendMessage(senderId, { text: "❌ | No messages found in the inbox." }, pageAccessToken);
         }
-   
+
         // Get the most recent message
         const latestMessage = inboxMessages[0];
-        const from = latestMessage.from || "Registration";
-        const date = latestMessage.date || "2024-2025";
+        const from = latestMessage.from || "Unknown sender";
+        const date = latestMessage.date || "Unknown date";
         const subject = latestMessage.subject || "No subject";
 
         const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;

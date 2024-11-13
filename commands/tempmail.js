@@ -56,7 +56,9 @@ module.exports = {
 
         // Get the most recent message
         const latestMessage = inboxMessages[0];
-        const { date, from, subject } = latestMessage;
+        const from = latestMessage.from || "Unknown sender";
+        const date = latestMessage.date || "Unknown date";
+        const subject = latestMessage.subject || "No subject";
 
         const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;
         return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);

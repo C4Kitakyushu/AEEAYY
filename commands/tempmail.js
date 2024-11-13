@@ -9,6 +9,8 @@ module.exports = {
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     try {
+      const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+
       if (args.length === 0) {
         return sendMessage(senderId, { text: "tempmail create and tempmail inbox <email>" }, pageAccessToken);
       }
@@ -29,7 +31,7 @@ module.exports = {
           console.error("❌ | Failed to generate email", error.message);
           return sendMessage(senderId, { text: `❌ | Failed to generate email. Error: ${error.message}` }, pageAccessToken);
         }
-        return sendMessage(senderId, { text: `generated email ✉️: ${email}` }, pageAccessToken);
+        return sendMessage(senderId, { text: `generated email ✉️: ${email}\n📅 Generated at: ${responseTime}` }, pageAccessToken);
       } else if (command === 'inbox' && args.length === 2) {
         const email = args[1];
         if (!email) {
@@ -51,14 +53,14 @@ module.exports = {
         }
 
         if (inboxMessages.length === 0) {
-          return sendMessage(senderId, { text: "❌ | No messages found in the inbox." }, pageAccessToken);
+          return sendMessage(senderId, { text: `❌ | No messages found in the inbox.\n📅 Checked at: ${responseTime}` }, pageAccessToken);
         }
 
         // Get the most recent message
         const latestMessage = inboxMessages[0];
         const { date, from, subject } = latestMessage;
 
-        const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;
+        const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${responseTime}\n━━━━━━━━━━━━━━━━`;
         return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
       } else {
         return sendMessage(senderId, { text: `❌ | Invalid command. Use 'tempmail create (generate email)\ntempmail inbox <email>. (to inbox code)` }, pageAccessToken);

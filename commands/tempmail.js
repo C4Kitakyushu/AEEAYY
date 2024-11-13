@@ -60,8 +60,8 @@ module.exports = {
         const latestMessage = inboxMessages[0];
         const { date, from, subject } = latestMessage;
 
-        const formattedMessage = `📧 From: Registration\n📩 Subject: ${subject}\n📅 Date: ${responseTime}\n━━━━━━━━━━━━━━━━`;
-        return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
+        const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;
+        return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}\n📅 Checked at: ${responseTime}` }, pageAccessToken);
       } else {
         return sendMessage(senderId, { text: `❌ | Invalid command. Use 'tempmail create (generate email)\ntempmail inbox <email>. (to inbox code)` }, pageAccessToken);
       }

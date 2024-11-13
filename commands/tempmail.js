@@ -53,12 +53,11 @@ module.exports = {
         if (inboxMessages.length === 0) {
           return sendMessage(senderId, { text: "❌ | No messages found in the inbox." }, pageAccessToken);
         }
-    const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-
+   
         // Get the most recent message
         const latestMessage = inboxMessages[0];
         const from = latestMessage.from || "Registration";
-        const date = latestMessage.date || "${respondTime}";
+        const date = latestMessage.date || "2024-2025";
         const subject = latestMessage.subject || "No subject";
 
         const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;

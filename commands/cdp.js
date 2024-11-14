@@ -7,7 +7,7 @@ module.exports = {
   usage: 'get cdp pics',
   author: 'developer',
   async execute(senderId, args, pageAccessToken) {
-    const apiUrl = 'https://c-v1.onrender.com/api/cdp';
+    const apiUrl = 'https://apis-markdevs69v2.onrender.com/api/randomgambar/couplepp';
 
     try {
       // Send a message indicating that the image is being fetched

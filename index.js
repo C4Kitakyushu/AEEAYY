@@ -103,6 +103,18 @@ fs.watch(COMMANDS_PATH, (eventType, filename) => {
   }
 });
 
+  if (fs.existsSync(RESTART_FILE) && fs.statSync(RESTART_FILE).size > 0) {
+    try {
+      const restartData = JSON.parse(fs.readFileSync(RESTART_FILE, 'utf8'));
+      const adminId = restartData.restartId;
+      const restartTime = new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
+      sendMessage(adminId, { text: `Successfully restarted the bot. Time: ${restartTime}` }, PAGE_ACCESS_TOKEN);
+      fs.unlinkSync(RESTART_FILE);
+    } catch (error) {
+      console.error("Error parsing restart file:", error);
+    }
+  }
+
 // Server initialization
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {

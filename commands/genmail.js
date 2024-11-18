@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
-const domains = ["rteet.com", "1secmail.com", "1secmail.org", "1secmail.net", "wwjmp.com", "esiix.com", "xojxe.com", "yoggm.com"];
+const domains = ["rteet.com", "1secmail.com", "1secmail.org", "1secmail.net"];
 
 module.exports = {
   name: 'genmail',

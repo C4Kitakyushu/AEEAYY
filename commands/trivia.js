@@ -1,26 +1,24 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'trivia',
-  description: 'fetches a random trivia question.',
-  author: 'developer',
+  name: 'quotes',
+  description: 'fetch a random motivational quote!',
+  author: 'Ali', // Replace 'Ali' with the desired author name if needed
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    sendMessage(senderId, { text: "⌛ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗿𝗮𝗻𝗱𝗼𝗺 𝘁𝗿𝗶𝘃𝗶𝗮 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁..." }, pageAccessToken);
+    sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗾𝘂𝗼𝘁𝗲..." }, pageAccessToken);
 
     try {
-      const apiUrl = 'https://jerome-web.onrender.com/service/api/trivia';
-      const response = await axios.get(apiUrl);
-      const trivia = response.data.trivia;
+      const response = await axios.get('https://xapiz.onrender.com/api/quote');
+      const { quote } = response.data;
 
-      if (trivia) {
-        const message = `🤔 𝗛𝗲𝗿𝗲'𝘀 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝘁𝗿𝗶𝘃𝗶𝗮 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻: \n\n❓ ${trivia.question}\n\n💡 Answer: ${trivia.answer}`;
-        sendMessage(senderId, { text: message }, pageAccessToken);
-      } else {
-        sendMessage(senderId, { text: "☹️ Sorry, I couldn't fetch a trivia question at the moment." }, pageAccessToken);
+      if (!quote) {
+        return sendMessage(senderId, { text: "🥺 𝗦𝗼𝗿𝗿𝘆, 𝗜 𝗰𝗼𝘂𝗹𝗱𝗻'𝘁 𝗳𝗶𝗻𝗱 𝗮 𝗾𝘂𝗼𝘁𝗲." }, pageAccessToken);
       }
+
+      sendMessage(senderId, { text: `💡 𝗛𝗲𝗿𝗲 𝗶𝘀 𝘁𝗵𝗲 𝗾𝘂𝗼𝘁𝗲:\n\n${quote}` }, pageAccessToken);
     } catch (error) {
-      console.error('Error fetching trivia:', error);
-      sendMessage(senderId, { text: `Error: ${error.message}` }, pageAccessToken);
+      console.error(error);
+      sendMessage(senderId, { text: `❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱: ${error.message}` }, pageAccessToken);
     }
   }
 };

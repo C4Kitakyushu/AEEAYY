@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗺𝗼𝘁𝗶𝘃𝗮𝘁𝗶𝗼𝗻 𝗾𝘂𝗼𝘁𝗲..." }, pageAccessToken);
 
     try {
-      const response = await axios.get('https://c-v5.onrender.com/api/motivation');
+      const response = await axios.get('https://xapiz.onrender.com/api/motivation');
       const { motivation } = response.data;
 
       if (!motivation) {

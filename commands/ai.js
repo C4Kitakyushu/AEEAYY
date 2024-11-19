@@ -6,51 +6,41 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'ai',
-  description: 'ask to gpt4o assistant.',
+  description: 'interact with Starling LM AI',
   author: 'developer',
 
   async execute(senderId, args) {
     const pageAccessToken = token;
+    const userInput = args.join(' ').trim();
 
-    const prompt = args.join(" ").trim();
-    if (!prompt) {
-      return await sendMessage(senderId, { text: `❌ 𝗣𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻` }, pageAccessToken);
+    if (!userInput) {
+      return await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻𝘀\𝗘𝘅𝗮𝗺𝗽𝗹𝗲: 𝗪𝗵𝗮𝘁 𝗶𝘀 𝘄𝗮𝘃𝗲?' }, pageAccessToken);
     }
 
-    await handleChatResponse(senderId, prompt, pageAccessToken);
+    await handleChatResponse(senderId, userInput, pageAccessToken);
   },
 };
 
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = "https://appjonellccapis.zapto.org/api/gpt4o-v2";
+  const apiUrl = 'https://joshweb.click/ai/starling-lm-7b';
 
   try {
-    const { data } = await axios.get(apiUrl, { params: { prompt: input } });
-    const result = data.response;
+    const { data } = await axios.get(apiUrl, { params: { q: input, uid: '100' } });
+    const responseString = data.result ? data.result : 'No result found.';
 
-    const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-    const formattedResponse = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟐 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n𝗤𝘂𝗲𝘀𝘁𝗶𝗼𝗻: ${input}\n━━━━━━━━━━━━━━━━━━\n𝗔𝗻𝘀𝘄𝗲𝗿: ${result}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
+    const formattedResponse = `
+ 𝗦𝘁𝗮𝗿𝗹𝗶𝗻𝗴 🌟
+━━━━━━━━━━━━━━━━━━
+${responseString}
+━━━━━━━━━━━━━━━━━━
+⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}
+    `;
 
-    if (result.includes('TOOL_CALL: generateImage')) {
-      const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
+    await sendConcatenatedMessage(senderId, formattedResponse.trim(), pageAccessToken);
 
-      if (imageUrlMatch && imageUrlMatch[1]) {
-        const imageUrl = imageUrlMatch[1];
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: { url: imageUrl }
-          }
-        }, pageAccessToken);
-      } else {
-        await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
-      }
-    } else {
-      await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
-    }
   } catch (error) {
     console.error('Error while processing AI response:', error.message);
-    await sendError(senderId, '❌ Ahh sh1t error again.', pageAccessToken);
+    await sendError(senderId, 'An error occurred while fetching the response.', pageAccessToken);
   }
 };
 
@@ -78,7 +68,7 @@ const splitMessageIntoChunks = (message, chunkSize) => {
 
 const sendError = async (senderId, errorMessage, pageAccessToken) => {
   const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟐 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
+  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
   await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

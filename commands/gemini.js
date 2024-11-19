@@ -28,11 +28,10 @@ module.exports = {
 
       // Use both APIs
       const apiUrlGemini = `https://joshweb.click/gemini`;
-      const apiUrlGpt4o = `https://appjonellccapis.zapto.org/api/gpt4o-v2`;
+      
 
       const responseGemini = await handleImageRecognition(apiUrlGemini, userPrompt, imageUrl);
-      const responseGpt4o = await handleImageRecognition(apiUrlGpt4o, userPrompt, imageUrl);
-
+     
       const result = responseGpt4o.gemini || responseGemini.gemini; // Prioritize response from the new API
 
       // Check for image generation

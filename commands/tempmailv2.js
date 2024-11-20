@@ -19,7 +19,7 @@ module.exports = {
     if (cmd === 'inbox' && email && domains.some(d => email.endsWith(`@${d}`))) {
       try {
         const [username, domain] = email.split('@');
-        const inbox = (await axios.get(`https://mekumi-rest-api.onrender.com/api/tempmail/Inbox?action=getMessages&login=${username}&domain=${domain}`)).data;
+        const inbox = (await axios.get(`https://mekumi-rest-api.onrender.com/api/tempmail/create?action=getMessages&login=${username}&domain=${domain}`)).data;
         if (!inbox.length) return sendMessage(senderId, { text: 'Inbox is empty.' }, pageAccessToken);
 
         const { id, from, subject, date } = inbox[0];

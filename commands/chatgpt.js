@@ -2,8 +2,8 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'chatgpt',
-  description: 'Interact with Gpt',
+  name: 'gpt',
+  description: 'Interact with GPT-4o',
   usage: 'gpt4 [your message]',
   author: 'coffee',
 
@@ -18,10 +18,15 @@ module.exports = {
       // Make the API request
       const response = await axios.get(`https://mekumi-rest-api.onrender.com/api/chatgpt?question=${encodeURIComponent(userQuestion)}`);
       
-      // Send the API response back to the user
-      const reply = response.data.answer || 'Sorry, no response was returned.';
-      await sendMessage(senderId, reply, pageAccessToken);
-      
+      // Check if the response data contains the expected structure
+      if (response.data && response.data.message) {
+        const reply = response.data.message;
+        await sendMessage(senderId, reply, pageAccessToken);
+      } else {
+        // Provide a fallback if the response format is unexpected
+        await sendMessage(senderId, 'No valid response received from the API.', pageAccessToken);
+      }
+
     } catch (error) {
       console.error('Error interacting with the API:', error);
       await sendMessage(senderId, 'An error occurred while trying to communicate with GPT-4.', pageAccessToken);

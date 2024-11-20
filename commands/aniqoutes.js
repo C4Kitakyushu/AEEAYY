@@ -20,7 +20,7 @@ module.exports = {
       }
 
       sendMessage(senderId, { 
-        text: `📜 **𝗔𝗻𝗶𝗺𝗲 𝗤𝘂𝗼𝘁𝗲**\n\n"${quote}"\n\n- ${character} (${anime})` 
+        text: `📝: 𝗔𝗻𝗶𝗺𝗲 𝗤𝘂𝗼𝘁𝗲\n\n 🖋️: "${quote}"\n\n👤: ${character} (${anime})` 
       }, pageAccessToken);
     } catch (error) {
       console.error(error);

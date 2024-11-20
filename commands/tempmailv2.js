@@ -1,73 +1,50 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
 
-const EMAIL_API_URL = "https://mekumi-rest-api.onrender.com/api/tempmail-create?";
-const INBOX_API_URL = "https://mekumi-rest-api.onrender.com/api/tempmail-inbox?email=";
+const domains = ["rteet.com", "dpptd.com", "1secmail.com", "1secmail.org", "1secmail.net"];
 
 module.exports = {
   name: 'tempmailv2',
-  description: 'Generate a temporary email or check inbox',
+  description: 'genmail gen (generate email) & genmail inbox <email>',
+  usage: 'genmail gen or genmail inbox <email>',
   author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    try {
-      if (args.length === 0) {
-        return sendMessage(senderId, { text: "Usage:\n1. tempmail create\n2. tempmail inbox <email>" }, pageAccessToken);
+
+  async execute(senderId, args, pageAccessToken) {
+    const [cmd, email] = args;
+    if (cmd === 'gen') {
+      try {
+        // Generate a temporary email
+        const response = await axios.get('https://mekumi-rest-api.onrender.com/api/tempmail-create?');
+        const generatedEmail = response.data?.email;
+        if (generatedEmail) {
+          return sendMessage(senderId, { text: `✨ Generated email: ${generatedEmail}` }, pageAccessToken);
+        }
+        return sendMessage(senderId, { text: 'Error: Unable to generate email.' }, pageAccessToken);
+      } catch {
+        return sendMessage(senderId, { text: 'Error: Unable to generate email.' }, pageAccessToken);
       }
-
-      const command = args[0].toLowerCase();
-
-      if (command === 'create') {
-        let email;
-        try {
-          // Generate a random temporary email
-          const response = await axios.get(EMAIL_API_URL);
-          email = response.data.email;
-
-          if (!email) {
-            throw new Error("Failed to generate email");
-          }
-        } catch (error) {
-          console.error("❌ | Failed to generate email", error.message);
-          return sendMessage(senderId, { text: `❌ | Failed to generate email. Error: ${error.message}` }, pageAccessToken);
-        }
-        return sendMessage(senderId, { text: `Generated email ✉️: ${email}` }, pageAccessToken);
-      } else if (command === 'inbox' && args.length === 2) {
-        const email = args[1];
-        if (!email) {
-          return sendMessage(senderId, { text: "❌ | Please provide an email address to check the inbox." }, pageAccessToken);
-        }
-
-        let inboxMessages;
-        try {
-          // Retrieve messages from the specified email
-          const inboxResponse = await axios.get(`${INBOX_API_URL}${email}`);
-          inboxMessages = inboxResponse.data;
-
-          if (!Array.isArray(inboxMessages)) {
-            throw new Error("Unexpected response format");
-          }
-        } catch (error) {
-          console.error(`❌ | Failed to retrieve inbox messages`, error.message);
-          return sendMessage(senderId, { text: `❌ | Failed to retrieve inbox messages. Error: ${error.message}` }, pageAccessToken);
-        }
-
-        if (inboxMessages.length === 0) {
-          return sendMessage(senderId, { text: "❌ | No messages found in the inbox." }, pageAccessToken);
-        }
-
-        // Get the most recent message
-        const latestMessage = inboxMessages[0];
-        const from = latestMessage.from || "Unknown sender";
-        const date = latestMessage.date || "Unknown date";
-        const subject = latestMessage.subject || "No subject";
-
-        const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;
-        return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
-      } else {
-        return sendMessage(senderId, { text: `❌ | Invalid command. Use:\n1. 'tempmail create' to generate an email\n2. 'tempmail inbox <email>' to check inbox` }, pageAccessToken);
-      }
-    } catch (error) {
-      console.error("Unexpected error:", error.message);
-      return sendMessage(senderId, { text: `❌ | An unexpected error occurred: ${error.message}` }, pageAccessToken);
     }
-  }
+
+    if (cmd === 'inbox' && email && domains.some(d => email.endsWith(`@${d}`))) {
+      try {
+        // Fetch inbox for the provided email
+        const inboxResponse = await axios.get(`https://mekumi-rest-api.onrender.com/api/tempmail-inbox?email=${email}`);
+        const inbox = inboxResponse.data?.messages || [];
+
+        if (!inbox.length) {
+          return sendMessage(senderId, { text: 'Inbox is empty.' }, pageAccessToken);
+        }
+
+        // Parse the latest email
+        const { from, subject, date, content } = inbox[0];
+        return sendMessage(senderId, {
+          text: `📬 | Latest Email:\nFrom: ${from}\nSubject: ${subject}\nDate: ${date}\n\nContent:\n${content}`,
+        }, pageAccessToken);
+      } catch {
+        return sendMessage(senderId, { text: 'Error: Unable to fetch inbox or email content.' }, pageAccessToken);
+      }
+    }
+
+    sendMessage(senderId, { text: 'Invalid usage. Use genmail gen or genmail inbox <email>' }, pageAccessToken);
+  },
 };

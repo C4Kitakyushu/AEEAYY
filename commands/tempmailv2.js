@@ -13,7 +13,7 @@ module.exports = {
     const [cmd, email] = args;
 
     // Command to generate a temporary email
-    if (cmd === 'create') {
+    if (cmd === 'gen') {
       try {
         const response = await axios.get('https://mekumi-rest-api.onrender.com/api/tempmail-create');
         const emailData = response.data;

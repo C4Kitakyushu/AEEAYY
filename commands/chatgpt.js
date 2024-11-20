@@ -1,40 +1,30 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'chatgpt',
-  description: 'Ask a question to ChatGPT model',
-  author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    let userInput = args.join(" ").trim();
+  description: 'Interact with Gpt',
+  usage: 'gpt4 [your message]',
+  author: 'coffee',
 
-    if (!userInput) {
-      return sendMessage(senderId, { text: '𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝗮 𝘃𝗮𝗹𝗶𝗱 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻.' }, pageAccessToken);
-    }
-
-    sendMessage(senderId, { text: '🕧 | 𝗦𝗲𝗮𝗿𝗰𝗵𝗶𝗻𝗴 𝗳𝗼𝗿 𝗮𝗻 𝗮𝗻𝘀𝘄𝗲𝗿, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
-
-    // Delay for 2 seconds
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const apiUrl = `https://mekumi-rest-api.onrender.com/api/chatgpt?question=${encodeURIComponent(userInput)}`;
-
+  async execute(senderId, args, pageAccessToken) {
     try {
-      const response = await axios.get(apiUrl);
-
-      if (response.data && response.data.answer) {
-        const generatedText = response.data.answer;
-        const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-
-        const message = `𝗖𝗵𝗮𝘁𝗚𝗣𝗧 𝗠𝗢𝗗𝗘𝗟 🤖\n━━━━━━━━━━━━━━━\n${generatedText}\n━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
-
-        sendMessage(senderId, { text: message }, pageAccessToken);
-      } else {
-        console.error('API response did not contain expected data:', response.data);
-        sendMessage(senderId, { text: '❌ An error occurred while generating the text response. Please try again later.' }, pageAccessToken);
+      // Construct the user question from the command arguments
+      const userQuestion = args.join(' ');
+      if (!userQuestion) {
+        return sendMessage(senderId, 'Please provide a question or message to send to GPT-4.', pageAccessToken);
       }
+
+      // Make the API request
+      const response = await axios.get(`https://mekumi-rest-api.onrender.com/api/chatgpt?question=${encodeURIComponent(userQuestion)}`);
+      
+      // Send the API response back to the user
+      const reply = response.data.answer || 'Sorry, no response was returned.';
+      await sendMessage(senderId, reply, pageAccessToken);
+      
     } catch (error) {
-      console.error('Error calling ChatGPT API:', error.message);
-      sendMessage(senderId, { text: `❌ An error occurred while generating the text response. Please try again later. Error details: ${error.message}` }, pageAccessToken);
+      console.error('Error interacting with the API:', error);
+      await sendMessage(senderId, 'An error occurred while trying to communicate with GPT-4.', pageAccessToken);
     }
   }
 };

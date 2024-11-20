@@ -8,28 +8,14 @@ module.exports = {
   author: 'coffee',
 
   async execute(senderId, args, pageAccessToken) {
+    const prompt = args.join(' ');
+    if (!prompt) return sendMessage(senderId, { text: "Usage: gpt4 <question>" }, pageAccessToken);
+
     try {
-      // Construct the user question from the command arguments
-      const userQuestion = args.join(' ');
-      if (!userQuestion) {
-        return sendMessage(senderId, 'Please provide a question or message to send to GPT-4.', pageAccessToken);
-      }
-
-      // Make the API request
-      const response = await axios.get(`https://mekumi-rest-api.onrender.com/api/chatgpt?question=${encodeURIComponent(userQuestion)}`);
-      
-      // Check if the response data contains the expected structure
-      if (response.data && response.data.message) {
-        const reply = response.data.message;
-        await sendMessage(senderId, reply, pageAccessToken);
-      } else {
-        // Provide a fallback if the response format is unexpected
-        await sendMessage(senderId, 'No valid response received from the API.', pageAccessToken);
-      }
-
-    } catch (error) {
-      console.error('Error interacting with the API:', error);
-      await sendMessage(senderId, 'An error occurred while trying to communicate with GPT-4.', pageAccessToken);
+      const { data: { result } } = await axios.get(`https://mekumi-rest-api.onrender.com/api/chatgpt?question=${encodeURIComponent(prompt)}`);
+      sendMessage(senderId, { text: result }, pageAccessToken);
+    } catch {
+      sendMessage(senderId, { text: 'There was an error generating the content. Please try again later.' }, pageAccessToken);
     }
   }
 };

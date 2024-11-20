@@ -19,11 +19,11 @@ module.exports = {
     if (cmd === 'inbox' && email && domains.some(d => email.endsWith(`@${d}`))) {
       try {
         const [username, domain] = email.split('@');
-        const inbox = (await axios.get(`https://mekumi-rest-api.onrender.com/api/tempmail-inbox?email=${email}`)).data;
+        const inbox = (await axios.get(`https://mekumi-rest-api.onrender.com/api/tempmail/Inbox?action=getMessages&login=${username}&domain=${domain}`)).data;
         if (!inbox.length) return sendMessage(senderId, { text: 'Inbox is empty.' }, pageAccessToken);
 
         const { id, from, subject, date } = inbox[0];
-        const { textBody } = (await axios.get(`https://mekumi-rest-api.onrender.com/api/tempmail-inbox?email=${email}&id=${id}`)).data;
+        const { textBody } = (await axios.get(`https://mekumi-rest-api.onrender.com/api/tempmail/Inbox?action=readMessage&login=${username}&domain=${domain}&id=${id}`)).data;
         return sendMessage(senderId, { text: `📬 | Latest Email:\nFrom: ${from}\nSubject: ${subject}\nDate: ${date}\n\nContent:\n${textBody}` }, pageAccessToken);
       } catch {
         return sendMessage(senderId, { text: 'Error: Unable to fetch inbox or email content.' }, pageAccessToken);

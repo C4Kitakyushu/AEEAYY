@@ -4,7 +4,7 @@ const { sendMessage } = require('../handles/sendMessage');
 const domains = ["rteet.com", "dpptd.com", "1secmail.com", "1secmail.org", "1secmail.net"];
 
 module.exports = {
-  name: 'temp',
+  name: 'tempx',
   description: 'genmail gen (generate email) & genmail inbox <email>',
   usage: 'genmail gen or genmail inbox <email>',
   author: 'developer',

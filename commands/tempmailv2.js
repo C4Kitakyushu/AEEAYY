@@ -4,7 +4,7 @@ const { sendMessage } = require('../handles/sendMessage');
 const domains = ["1secmail.com", "1secmail.org", "1secmail.net"];
 
 module.exports = {
-  name: 'tempmailv2',
+  name: 'temp',
   description: 'Generates a temporary email and checks its inbox.',
   usage: 'tempmail create or tempmail inbox <email>',
   author: 'Akimitsu',

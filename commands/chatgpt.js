@@ -9,7 +9,7 @@ module.exports = {
 
   async execute(senderId, args, pageAccessToken) {
     const question = args.join(' ');
-    if (! question) {
+    if (!question) {
       sendMessage(senderId, { text: 'Please provide a question.' }, pageAccessToken);
       return;
     }

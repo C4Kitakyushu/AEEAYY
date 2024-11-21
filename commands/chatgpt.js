@@ -8,14 +8,14 @@ module.exports = {
   author: 'Ali',
 
   async execute(senderId, args, pageAccessToken) {
-    const prompt = args.join(' ');
-    if (!prompt) {
+    const question = args.join(' ');
+    if (! question) {
       sendMessage(senderId, { text: 'Please provide a question.' }, pageAccessToken);
       return;
     }
 
     try {
-      const response = await axios.get(`https://mekumi-rest-api.onrender.com/api/chatgpt?question=${encodeURIComponent(prompt)}`);
+      const response = await axios.get(`https://mekumi-rest-api.onrender.com/api/chatgpt?question=${encodeURIComponent(question)}`);
       const answer = response.data.answer;
 
       sendMessage(senderId, { text: answer }, pageAccessToken);

@@ -1,21 +1,26 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'gpt',
-  description: 'Interact with GPT-4o',
-  usage: 'gpt4 [your message]',
-  author: 'coffee',
+  name: 'chatgpt',
+  description: 'Generates AI-based responses from the API.',
+  usage: '!generateAI <your text>',
+  author: 'Ali',
 
   async execute(senderId, args, pageAccessToken) {
-    const prompt = args.join(' ');
-    if (!prompt) return sendMessage(senderId, { text: "Usage: gpt4 <question>" }, pageAccessToken);
+    const inputText = args.join(' ');
 
     try {
-      const { data: { result } } = await axios.get(`https://mekumi-rest-api.onrender.com/api/chatgpt?question=${encodeURIComponent(prompt)}`);
-      sendMessage(senderId, { text: result }, pageAccessToken);
-    } catch {
-      sendMessage(senderId, { text: 'There was an error generating the content. Please try again later.' }, pageAccessToken);
+      const response = await axios.post('https://mekumi-rest-api.onrender.com/api/ai', {
+        data: inputText,
+      });
+
+      const aiResponse = response.data.generatedText; // Assuming the response has a 'generatedText' field
+
+      sendMessage(senderId, aiResponse); // Send the AI-generated response to the user
+
+    } catch (error) {
+      console.error('Error generating AI response:', error);
+      sendMessage(senderId, 'Sorry, there was an error generating the response. Please try again later.');
     }
   }
 };

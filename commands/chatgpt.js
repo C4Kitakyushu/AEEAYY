@@ -2,25 +2,37 @@ const axios = require('axios');
 
 module.exports = {
   name: 'chatgpt',
-  description: 'Generates AI-based responses from the API.',
-  usage: '!generateAI <your text>',
+  description: 'Generate responses from AI.',
   author: 'Ali',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    const userInput = args.join(' ').trim();
 
-  async execute(senderId, args, pageAccessToken) {
-    const inputText = args.join(' ');
+    if (!userInput) {
+      return sendMessage(senderId, { text: '❌ Please provide your input for AI generation.\n\nExample: Tell me a joke.' }, pageAccessToken);
+    }
+
+    sendMessage(senderId, { text: '⌛ AI is processing your request, please wait...' }, pageAccessToken);
 
     try {
       const response = await axios.post('https://mekumi-rest-api.onrender.com/api/ai', {
-        data: inputText,
+        data: userInput,
       });
 
-      const aiResponse = response.data.generatedText; // Assuming the response has a 'generatedText' field
+      const aiResponse = response.data.generatedText ? response.data.generatedText : 'No response generated.';
 
-      sendMessage(senderId, aiResponse); // Send the AI-generated response to the user
+      const formattedResponse = `
+🤖 AI Response
+━━━━━━━━━━━━━━━━━━
+${aiResponse}
+━━━━━━━━━━━━━━━━━━
+
+      `;
+
+      sendMessage(senderId, { text: formattedResponse.trim() }, pageAccessToken);
 
     } catch (error) {
-      console.error('Error generating AI response:', error);
-      sendMessage(senderId, 'Sorry, there was an error generating the response. Please try again later.');
+      console.error('Error:', error);
+      sendMessage(senderId, { text: 'An error occurred while generating the AI response.' }, pageAccessToken);
     }
   }
 };

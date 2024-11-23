@@ -21,8 +21,18 @@ module.exports = {
           message: encodeURIComponent(message)
         }
       });
-      console.log('Response:', response.data);
-      sendMessage(senderId, { text: '𝗠𝗲𝘀𝘀𝗮𝗴𝗲 𝗵𝗮𝘀 𝗯𝗲𝗲𝗻 𝘀𝘂𝗰𝗰𝗲𝘀𝘀𝗳𝘂𝗹𝗹𝘆 𝘀𝗲𝗻𝘁 ✅' }, pageAccessToken);
+
+      const { status, response: messageResponse, sim_network, message_parts, message_remaining } = response.data;
+
+      // Sending back detailed response data
+      if (status) {
+        sendMessage(senderId, { 
+          text: `✅ ${messageResponse}\n\n📱 Network: ${sim_network}\n📝 Parts: ${message_parts}\n📊 Remaining: ${message_remaining.toFixed(2)}`
+        }, pageAccessToken);
+      } else {
+        sendMessage(senderId, { text: '❌ Failed to send the message.' }, pageAccessToken);
+      }
+
     } catch (error) {
       console.error('Error:', error);
       sendMessage(senderId, { text: '❌ Failed to send the message.' }, pageAccessToken);

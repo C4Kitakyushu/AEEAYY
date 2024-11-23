@@ -16,21 +16,17 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const data = response.data;
 
-      if (!data.result || data.result.length === 0) {
-        return sendMessage(senderId, { text: `No stories found on Wattpad for the given query.` }, pageAccessToken);
+      if (!data.status || !data.result || data.result.length === 0) {
+        return sendMessage(senderId, { text: `No results found on Wattpad for the given query.` }, pageAccessToken);
       }
 
-      let message = `🔍 Wattpad Search Results for: "${searchQuery}"\n\n`;
+      // Prepare the response message with multiple results
+      let message = `📖 Wattpad Search Results :\n\n`;
 
-      data.result.forEach((story, index) => {
-        message += `📖 ${index + 1}. *${story.title}*\n`;
-        message += `👤 Author: ${data.author}\n`;
-        message += `👀 Reads: ${story.read} | ⭐ Votes: ${story.vote}\n`;
-        message += `🔗 [Read Here](${story.link})\n`;
-        message += `🖼️ Thumbnail: ${story.thumbnail}\n\n`;
+      // Iterate over the results
+      data.result.forEach((item, index) => {
+        message += `📚 ${index + 1}. *${item.title}*\n👁️ Reads: ${item.read}\n👍 Votes: ${item.vote}\n🔗 [Read Here](${item.link})\n\n`;
       });
-
-      message += `📖 Use: \`wattpad read [story number] [chapter number]\` to read a specific chapter.`;
 
       sendMessage(senderId, { text: message }, pageAccessToken);
     } catch (error) {

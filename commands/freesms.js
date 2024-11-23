@@ -24,18 +24,17 @@ module.exports = {
 
       const { status, response: messageResponse, sim_network, message_parts, message_remaining } = response.data;
 
-      // Sending back detailed response data
       if (status) {
         sendMessage(senderId, { 
-          text: `✅ ${messageResponse}\n\n📱 Network: ${sim_network}\n📝 Parts: ${message_parts}\n📊 Remaining: ${message_remaining.toFixed(2)}`
+          text: `✅ 𝗦𝘂𝗰𝗰𝗲𝘀𝘀𝗳𝘂𝗹𝗹𝘆 𝘀𝗲𝗻𝘁!\n\n📲 𝗠𝗲𝘀𝘀𝗮𝗴𝗲: ${messageResponse}\n\n📱 𝗡𝗲𝘁𝘄𝗼𝗿𝗸: ${sim_network}\n📝 𝗣𝗮𝗿𝘁𝘀: ${message_parts}\n📊 𝗠𝗲𝘀𝘀𝗮𝗴𝗲𝘀 𝗥𝗲𝗺𝗮𝗶𝗻𝗶𝗻𝗴: ${message_remaining.toFixed(2)}`
         }, pageAccessToken);
       } else {
-        sendMessage(senderId, { text: '❌ Failed to send the message.' }, pageAccessToken);
+        sendMessage(senderId, { text: '❌ 𝗙𝗮𝗶𝗹𝗲𝗱 𝘁𝗼 𝘀𝗲𝗻𝗱 𝘁𝗵𝗲 𝗺𝗲𝘀𝘀𝗮𝗴𝗲.' }, pageAccessToken);
       }
 
     } catch (error) {
       console.error('Error:', error);
-      sendMessage(senderId, { text: '❌ Failed to send the message.' }, pageAccessToken);
+      sendMessage(senderId, { text: '❌ 𝗙𝗮𝗶𝗹𝗲𝗱 𝘁𝗼 𝘀𝗲𝗻𝗱 𝘁𝗵𝗲 𝗺𝗲𝘀𝘀𝗮𝗴𝗲.' }, pageAccessToken);
     }
   }
 };

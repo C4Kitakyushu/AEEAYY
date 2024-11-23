@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'wattpad',
-  description: 'Search and read Wattpad stories.',
+  description: 'search for wattpad stories.',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const searchQuery = args.join(" ");
@@ -24,13 +24,13 @@ module.exports = {
 
       data.result.forEach((story, index) => {
         message += `📖 ${index + 1}. *${story.title}*\n`;
-        message += `👤 Author: ${story.author || 'Unknown'}\n`;
+        message += `👤 Author: ${story.author}\n`;
         message += `👀 Reads: ${story.read} | ⭐ Votes: ${story.vote}\n`;
         message += `🔗 [Read Here](${story.link})\n`;
         message += `🖼️ Thumbnail: ${story.thumbnail}\n\n`;
       });
 
-      message += `📖 Use: \`wattpad read [story number] [chapter number]\` to read a specific chapter.`;
+      message += `📖 Use: \`wattpad read [story number] [chapter number]\` to read a specific chapter`;
 
       sendMessage(senderId, { text: message }, pageAccessToken);
     } catch (error) {

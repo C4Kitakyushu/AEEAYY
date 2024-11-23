@@ -1,8 +1,8 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'test',
-  description: 'Search for stories on Wattpad.',
+  name: 'wattpad',
+  description: 'Search for stories on Wattpad based on the given query.',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const searchQuery = args.join(" ");
@@ -16,17 +16,16 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const data = response.data;
 
-      if (!data.status || !data.result || data.result.length === 0) {
-        return sendMessage(senderId, { text: `No results found on Wattpad for the given query.` }, pageAccessToken);
+      if (!data.result || data.result.length === 0) {
+        return sendMessage(senderId, { text: `No stories found on Wattpad for the given query.` }, pageAccessToken);
       }
 
-      // Prepare the response message with multiple results
-      let message = `📖 Wattpad Search Results by ${data.author}:\n\n`;
+      // Format the first 5 results for the response message
+      const formattedResults = data.result.slice(0, 5).map((story, index) => {
+        return `📖 ${index + 1}. *${story.title}*\n👤 Author: ${data.author}\n👀 Reads: ${story.read}\n⭐ Votes: ${story.vote}\n🔗 [Read Here](${story.link})\n🖼️ Thumbnail: ${story.thumbnail}`;
+      }).join('\n\n');
 
-      // Iterate over the results
-      data.result.forEach((item, index) => {
-        message += `📚 ${index + 1}. *${item.title}*\n👁️ Reads: ${item.read}\n👍 Votes: ${item.vote}\n🔗 [Read Here](${item.link})\n\n`;
-      });
+      const message = `🔍 Wattpad Search Results for: "${searchQuery}"\n\n${formattedResults}`;
 
       sendMessage(senderId, { text: message }, pageAccessToken);
     } catch (error) {

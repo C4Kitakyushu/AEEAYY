@@ -22,7 +22,7 @@ module.exports = {
       if (status) {
         const { number_prefix, brand_code, brand_name, brand_description } = brandInfo;
         sendMessage(senderId, {
-          text: `𝗡𝘂𝗺𝗯𝗲𝗿 𝗕𝗿𝗮𝗻𝗱 𝗶𝗻𝗳𝗼𝗿𝗺𝗮𝘁𝗶𝗼𝗻 ✅:\n\n` +
+          text: `𝗡𝘂𝗺𝗯𝗲𝗿 𝗕𝗿𝗮𝗻𝗱 𝗜𝗻𝗳𝗼𝗿𝗺𝗮𝘁𝗶𝗼𝗻 ✅:\n\n` +
                 `📞 𝗡𝘂𝗺𝗯𝗲𝗿 𝗣𝗿𝗲𝗳𝗶𝘅: ${number_prefix}\n` +
                 `🏷️ 𝗕𝗿𝗮𝗻𝗱 𝗖𝗼𝗱𝗲: ${brand_code}\n` +
                 `📡 𝗕𝗿𝗮𝗻𝗱 𝗡𝗮𝗺𝗲: ${brand_name}\n` +

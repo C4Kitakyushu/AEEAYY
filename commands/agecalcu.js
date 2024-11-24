@@ -6,73 +6,42 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'test',
-  description: 'interact with ai.',
+  description: 'ask to a specific AI model',
   author: 'developer',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    let userInput = args.join(" ").trim();
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
-
-    const query = args.join(" ").toLowerCase();
-    if (!query) {
-      return await sendMessage(senderId, { text: "𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\nHow can I help you?\n━━━━━━━━━━━━━━━━" }, pageAccessToken);
+    if (!userInput) {
+      return sendMessage(senderId, { text: '𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝗮 𝘃𝗮𝗹𝗶𝗱 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻.' }, pageAccessToken);
     }
 
-    if (query === "hello" || query === "hi") {
-      return await sendMessage(senderId, { text: "𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\nHello! How can I help you?\n━━━━━━━━━━━━━━━━" }, pageAccessToken);
-    }
+    sendMessage(senderId, { text: '🕧 | 𝗦𝗲𝗮𝗿𝗰𝗵𝗶𝗻𝗴 𝗳𝗼𝗿 𝗮𝗻 𝗮𝗻𝘀𝘄𝗲𝗿, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
 
-    await handleChatResponse(senderId, query, pageAccessToken);
-  },
-};
+    // Delay for 2 seconds
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = "https://mekumi-rest-api.onrender.com/api/ai";
+    // API parameters
+    const model = 'gpt-4o-mini-free';  // You can change the model as needed
+    const systemMessage = 'You are a helpful assistant';
+    const apiUrl = `https://mekumi-rest-api.onrender.com/api/ai?model=${encodeURIComponent(model)}&system=${encodeURIComponent(systemMessage)}&question=${encodeURIComponent(userInput)}`;
 
-  try {
-    const { data } = await axios.get(apiUrl, {
-      params: {
-        model: "gpt-4-turbo-2024-04-09", // Example model, replace if needed
-        system: "You are a helpful assistant",
-        question: input
+    try {
+      const response = await axios.get(apiUrl);
+
+      if (response.data && response.data.answer) {
+        const generatedText = response.data.answer;
+        const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+
+        const message = `𝗔𝗜 𝗠𝗢𝗗𝗘𝗟 🤖\n━━━━━━━━━━━━━━━\n${generatedText}\n━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
+
+        sendMessage(senderId, { text: message }, pageAccessToken);
+      } else {
+        console.error('API response did not contain expected data:', response.data);
+        sendMessage(senderId, { text: '❌ An error occurred while generating the text response. Please try again later.' }, pageAccessToken);
       }
-    });
-    let response = data.response;
-
-    const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-    const formattedResponse = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\n𝗤𝘂𝗲𝘀𝘁𝗶𝗼𝗻: ${input}\n━━━━━━━━━━━━━━━━\n𝗔𝗻𝘀𝘄𝗲𝗿: ${response}\n━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
-
-    await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
-  } catch (error) {
-    console.error('Error while processing AI response:', error.message);
-    await sendError(senderId, '❌ Ahh sh1t error again.', pageAccessToken);
-  }
-};
-
-const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
+    } catch (error) {
+      console.error('Error calling the AI API:', error.message);
+      sendMessage(senderId, { text: `❌ An error occurred while generating the text response. Please try again later. Error details: ${error.message}` }, pageAccessToken);
     }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
   }
-};
-
-const splitMessageIntoChunks = (message, chunkSize) => {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-};
-
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖 \n━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
-
-  await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

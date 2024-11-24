@@ -14,11 +14,11 @@ module.exports = {
 
     const query = args.join(" ").toLowerCase();
     if (!query) {
-      return await sendMessage(senderId, { text: "🗃 | 𝙱𝚕𝚊𝚌𝚔 𝙱𝚘𝚡 | \n━━━━━━━━━━━━━━━━\nHow can I help you?\n━━━━━━━━━━━━━━━━" }, pageAccessToken);
+      return await sendMessage(senderId, { text: "𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟐 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\nHow can I help you?\n━━━━━━━━━━━━━━━━" }, pageAccessToken);
     }
 
     if (query === "hello" || query === "hi") {
-      return await sendMessage(senderId, { text: "🗃 | 𝙱𝚊𝚌𝚔 𝙱𝚘𝚡 | \n━━━━━━━━━━━━━━━━\nHello! How can I help you?\n━━━━━━━━━━━━━━━━" }, pageAccessToken);
+      return await sendMessage(senderId, { text: "𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟐 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\nHello! How can I help you?\n━━━━━━━━━━━━━━━━" }, pageAccessToken);
     }
 
     await handleChatResponse(senderId, query, pageAccessToken);
@@ -33,7 +33,7 @@ const handleChatResponse = async (senderId, input, pageAccessToken) => {
     let response = data.response;
 
     const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-    const formattedResponse = `🗃 | 𝙱𝚕𝚊𝚌𝚔 𝙱𝚘𝚡 | \n━━━━━━━━━━━━━━━━\n𝗤𝘂𝗲𝘀𝘁𝗶𝗼𝗻: ${input}\n━━━━━━━━━━━━━━━━\n𝗔𝗻𝘀𝘄𝗲𝗿: ${response}\n━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
+    const formattedResponse = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟐 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\n𝗤𝘂𝗲𝘀𝘁𝗶𝗼𝗻: ${input}\n━━━━━━━━━━━━━━━━\n𝗔𝗻𝘀𝘄𝗲𝗿: ${response}\n━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
     // Check if response contains image URL
     if (response.includes('TOOL_CALL: generateImage')) {
@@ -82,7 +82,7 @@ const splitMessageIntoChunks = (message, chunkSize) => {
 
 const sendError = async (senderId, errorMessage, pageAccessToken) => {
   const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-  const formattedMessage = `🗃 | 𝙱𝚕𝚊𝚌𝚔 𝙱𝚘𝚡 | \n━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
+  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟐 𝗔𝗜 🤖 \n━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
   await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

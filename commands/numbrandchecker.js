@@ -16,17 +16,18 @@ module.exports = {
     try {
       const response = await axios.get(`https://api.kenliejugarap.com/ph-numbrandchecker/?number=${phoneNumber}`);
       
-      const { status, response: brandInfo, promotion } = response.data;
+      const { status, response: brandInfo } = response.data;
+      const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
       if (status) {
         const { number_prefix, brand_code, brand_name, brand_description } = brandInfo;
         sendMessage(senderId, {
-          text: `✅ 𝗕𝗿𝗮𝗻𝗱 𝗶𝗻𝗳𝗼𝗿𝗺𝗮𝘁𝗶𝗼𝗻:\n\n` +
+          text: `𝗡𝘂𝗺𝗯𝗲𝗿 𝗕𝗿𝗮𝗻𝗱 𝗶𝗻𝗳𝗼𝗿𝗺𝗮𝘁𝗶𝗼𝗻 ✅:\n\n` +
                 `📞 𝗡𝘂𝗺𝗯𝗲𝗿 𝗣𝗿𝗲𝗳𝗶𝘅: ${number_prefix}\n` +
                 `🏷️ 𝗕𝗿𝗮𝗻𝗱 𝗖𝗼𝗱𝗲: ${brand_code}\n` +
                 `📡 𝗕𝗿𝗮𝗻𝗱 𝗡𝗮𝗺𝗲: ${brand_name}\n` +
                 `📋 𝗗𝗲𝘀𝗰𝗿𝗶𝗽𝘁𝗶𝗼𝗻: ${brand_description}\n\n` +
-                `📢 𝗣𝗿𝗼𝗺𝗼𝘁𝗶𝗼𝗻:\n${promotion}`
+                `⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`
         }, pageAccessToken);
       } else {
         sendMessage(senderId, { text: '❌ 𝗙𝗮𝗶𝗹𝗲𝗱 𝘁𝗼 𝗿𝗲𝘁𝗿𝗶𝗲𝘃𝗲 𝗯𝗿𝗮𝗻𝗱 𝗶𝗻𝗳𝗼𝗿𝗺𝗮𝘁𝗶𝗼𝗻.' }, pageAccessToken);

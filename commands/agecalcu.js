@@ -4,24 +4,6 @@ const fs = require('fs');
 
 const token = fs.readFileSync('token.txt', 'utf8');
 
-const availableModels = [
-  "gpt-4o-mini-free",
-  "gpt-4o-mini",
-  "gpt-4o-free",
-  "gpt-4-turbo-2024-04-09",
-  "gpt-4o-2024-08-06",
-  "grok-2",
-  "grok-2-mini",
-  "claude-3-opus-20240229",
-  "claude-3-opus-20240229-gcp",
-  "claude-3-sonnet-20240229",
-  "claude-3-5-sonnet-20240620",
-  "claude-3-haiku-20240307",
-  "claude-2.1",
-  "gemini-1.5-flash-exp-0827",
-  "gemini-1.5-pro-exp-0827"
-];
-
 module.exports = {
   name: 'test',
   description: 'interact with ai.',
@@ -37,11 +19,6 @@ module.exports = {
 
     if (query === "hello" || query === "hi") {
       return await sendMessage(senderId, { text: "𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\nHello! How can I help you?\n━━━━━━━━━━━━━━━━" }, pageAccessToken);
-    }
-
-    // Command to show all available models
-    if (query === "models") {
-      return await showAvailableModels(senderId, pageAccessToken);
     }
 
     await handleChatResponse(senderId, query, pageAccessToken);
@@ -69,13 +46,6 @@ const handleChatResponse = async (senderId, input, pageAccessToken) => {
     console.error('Error while processing AI response:', error.message);
     await sendError(senderId, '❌ Ahh sh1t error again.', pageAccessToken);
   }
-};
-
-const showAvailableModels = async (senderId, pageAccessToken) => {
-  const modelsList = availableModels.join("\n- ");
-  const modelsMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\nAvailable Models:\n━━━━━━━━━━━━━━━━\n- ${modelsList}`;
-
-  await sendMessage(senderId, { text: modelsMessage }, pageAccessToken);
 };
 
 const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {

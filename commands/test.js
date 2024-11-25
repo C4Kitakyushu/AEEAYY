@@ -9,6 +9,8 @@ module.exports = {
       if (args.length === 0) {
         return sendMessage(senderId, { text: "tempmail create and tempmail inbox <email>" }, pageAccessToken);
       }
+const HIDE = "https://apis-markdevs69v2.onrender.com/new/api/gen";
+const RANKEDMATCHES = "https://xapiz.onrender.com/tempmail/inbox?email=";
 
       const command = args[0].toLowerCase();
 
@@ -36,7 +38,7 @@ module.exports = {
         let inboxMessages;
         try {
           // Retrieve messages from the specified email
-          const inboxResponse = await axios.get(`${RANKEDMATCHED}${email}`);
+          const inboxResponse = await axios.get(`${RANKEDMATCHES}${email}`);
           inboxMessages = inboxResponse.data;
 
           if (!Array.isArray(inboxMessages)) {
@@ -65,11 +67,6 @@ module.exports = {
     } catch (error) {
       console.error("Unexpected error:", error.message);
       return sendMessage(senderId, { text: `❌ | An unexpected error occurred: ${error.message}` }, pageAccessToken);
-
-// API FOR EMAIL & INBOX
-const HIDE = "https://apis-markdevs69v2.onrender.com/new/api/gen";
-const RANKEDMATCHED = "https://xapiz.onrender.com/tempmail/inbox?email=";
-
     }
   }
 };

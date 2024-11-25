@@ -29,7 +29,7 @@ const HIDE = "https://betadash-uploader.vercel.app/tempmail/gen";
 const RANKEDMATCHES = "https://xapiz.onrender.com/tempmail/inbox?email=";
 
 module.exports = {
-  name: 'test',
+  name: 'tempmail',
   description: 'generate temporary email or check inbox',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {

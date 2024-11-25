@@ -1,7 +1,9 @@
+
+
 const axios = require('axios');
 
-const HIDE = "https://apis-markdevs69v2.onrender.com/new/api/gen";
-const RANKEDMATCHES = "https://xapiz.onrender.com/tempmail/inbox?email=";
+const HIDE = "https://betadash-uploader.vercel.app/tempmail/gen";
+const RANKEDMATCHES = "https://betadash-uploader.vercel.app/tempmail/message?email=";
 
 module.exports = {
   name: 'test',

@@ -54,7 +54,7 @@ module.exports = {
           console.error("❌ | Failed to generate email", error.message);
           return sendMessage(senderId, { text: `❌ | Failed to generate email. Error: ${error.message}` }, pageAccessToken);
         }
-        return sendMessage(senderId, { text: `generated email ✉️: ${email}\n\nDATE: ${date}` }, pageAccessToken);
+        return sendMessage(senderId, { text: `generated email ✉️: ${email}` }, pageAccessToken);
       } else if (command === 'inbox' && args.length === 2) {
         const email = args[1];
         if (!email) {

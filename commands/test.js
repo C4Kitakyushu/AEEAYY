@@ -2,7 +2,7 @@ cconst axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'gpt4',
+  name: 'test',
   description: 'Interact with GPT-4 via the Mekumi API',
   usage: 'gpt4 [your message]',
   author: 'coffee',

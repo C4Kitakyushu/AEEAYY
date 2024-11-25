@@ -1,5 +1,8 @@
 const axios = require('axios');
 
+const HIDE = "https://apis-markdevs69v2.onrender.com/new/api/gen";
+const RANKEDMATCHES = "https://xapiz.onrender.com/tempmail/inbox?email=";
+
 module.exports = {
   name: 'test',
   description: 'generate temporary email or check inbox',
@@ -9,10 +12,8 @@ module.exports = {
       if (args.length === 0) {
         return sendMessage(senderId, { text: "tempmail create and tempmail inbox <email>" }, pageAccessToken);
       }
-const HIDE = "https://apis-markdevs69v2.onrender.com/new/api/gen";
-const RANKEDMATCHES = "https://xapiz.onrender.com/tempmail/inbox?email=";
 
-      const command = args[0].toLowerCase();
+   const command = args[0].toLowerCase();
 
       if (command === 'create') {
         let email;

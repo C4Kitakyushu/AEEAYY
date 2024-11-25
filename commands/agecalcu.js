@@ -2,36 +2,43 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'test',
-  description: 'Interact with AI models',
-  usage: 'ai [your message]',
-  author: 'jerome',
+  name: 'gpt4',
+  description: 'Interact with GPT-4o via Mekumi API',
+  usage: 'gpt4 [your message]',
+  author: 'coffee',
 
   async execute(senderId, args, pageAccessToken) {
     const prompt = args.join(' ');
+
+    // Ensure the user provided a prompt
     if (!prompt) {
-      return sendMessage(senderId, { text: "Usage: ai <question>" }, pageAccessToken);
+      return sendMessage(senderId, 'Please provide a message for GPT-4.');
     }
 
+    // Define system context and available model (can be adjusted as needed)
+    const system = 'You are a helpful assistant.';
+    const model = 'gpt-4-turbo-2024-04-09'; // Example model, can be changed
+
     try {
-      // Define the model and system message
-      const model = "gpt-4-turbo-2024-04-09"; // Example model, change as needed
-      const systemMessage = "You are a helpful assistant.";
+      // Build the URL with the necessary query parameters
+      const apiUrl = `https://mekumi-rest-api.onrender.com/api/ai?model=${encodeURIComponent(model)}&system=${encodeURIComponent(system)}&question=${encodeURIComponent(prompt)}`;
 
-      // Construct the API URL
-      const apiUrl = `https://mekumi-rest-api.onrender.com/api/ai?model=${encodeURIComponent(model)}&system=${encodeURIComponent(systemMessage)}&question=${encodeURIComponent(prompt)}`;
+      // Send the GET request to the API
+      const response = await axios.get(apiUrl);
 
-      // Send the API request
-      const { data } = await axios.get(apiUrl);
+      // Extract the answer from the API response
+      const answer = response.data.answer;
 
-      // Handle the response
-      if (data && data.message) {
-        sendMessage(senderId, { text: data.message }, pageAccessToken);
+      // Send the response back to the user
+      if (answer) {
+        sendMessage(senderId, answer);
       } else {
-        sendMessage(senderId, { text: 'There was an error generating the content. Please try again later.' }, pageAccessToken);
+        sendMessage(senderId, 'Sorry, I could not get a response from the API.');
       }
-    } catch {
-      sendMessage(senderId, { text: 'There was an error generating the content. Please try again later.' }, pageAccessToken);
+
+    } catch (error) {
+      console.error('Error interacting with Mekumi API:', error);
+      sendMessage(senderId, 'Sorry, there was an error while processing your request.');
     }
   }
 };

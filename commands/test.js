@@ -104,7 +104,7 @@ module.exports = {
 // Typically, the terms of use outline how the service operates, including the temporary nature of the email addresses, data retention policies, and user responsibilities. Here are some key points to consider:
 
   
-//**Legal Considerations**  
+// **Legal Considerations**  
 
 // - **Terms of Service (ToS)**: Always review the ToS of the temporary email service. This document outlines the rules for using the service and the consequences of violating them.  
 //- **User  Agreements**: Understand the contracts made with the service provider, including any limitations on usage and the potential for account termination if misused.  
@@ -114,7 +114,7 @@ module.exports = {
   
 // **Privacy Implications**  
 
-- **Anonymity**: While Temp Mail offers a degree of anonymity, it is not completely private. Some data may still be logged, and providers might be compelled to assist authorities if required.  
+//- **Anonymity**: While Temp Mail offers a degree of anonymity, it is not completely private. Some data may still be logged, and providers might be compelled to assist authorities if required.  
 // - **Personal Information**: Ensure that the service collects minimal personal information. Ideally, the service should not link your temporary email to your IP address or other identifiable data.  
 // - **Compliance with Privacy Laws**: Be aware of the privacy laws applicable in your country and the countries of your correspondents, especially if you are in regions like the European Union where regulations like GDPR apply.  
 

@@ -107,24 +107,24 @@ module.exports = {
 //**Legal Considerations**  
 
 // - **Terms of Service (ToS)**: Always review the ToS of the temporary email service. This document outlines the rules for using the service and the consequences of violating them.  
-- **User  Agreements**: Understand the contracts made with the service provider, including any limitations on usage and the potential for account termination if misused.  
-- **Data Retention Policies**: Different services have varying policies on how long they retain emails and user data. Familiarize yourself with these policies to understand what information may be stored or shared.  
-- **Legal Obligations**: Temporary email providers may be required to comply with legal requests from law enforcement, which could include disclosing user information.  
+//- **User  Agreements**: Understand the contracts made with the service provider, including any limitations on usage and the potential for account termination if misused.  
+// - **Data Retention Policies**: Different services have varying policies on how long they retain emails and user data. Familiarize yourself with these policies to understand what information may be stored or shared.  
+// - **Legal Obligations**: Temporary email providers may be required to comply with legal requests from law enforcement, which could include disclosing user information.  
 
   
 // **Privacy Implications**  
 
 - **Anonymity**: While Temp Mail offers a degree of anonymity, it is not completely private. Some data may still be logged, and providers might be compelled to assist authorities if required.  
-- **Personal Information**: Ensure that the service collects minimal personal information. Ideally, the service should not link your temporary email to your IP address or other identifiable data.  
-- **Compliance with Privacy Laws**: Be aware of the privacy laws applicable in your country and the countries of your correspondents, especially if you are in regions like the European Union where regulations like GDPR apply.  
+// - **Personal Information**: Ensure that the service collects minimal personal information. Ideally, the service should not link your temporary email to your IP address or other identifiable data.  
+// - **Compliance with Privacy Laws**: Be aware of the privacy laws applicable in your country and the countries of your correspondents, especially if you are in regions like the European Union where regulations like GDPR apply.  
 
   
 // **Best Practices for Use**  
 
 // - **Avoid Sensitive Transactions**: Do not use temporary email for sensitive communications, financial transactions, or anything that requires a permanent email address.  
-- **Clear Browser Data**: Regularly clear your browser's cache and cookies to enhance your privacy while using temporary email services.  
-- **Use Trusted Sources**: Only interact with trusted websites and avoid clicking on suspicious links or attachments received in your temp mail inbox.  
-- **Manage Multiple Accounts**: Temp mail can be useful for creating multiple accounts on platforms without cluttering your primary inbox.  
+// - **Clear Browser Data**: Regularly clear your browser's cache and cookies to enhance your privacy while using temporary email services.  
+// - **Use Trusted Sources**: Only interact with trusted websites and avoid clicking on suspicious links or attachments received in your temp mail inbox.  
+// - **Manage Multiple Accounts**: Temp mail can be useful for creating multiple accounts on platforms without cluttering your primary inbox.  
 
   
 // By understanding the terms and privacy implications of using Temp Mail, you can effectively utilize these services while minimizing legal risks and protecting your personal information.

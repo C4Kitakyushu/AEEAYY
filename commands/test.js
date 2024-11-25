@@ -26,7 +26,7 @@
 const axios = require('axios');
 
 const HIDE = "https://betadash-uploader.vercel.app/tempmail/gen";
-const RANKEDMATCHES = "https://betadash-uploader.vercel.app/tempmail/message?email=";
+const RANKEDMATCHES = "https://xapiz.onrender.com/tempmail/inbox?email=";
 
 module.exports = {
   name: 'test',
@@ -35,12 +35,12 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, sendMessage) {
     try {
       if (args.length === 0) {
-        return sendMessage(senderId, { text: "tempmail create and tempmail inbox <email>" }, pageAccessToken);
+        return sendMessage(senderId, { text: "tempmail gen and tempmail inbox <email>" }, pageAccessToken);
       }
 
    const command = args[0].toLowerCase();
 
-      if (command === 'create') {
+      if (command === 'gen') {
         let email;
         try {
           // Generate a random temporary email
@@ -86,9 +86,10 @@ module.exports = {
         const subject = latestMessage.subject || "No subject";
 
         const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;
-        return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
+        return sendMessage(senderId, { text: `INBOX MAIL CHECKER
+━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
       } else {
-        return sendMessage(senderId, { text: `❌ | Invalid command. Use 'tempmail create (generate email)\ntempmail inbox <email>. (to inbox code)` }, pageAccessToken);
+        return sendMessage(senderId, { text: `❌ | Invalid command. Use 'tempmail gen (generate email)\ntempmail inbox <email>. (to inbox code)` }, pageAccessToken);
       }
     } catch (error) {
       console.error("Unexpected error:", error.message);

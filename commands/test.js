@@ -1,9 +1,9 @@
-const axios = require('axios');
+cconst axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'test',
-  description: 'Interact with GPT-4o via Mekumi API',
+  name: 'gpt4',
+  description: 'Interact with GPT-4 via the Mekumi API',
   usage: 'gpt4 [your message]',
   author: 'coffee',
 
@@ -15,15 +15,11 @@ module.exports = {
       return sendMessage(senderId, 'Please provide a message for GPT-4.');
     }
 
-    // Define system context and available model (can be adjusted as needed)
-    const system = 'You are a helpful assistant.';
-    const model = 'gpt-4-turbo-2024-04-09'; // Example model, can be changed
-
     try {
-      // Build the URL with the necessary query parameters
-      const apiUrl = `https://mekumi-rest-api.onrender.com/api/ai?model=${encodeURIComponent(model)}&system=${encodeURIComponent(system)}&question=${encodeURIComponent(prompt)}`;
+      // Construct the API URL with the 'question' query parameter
+      const apiUrl = `https://mekumi-rest-api.onrender.com/api/chatgpt?question=${encodeURIComponent(prompt)}`;
 
-      // Send the GET request to the API
+      // Make the GET request to the Mekumi API
       const response = await axios.get(apiUrl);
 
       // Extract the answer from the API response

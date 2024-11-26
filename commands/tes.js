@@ -26,7 +26,7 @@ module.exports = {
 };
 
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = "https://api.kenliejugarap.com/blackbox";
+  const apiUrl = "https://api.kenliejugarap.com/freegpt-openai/?";
 
   try {
     const { data } = await axios.get(apiUrl, { params: { text: input } });

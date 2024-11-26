@@ -7,7 +7,7 @@ const token = fs.readFileSync('token.txt', 'utf8');
 module.exports = {
   name: 'test',
   description: 'interact with ai.',
-  author: 'developer',
+  author: 'Arn',
 
   async execute(senderId, args) {
     const pageAccessToken = token;
@@ -35,23 +35,7 @@ const handleChatResponse = async (senderId, input, pageAccessToken) => {
     const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
     const formattedResponse = `${response}`;
 
-    // Check if response contains image URL
-    if (response.includes('TOOL_CALL: generateImage')) {
-      const imageUrlMatch = response.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
-      if (imageUrlMatch && imageUrlMatch[1]) {
-        const imageUrl = imageUrlMatch[1];
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: { url: imageUrl }
-          }
-        }, pageAccessToken);
-      } else {
-        await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
-      }
-    } else {
-      await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
-    }
+    await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
   } catch (error) {
     console.error('Error while processing AI response:', error.message);
     await sendError(senderId, '❌ Ahh sh1t error again.', pageAccessToken);

@@ -29,7 +29,7 @@ const handleChatResponse = async (senderId, input, pageAccessToken) => {
   const apiUrl = "https://api.kenliejugarap.com/freegpt-openai/?";
 
   try {
-    const { data } = await axios.get(apiUrl, { params: { text: question } });
+    const { data } = await axios.get(apiUrl, { params: { question: input } });
     let response = data.response;
 
     const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });

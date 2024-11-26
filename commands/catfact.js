@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗰𝗮𝘁 𝗳𝗮𝗰𝘁..." }, pageAccessToken);
 
     try {
-      const response = await axios.get('https://c-v5.onrender.com/api/catfact');
+      const response = await axios.get('https://xapiz.onrender.com/api/catfact');
       const { fact } = response.data;
 
       if (!fact) {

@@ -8,7 +8,7 @@ const useFontFormatting = true;
 
 module.exports = {
   name: 'ai2',
-  description: 'Interact to Free GPT - OpenAI.',
+  description: 'free gpt.',
   author: 'Arn', // API by Kenlie Navacilla Jugarap
 
   async execute(senderId, args) {

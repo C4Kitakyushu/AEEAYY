@@ -27,7 +27,7 @@ module.exports = {
       }
 
       const apiUrl = `https://jerome-web.gleeze.com/service/api/gemini?`;
-      const response = await handleImageRecognition(apiUrl, ask, imageUrl);
+      const response = await handleImageRecognition(apiUrl, input, imageUrl);
       const result = response.gemini;
 
       // Get the current response time in Manila timezone

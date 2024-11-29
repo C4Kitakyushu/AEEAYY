@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗱𝗼𝗴 𝗳𝗮𝗰𝘁..." }, pageAccessToken);
 
     try {
-      const response = await axios.get('https://xapiz.onrender.com/api/dogfact');
+      const response = await axios.get('https://aryanchauhanapi.onrender.com/api/dogfact');
       const { fact } = response.data;
 
       if (!fact) {

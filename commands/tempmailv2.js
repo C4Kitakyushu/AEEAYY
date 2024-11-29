@@ -26,7 +26,7 @@
 const axios = require('axios');
 
 const HIDE = "https://betadash-uploader.vercel.app/tempmail/gen";
-const RANKEDMATCHES = "https://xapiz.onrender.com/tempmail/inbox?email=";
+const RANKEDMATCHES = "https://aryanchauhanapi.onrender.com/tempmail/inbox?email=";
 
 module.exports = {
   name: 'tempmailv2',

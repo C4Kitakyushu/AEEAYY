@@ -12,9 +12,7 @@ module.exports = {
     }
 
     const text = args.join(' ');
-    const apiUrl = `Bogart canvas
-
-https://kupal-ka-bogart.onrender.com/bogart?q=${encodeURIComponent(text)}`;
+    const apiUrl = `https://kupal-ka-bogart.onrender.com/bogart?q=${encodeURIComponent(text)}`;
 
     try {
       await sendMessage(senderId, { 

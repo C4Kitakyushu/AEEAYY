@@ -1,30 +1,24 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const fs = require('fs');
-const token = fs.readFileSync('token.txt', 'utf8');
 
-// [ true if turn on font & false if turn off ]
-const useFontFormatting = true;
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'ai2',
-  description: 'free gpt.',
-  author: 'Arn', // API by Kenlie Navacilla Jugarap
+  description: 'interact with ai.',
+  author: 'developer',
 
   async execute(senderId, args) {
     const pageAccessToken = token;
-    const query = args.join(" ").toLowerCase();
 
+    const query = args.join(" ").toLowerCase();
     if (!query) {
-      const defaultMessage = "🌟 Hello, how can i help you?";
-      const formattedMessage = useFontFormatting ? formatResponse(defaultMessage) : defaultMessage;
-      return await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
+      return await sendMessage(senderId, { text: "𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\nHow can I help you?\n━━━━━━━━━━━━━━━━" }, pageAccessToken);
     }
 
-    if (query === "sino creator mo?" || query === "who created you?") {
-      const jokeMessage = "Arn/Rynx Gaiser";
-      const formattedMessage = useFontFormatting ? formatResponse(jokeMessage) : jokeMessage;
-      return await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
+    if (query === "hello" || query === "hi") {
+      return await sendMessage(senderId, { text: "𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\nHello! How can I help you?\n━━━━━━━━━━━━━━━━" }, pageAccessToken);
     }
 
     await handleChatResponse(senderId, query, pageAccessToken);
@@ -32,35 +26,35 @@ module.exports = {
 };
 
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = "https://api.kenliejugarap.com/freegpt-openai/?";
+  const apiUrl = "https://api.kenliejugarap.com/blackbox";
 
   try {
-    const { data } = await axios.get(apiUrl, { params: { question: input } });
+    const { data } = await axios.get(apiUrl, { params: { text: input } });
     let response = data.response;
 
     const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+    const formattedResponse = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━\n𝗤𝘂𝗲𝘀𝘁𝗶𝗼𝗻: ${input}\n━━━━━━━━━━━━━━━━\n𝗔𝗻𝘀𝘄𝗲𝗿: ${response}\n━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
-    const answeringMessage = `🕗 Answering your question...`;
-    const formattedAnsweringMessage = useFontFormatting ? formatResponse(answeringMessage) : answeringMessage;
-    await sendMessage(senderId, { text: formattedAnsweringMessage }, pageAccessToken);
-
-    const defaultMessage = `Free GPT / OpenAI
-━━━━━━━━━━━━━━━━
-❓Question: ${input}
-━━━━━━━━━━━━━━━━ 
-✅ Answer: ${response}
-━━━━━━━━━━━━━━━━ 
-⏰ Response: ${responseTime}`;
-
-    const formattedMessage = useFontFormatting ? formatResponse(defaultMessage) : defaultMessage;
-
-    await sendConcatenatedMessage(senderId, formattedMessage, pageAccessToken);
+    // Check if response contains image URL
+    if (response.includes('TOOL_CALL: generateImage')) {
+      const imageUrlMatch = response.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
+      if (imageUrlMatch && imageUrlMatch[1]) {
+        const imageUrl = imageUrlMatch[1];
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'image',
+            payload: { url: imageUrl }
+          }
+        }, pageAccessToken);
+      } else {
+        await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
+      }
+    } else {
+      await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
+    }
   } catch (error) {
     console.error('Error while processing AI response:', error.message);
-
-    const errorMessage = '❌ Ahh sh1t error again.';
-    const formattedMessage = useFontFormatting ? formatResponse(errorMessage) : errorMessage;
-    await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
+    await sendError(senderId, '❌ Ahh sh1t error again.', pageAccessToken);
   }
 };
 
@@ -86,17 +80,9 @@ const splitMessageIntoChunks = (message, chunkSize) => {
   return chunks;
 };
 
-function formatResponse(responseText) {
-  const fontMap = {
-    ' ': ' ',
-    'a': '𝗮', 'b': '𝗯', 'c': '𝗰', 'd': '𝗱', 'e': '𝗲', 'f': '𝗳', 'g': '𝗴', 'h': '𝗵',
-    'i': '𝗶', 'j': '𝗷', 'k': '𝗸', 'l': '𝗹', 'm': '𝗺', 'n': '𝗻', 'o': '𝗼', 'p': '𝗽', 'q': '𝗾',
-    'r': '𝗿', 's': '𝘀', 't': '𝘁', 'u': '𝘂', 'v': '𝘃', 'w': '𝘄', 'x': '𝘅', 'y': '𝘆', 'z': '𝘇',
-    'A': '𝗔', 'B': '𝗕', 'C': '𝗖', 'D': '𝗗', 'E': '𝗘', 'F': '𝗙', 'G': '𝗚', 'H': '𝗛',
-    'I': '𝗜', 'J': '𝗝', 'K': '𝗞', 'L': '𝗟', 'M': '𝗠', 'N': '𝗡', 'O': '𝗢', 'P': '𝗣', 'Q': '𝗤',
-    'R': '𝗥', 'S': '𝗦', 'T': '𝗧', 'U': '𝗨', 'V': '𝗩', 'W': '𝗪', 'X': '𝗫', 'Y': '𝗬', 'Z': '𝗭',
-  };
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖 \n━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
-  return responseText.split('').map(char => fontMap[char] || char).join('');
-}
-// WhyWouldiCare
+  await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
+};

@@ -6,10 +6,10 @@ module.exports = {
   author: 'developer',
 
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    const [phone, amount, cooldown] = args;
+    const [phone, amount] = args;
 
-    if (!phone || !amount || !cooldown) {
-      sendMessage(senderId, { text: 'Usage: smsbomb [phone] [amount] [cooldown]' }, pageAccessToken);
+    if (!phone || !amount) {
+      sendMessage(senderId, { text: 'Usage: smsbomb [phone] [amount]' }, pageAccessToken);
       return;
     }
 

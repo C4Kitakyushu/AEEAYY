@@ -13,7 +13,7 @@ module.exports = {
     }
 
     try {
-      const apiUrl = `https://appjonellccapis.zapto.org/api/wiki?q=${encodeURIComponent(searchQuery)}`;
+      const apiUrl = `https://ccprojectapis.ddns.net/api/wiki?q=${encodeURIComponent(searchQuery)}`;
       const response = await axios.get(apiUrl);
 
       if (response.data.title && response.data.extract) {

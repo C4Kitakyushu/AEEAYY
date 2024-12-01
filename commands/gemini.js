@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "gemini",
-  description: "interact to gemini 1.5 flash vision",
+  description: "Interact with Gemini 1.5 Flash Vision",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
@@ -11,11 +11,11 @@ module.exports = {
 
     if (!userPrompt && !imageUrl) {
       return sendMessage(senderId, { 
-        text: `❌ 𝗣𝗿𝗼𝘃𝗶𝗱𝗲𝗱 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻 𝗼𝗿 𝗶𝗺𝗮𝗴𝗲 𝗮𝗻𝗱 𝘁𝘆𝗽𝗲 𝘆𝗼𝘂𝗿 𝗱𝗲𝘀𝗰𝗿𝗶𝗽𝘁𝗶𝗼𝗻 𝘁𝗼 𝗿𝗲𝗰𝗼𝗴𝗻𝗶𝘇𝗲...` 
+        text: `❌ Provide your question or image and type your description to recognize...` 
       }, pageAccessToken);
     }
 
-    sendMessage(senderId, { text: "⌛ 𝗔𝗻𝘀𝘄𝗲𝗿𝗶𝗻𝗴 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁 𝗮 𝗺𝗼𝗺𝗲𝗻𝘁.." }, pageAccessToken);
+    sendMessage(senderId, { text: "⌛ Processing your request, please wait a moment..." }, pageAccessToken);
 
     try {
       if (!imageUrl) {
@@ -26,16 +26,15 @@ module.exports = {
         }
       }
 
-      const apiUrl = `https://jerome-web.gleeze.com/service/api/gemini?`;
-      const response = await handleImageRecognition(apiUrl, input, imageUrl);
-      const result = response.gemini;
+      const apiUrl = `https://ccprojectapis.ddns.net/api/geminiversion2`;
+      const response = await handleImageRecognition(apiUrl, userPrompt, imageUrl);
+      const result = response.response; // Update field based on the API's response structure
 
       // Get the current response time in Manila timezone
       const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
       // Format the response message
-      const message = `𝗚𝗲𝗺𝗶𝗻𝗶 1.5 𝗙𝗹𝗮𝘀𝗵 𝗩𝗶𝘀𝗶𝗼𝗻 ♊\n━━━━━━━━━━━━━━━━━━
-${result}━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
+      const message = `𝗚𝗲𝗺𝗶𝗻𝗶 1.5 𝗙𝗹𝗮𝘀𝗵 𝗩𝗶𝘀𝗶𝗼𝗻 ♊\n━━━━━━━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
       await sendConcatenatedMessage(senderId, message, pageAccessToken);
 
@@ -46,11 +45,11 @@ ${result}━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲�
   }
 };
 
-async function handleImageRecognition(apiUrl, prompt, imageUrl) {
+async function handleImageRecognition(apiUrl, ask, imagurl) {
   const { data } = await axios.get(apiUrl, {
     params: {
-      prompt,
-      url: imageUrl || ""
+      ask,
+      imagurl: imagurl || ""
     }
   });
 

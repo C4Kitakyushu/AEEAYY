@@ -70,20 +70,20 @@ if (messageText === 'remini') {
 }
 
 
-    // Handling "gemini" command
-if (messageText.startsWith('gemini')) {
-  const args = messageText.split(/\s+/).slice(1);
-  const senderId = event.sender.id; // Replace with appropriate senderId extraction logic
-  
-  try {
-    // Execute the gemini command
-    await commands.get('gemini').execute(senderId, args, pageAccessToken);
-  } catch (error) {
-    console.error('Error processing the Gemini command:', error);
-    await sendMessage(senderId, { text: 'An error occurred while processing the Gemini command.' }, pageAccessToken);
-  }
-  return;
-}
+    Handling "gemini" command
+    if (messageText.startsWith('gemini')) {
+      const lastImage = lastImageByUser.get(senderId);
+      const args = messageText.split(/\s+/).slice(1);
+
+      try {
+        await commands.get('gemini').execute(senderId, args, pageAccessToken, event, lastImage);
+        lastImageByUser.delete(senderId);
+      } catch (error) {
+        await sendMessage(senderId, { text: 'An error occurred while processing the Geni command.' }, pageAccessToken);
+      }
+      return;
+    }
+
 
 
 if (messageText === 'imgur') {

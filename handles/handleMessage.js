@@ -70,7 +70,7 @@ if (messageText === 'remini') {
 }
 
 
-    Handling "gemini" command
+    // Handling "gemini" command
     if (messageText.startsWith('gemini')) {
       const lastImage = lastImageByUser.get(senderId);
       const args = messageText.split(/\s+/).slice(1);

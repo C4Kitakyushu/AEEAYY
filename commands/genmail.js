@@ -24,7 +24,7 @@ module.exports = {
 
         const { id, from, subject, date } = inbox[0];
         const { textBody } = (await axios.get(`https://www.1secmail.com/api/v1/?action=readMessage&login=${username}&domain=${domain}&id=${id}`)).data;
-        return sendMessage(senderId, { text: `📬 | Latest Email:\nFrom: ${from}\nSubject: ${subject}\nDate: ${date}\n\nContent:\n${textBody}` }, pageAccessToken);
+        return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📧 From: ${from}\n📄 Subject: ${subject}\n🗓️ Date: ${date}\n━━━━━━━━━━━━━━━━` }, pageAccessToken);
       } catch {
         return sendMessage(senderId, { text: 'Error: Unable to fetch inbox or email content.' }, pageAccessToken);
       }

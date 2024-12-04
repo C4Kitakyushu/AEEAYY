@@ -105,7 +105,7 @@ if (messageText === 'imgur') {
       return;
     }
 // Handling "remini" command
-if (messageText === 'enhancev2') {
+if (messageText === 'remini') {
   const lastImage = lastImageByUser.get(senderId);
   if (lastImage) {
     try {

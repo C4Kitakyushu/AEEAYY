@@ -71,18 +71,28 @@ if (messageText === 'upscale') {
 
 
     // Handling "gemini" command
-    if (messageText.startsWith('gemini')) {
-      const lastImage = lastImageByUser.get(senderId);
-      const args = messageText.split(/\s+/).slice(1);
+if (messageText.startsWith('gemini')) {
+  const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
+  const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
 
-      try {
-        await commands.get('gemini').execute(senderId, args, pageAccessToken, event, lastImage);
-        lastImageByUser.delete(senderId);
-      } catch (error) {
-        await sendMessage(senderId, { text: 'An error occurred while processing the Geni command.' }, pageAccessToken);
-      }
-      return;
-    }
+  try {
+    // Execute the "gemini" command
+    await commands.get('gemini').execute(senderId, args, pageAccessToken, event, lastImage);
+    
+    // Clear the stored image after processing
+    lastImageByUser.delete(senderId);
+  } catch (error) {
+    console.error('Error while processing the Gemini command:', error);
+    // Send error feedback to the user
+    await sendMessage(
+      senderId, 
+      { text: '❌ An error occurred while processing your Gemini request. Please try again later.' }, 
+      pageAccessToken
+    );
+  }
+  return;
+}
+
 
 
 

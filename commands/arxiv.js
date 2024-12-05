@@ -12,7 +12,7 @@ module.exports = {
     }
 
     try {
-      const apiUrl = `https://gpt4withcustommodel.onrender.com/arxiv?query=${encodeURIComponent(searchQuery)}`;
+      const apiUrl = `https://jerome-web.onrender.com/service/api/arxiv?query=${encodeURIComponent(searchQuery)}`;
       const response = await axios.get(apiUrl);
       const data = response.data;
 

@@ -64,12 +64,10 @@ async function handleMessage(event, pageAccessToken) {
       lastImageByUser.delete(senderId);
       lastVideoByUser.delete(senderId);
     } catch (error) {
-      await sendMessage(senderId, { text: '❌ An error occurred. Please try again later.' }, pageAccessToken);
+      await sendMessage(senderId, { text: '🫵😼' }, pageAccessToken);
     }
   } else {
-    await sendMessage(senderId, {
-      text: '❌ Please send an image or video first, then type "imgbb" to upload and get the link.'
-    }, pageAccessToken);
+    await sendMessage(senderId, { text: '❌ Please send an image or video first, then type "imgbb" to upload and convert the link.' }, pageAccessToken);
   }
   return;
 }

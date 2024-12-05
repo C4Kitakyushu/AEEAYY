@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'imgbb',
-  description: 'upload an image to imgbb and get the link.',
+  description: 'Upload an image to ImgBB and get the link.',
   author: 'Dale Mekumi',
 
   async execute(senderId, args, pageAccessToken, imageUrl) {

@@ -53,24 +53,31 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-  if (messageText === 'imgbb') {
-  const lastImage = lastImageByUser.get(senderId);
-  const lastVideo = lastVideoByUser.get(senderId);
-  const mediaToUpload = lastImage || lastVideo;
-
-  if (mediaToUpload) {
+  // Handling "faceswap" command
+if (messageText === 'faceswap') {
+  const lastImages = lastImagesByUser.get(senderId); // Assume this is a map that stores both target and source image URLs
+  
+  if (lastImages && lastImages.targetUrl && lastImages.sourceUrl) {
     try {
-      await commands.get('imgbb').execute(senderId, [], pageAccessToken, mediaToUpload);
-      lastImageByUser.delete(senderId);
-      lastVideoByUser.delete(senderId);
+      // Execute the faceswap command with the two image URLs
+      await commands.get('faceswap').execute(senderId, [], pageAccessToken, lastImages.targetUrl, lastImages.sourceUrl);
+      
+      // After processing, remove the images from memory
+      lastImagesByUser.delete(senderId);
     } catch (error) {
-      await sendMessage(senderId, { text: '🫵😼' }, pageAccessToken);
+      await sendMessage(senderId, {
+        text: '❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗽𝗿𝗼𝗰𝗲𝘀𝘀𝗶𝗻𝗴 𝘁𝗵𝗲 𝗳𝗮𝗰𝗲 𝘀𝘄𝗮𝗽.'
+      }, pageAccessToken);
     }
   } else {
-    await sendMessage(senderId, { text: '❌ Please send an image or video first, then type "imgbb" to upload and convert the link.' }, pageAccessToken);
+    // If both images are not available
+    await sendMessage(senderId, {
+      text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝘁𝗵𝗲 𝘁𝗮𝗿𝗴𝗲𝘁 𝗮𝗻𝗱 𝘀𝗼𝘂𝗿𝗰𝗲 𝗶𝗺𝗮𝗴𝗲𝘀 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗳𝗮𝗰𝗲𝘀𝘄𝗮𝗽" 𝘁𝗼 𝗳𝗮𝗰𝗲 𝘀𝘄𝗮𝗽.'
+    }, pageAccessToken);
   }
   return;
 }
+
 
     // Handling "upscale" command
 if (messageText === 'upscale') {

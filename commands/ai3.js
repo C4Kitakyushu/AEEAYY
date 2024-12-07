@@ -1,74 +1,91 @@
-const axios = require('axios');
+const axios = require("axios");
 const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: 'ai3',
-  description: 'ask to GPT-4o Pro assistant with image support.',
-  author: 'developer',
+  name: "ai3",
+  description: "Recognize or generate images using AI",
+  author: "developer",
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
+  async execute(senderId, args, pageAccessToken, event, imageUrl) {
+    const userPrompt = args.join(" ").trim();
 
-    const input = args.join(" ").trim();
-    if (!input) {
-      return await sendMessage(senderId, { text: `❌ 𝗣𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻 𝗼𝗿 𝗮𝗱𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗨𝗥𝗟.` }, pageAccessToken);
+    if (!userPrompt && !imageUrl) {
+      return sendMessage(
+        senderId,
+        {
+          text: `❌ Provide a description for image generation or an image URL for recognition.`
+        },
+        pageAccessToken
+      );
     }
 
-    const [query, imageUrl] = parseInput(input);
-    await handleChatResponse(senderId, query, imageUrl, pageAccessToken);
-  },
-};
+    sendMessage(
+      senderId,
+      {
+        text: "⌛ Processing your request, please wait..."
+      },
+      pageAccessToken
+    );
 
-const parseInput = (input) => {
-  const imageRegex = /imageUrl=(https?:\/\/\S+)/;
-  const imageUrlMatch = input.match(imageRegex);
-
-  const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
-  const query = imageUrl ? input.replace(imageRegex, '').trim() : input;
-
-  return [query, imageUrl];
-};
-
-const handleChatResponse = async (senderId, query, imageUrl, pageAccessToken) => {
-  const apiUrl = "https://kaiz-apis.gleeze.com/api/gpt-4o-pro";
-
-  try {
-    const params = {
-      q: query,
-      uid: senderId,
-      ...(imageUrl && { imageUrl }),
-    };
-
-    const { data } = await axios.get(apiUrl, { params });
-    const result = data.response;
-
-    const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-    const formattedResponse = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n𝗤𝘂𝗲𝘀𝘁𝗶𝗼𝗻: ${query || 'N/A'}\n𝗜𝗺𝗮𝗴𝗲 𝗥𝗲𝗰𝗼𝗴𝗻𝗶𝘁𝗶𝗼𝗻: ${imageUrl || 'N/A'}\n━━━━━━━━━━━━━━━━━━\n𝗔𝗻𝘀𝘄𝗲𝗿: ${result}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
-
-    if (data.imageResponse) {
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'image',
-          payload: { url: data.imageResponse }
+    try {
+      if (!imageUrl) {
+        if (event.message?.reply_to?.mid) {
+          imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
+        } else if (event.message?.attachments?.[0]?.type === "image") {
+          imageUrl = event.message.attachments[0].payload.url;
         }
-      }, pageAccessToken);
-    } else {
-      await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
+      }
+
+      const apiUrl = "https://kaiz-apis.gleeze.com/api/gpt-4o-pro";
+      const response = await handleAI3Request(apiUrl, userPrompt, imageUrl);
+
+      const result = response.response;
+
+      const message = `${result}`;
+
+      await sendConcatenatedMessage(senderId, message, pageAccessToken);
+
+    } catch (error) {
+      console.error("Error in AI3 command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
     }
-  } catch (error) {
-    console.error('Error while processing AI response:', error.message);
-    await sendError(senderId, '❌ Ahh sh1t error again.', pageAccessToken);
   }
 };
 
-const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
+async function handleAI3Request(apiUrl, query, imageUrl) {
+  const { data } = await axios.get(apiUrl, {
+    params: {
+      q: query || "",
+      uid: "conversational",
+      imageUrl: imageUrl || ""
+    }
+  });
+
+  return data;
+}
+
+async function getRepliedImage(mid, pageAccessToken) {
+  const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
+    params: { access_token: pageAccessToken }
+  });
+
+  if (data?.data?.[0]?.image_data?.url) {
+    return data.data[0].image_data.url;
+  }
+
+  return "";
+}
+
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   const maxMessageLength = 2000;
 
   if (text.length > maxMessageLength) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
+
     for (const message of messages) {
       await new Promise(resolve => setTimeout(resolve, 500));
       await sendMessage(senderId, { text: message }, pageAccessToken);
@@ -76,19 +93,12 @@ const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
   } else {
     await sendMessage(senderId, { text }, pageAccessToken);
   }
-};
+}
 
-const splitMessageIntoChunks = (message, chunkSize) => {
+function splitMessageIntoChunks(message, chunkSize) {
   const chunks = [];
   for (let i = 0; i < message.length; i += chunkSize) {
     chunks.push(message.slice(i, i + chunkSize));
   }
   return chunks;
-};
-
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
-
-  await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
-};
+}

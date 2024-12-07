@@ -6,45 +6,55 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'ai3',
-  description: 'ask to gpt4o assistant.',
+  description: 'ask to GPT-4o Pro assistant with image support.',
   author: 'developer',
 
   async execute(senderId, args) {
     const pageAccessToken = token;
 
-    const prompt = args.join(" ").trim();
-    if (!prompt) {
-      return await sendMessage(senderId, { text: `❌ 𝗣𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻` }, pageAccessToken);
+    const input = args.join(" ").trim();
+    if (!input) {
+      return await sendMessage(senderId, { text: `❌ 𝗣𝗿𝗼𝘃𝗶𝗱𝗲 𝘆𝗼𝘂𝗿 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻 𝗼𝗿 𝗮𝗱𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗨𝗥𝗟.` }, pageAccessToken);
     }
 
-    await handleChatResponse(senderId, prompt, pageAccessToken);
+    const [query, imageUrl] = parseInput(input);
+    await handleChatResponse(senderId, query, imageUrl, pageAccessToken);
   },
 };
 
-const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = "https://ccprojectapis.ddns.net/api/gpt4o-v2";
+const parseInput = (input) => {
+  const imageRegex = /imageUrl=(https?:\/\/\S+)/;
+  const imageUrlMatch = input.match(imageRegex);
+
+  const imageUrl = imageUrlMatch ? imageUrlMatch[1] : null;
+  const query = imageUrl ? input.replace(imageRegex, '').trim() : input;
+
+  return [query, imageUrl];
+};
+
+const handleChatResponse = async (senderId, query, imageUrl, pageAccessToken) => {
+  const apiUrl = "https://kaiz-apis.gleeze.com/api/gpt-4o-pro";
 
   try {
-    const { data } = await axios.get(apiUrl, { params: { prompt: input } });
+    const params = {
+      q: query,
+      uid: senderId,
+      ...(imageUrl && { imageUrl }),
+    };
+
+    const { data } = await axios.get(apiUrl, { params });
     const result = data.response;
 
     const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-    const formattedResponse = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟐 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n𝗤𝘂𝗲𝘀𝘁𝗶𝗼𝗻: ${input}\n━━━━━━━━━━━━━━━━━━\n𝗔𝗻𝘀𝘄𝗲𝗿: ${result}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
+    const formattedResponse = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n𝗤𝘂𝗲𝘀𝘁𝗶𝗼𝗻: ${query || 'N/A'}\n𝗜𝗺𝗮𝗴𝗲 𝗥𝗲𝗰𝗼𝗴𝗻𝗶𝘁𝗶𝗼𝗻: ${imageUrl || 'N/A'}\n━━━━━━━━━━━━━━━━━━\n𝗔𝗻𝘀𝘄𝗲𝗿: ${result}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
-    if (result.includes('TOOL_CALL: generateImage')) {
-      const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
-
-      if (imageUrlMatch && imageUrlMatch[1]) {
-        const imageUrl = imageUrlMatch[1];
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: { url: imageUrl }
-          }
-        }, pageAccessToken);
-      } else {
-        await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
-      }
+    if (data.imageResponse) {
+      await sendMessage(senderId, {
+        attachment: {
+          type: 'image',
+          payload: { url: data.imageResponse }
+        }
+      }, pageAccessToken);
     } else {
       await sendConcatenatedMessage(senderId, formattedResponse, pageAccessToken);
     }
@@ -78,7 +88,7 @@ const splitMessageIntoChunks = (message, chunkSize) => {
 
 const sendError = async (senderId, errorMessage, pageAccessToken) => {
   const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟐 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
+  const formattedMessage = `𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗩𝟮 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${errorMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
   await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

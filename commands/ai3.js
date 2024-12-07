@@ -41,6 +41,21 @@ module.exports = {
 
       const result = response.response;
 
+      if (result.includes('TOOL_CALL: generateImage')) {
+        const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
+
+        if (imageUrlMatch && imageUrlMatch[1]) {
+          const imageUrl = imageUrlMatch[1];
+          await sendMessage(senderId, {
+            attachment: {
+              type: 'image',
+              payload: { url: imageUrl }
+            }
+          }, pageAccessToken);
+          return;
+        }
+      }
+
       const message = `${result}`;
 
       await sendConcatenatedMessage(senderId, message, pageAccessToken);

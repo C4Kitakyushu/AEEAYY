@@ -53,33 +53,29 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-  if (messageText === 'getlink') {
-  const lastImage = lastImageByUser.get(senderId);
-  const lastVideo = lastVideoByUser.get(senderId);
-  const mediaToRetrieve = lastImage || lastVideo;
+  // Handling "ai3" command
+if (messageText.startsWith('ai3')) {
+  const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
+  const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
 
-  if (mediaToRetrieve) {
-    try {
-      // Execute the 'getlink' command to retrieve the media link
-      await commands.get('getlink').execute(senderId, [], pageAccessToken, {
-        messageReply: { attachments: [{ url: mediaToRetrieve }] }
-      });
+  try {
+    // Execute the "ai3" command
+    await commands.get('ai3').execute(senderId, args, pageAccessToken, event, lastImage);
 
-      // Clear the last media references for the user
-      lastImageByUser.delete(senderId);
-      lastVideoByUser.delete(senderId);
-    } catch (error) {
-      console.error('Error while retrieving the media link:', error.message);
-      await sendMessage(senderId, { text: '🫵😼 Something went wrong. Please try again.' }, pageAccessToken);
-    }
-  } else {
-    // Inform the user to send media before using the 'getlink' command
-    await sendMessage(senderId, {
-      text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗼𝗿 𝘃𝗶𝗱𝗲𝗼 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗴𝗲𝘁𝗹𝗶𝗻𝗸" 𝘁𝗼 𝗿𝗲𝘁𝗿𝗶𝗲𝘃𝗲 𝘁𝗵𝗲 𝗹𝗶𝗻𝗸.'
-    }, pageAccessToken);
+    // Clear the stored image after processing
+    lastImageByUser.delete(senderId);
+  } catch (error) {
+    console.error('Error while processing the AI3 command:', error);
+    // Send error feedback to the user
+    await sendMessage(
+      senderId, 
+      { text: '❌ An error occurred while processing your AI3 request. Please try again later.' }, 
+      pageAccessToken
+    );
   }
   return;
 }
+
 
 
     // Handling "upscale" command

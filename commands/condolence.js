@@ -4,7 +4,7 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   name: 'condolence',
   description: 'condolence <name> <uid>',
-  usage: 'hack <name> <uid>',
+  usage: ' <name> <uid>',
   author: 'Developer’s name',
 
   async execute(senderId, args, pageAccessToken) {

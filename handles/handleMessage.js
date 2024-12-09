@@ -175,21 +175,22 @@ if (messageText === 'remini') {
   return;
 }
 
-// Handling "makeazombie" command
-if (messageText === 'zombie') {
-  const lastImage = lastImageByUser.get(senderId);
-  if (lastImage) {
-    try {
-      await commands.get('zombie').execute(senderId, [], pageAccessToken, lastImage);
-      lastImageByUser.delete(senderId); // Remove the image from memory after processing
-    } catch (error) {
-      await sendMessage(senderId, { 
-        text: '❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗽𝗿𝗼𝗰𝗲𝘀𝘀𝗶𝗻𝗴 𝘁𝗵𝗲 𝗶𝗺𝗮𝗴𝗲.' 
-      }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { 
-      text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗺𝗮𝗸𝗲𝗮𝗭𝗼𝗺𝗯𝗶𝗲" 𝘁𝗼 𝗰𝗼𝗻𝘃𝗲𝗿𝘁 𝗶𝘁.' 
+// Handling "xmaslist" command
+if (messageText.startsWith('xmaslist')) {
+  const args = messageText.replace('xmaslist', '').trim().split(',').map(arg => arg.trim());
+
+  if (args.length < 4) {
+    await sendMessage(senderId, {
+      text: "❌ Please provide four text values separated by commas. Example: 'xmaslist Item1, Item2, Item3, Item4'"
+    }, pageAccessToken);
+    return;
+  }
+
+  try {
+    await commands.get('xmaslist').execute(senderId, args, pageAccessToken);
+  } catch (error) {
+    await sendMessage(senderId, {
+      text: "❌ An error occurred while creating your Christmas list. Please try again later."
     }, pageAccessToken);
   }
   return;

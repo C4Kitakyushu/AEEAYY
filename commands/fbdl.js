@@ -1,39 +1,31 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'fbdl',
-  description: 'Download Facebook video using video URL',
-  author: 'Dale Mekumi',
-  usage: 'fbvideo videoUrl',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    const videoUrl = args.join(' ');
-    if (!videoUrl) {
-      return sendMessage(senderId, { text: "❌ Please provide a Facebook video URL." }, pageAccessToken);
+  description: 'fbdl [Facebook video link]',
+  usage: '-fbdl <link>',
+  author: 'coffee',
+  async execute(senderId, args, pageAccessToken) {
+    if (!args || !Array.isArray(args) || args.length === 0) {
+      await sendMessage(senderId, { text: 'Error: Missing URL!' }, pageAccessToken);
+      return;
     }
 
+    const videoUrl = args.join(' ');
+
     try {
-      sendMessage(senderId, { text: "⌛ Downloading video, please wait..." }, pageAccessToken);
+      const apiUrl = `https://api.kenliejugarap.com/fbdl/?videoUrl=${encodeURIComponent(videoUrl)}`;
+      const response = await axios.get(apiUrl);
 
-      const response = await axios.get(`https://api.kenliejugarap.com/fbdl/?videoUrl=${encodeURIComponent(videoUrl)}`);
-      const downloadUrl = response.data.downloadUrl;
-
-      if (!downloadUrl) {
-        return sendMessage(senderId, { text: "❌ Unable to retrieve the video. Please check the URL and try again." }, pageAccessToken);
+      if (response.data && response.data.status === 'success' && response.data.downloadUrl) {
+        await sendMessage(senderId, { attachment: { type: 'video', payload: { url: response.data.downloadUrl } } }, pageAccessToken);
+      } else {
+        await sendMessage(senderId, { text: 'Error: Unable to fetch video. Please try again later.' }, pageAccessToken);
       }
-
-      const videoMessage = {
-        attachment: {
-          type: 'video',
-          payload: {
-            url: downloadUrl,
-          },
-        },
-      };
-
-      await sendMessage(senderId, videoMessage, pageAccessToken);
     } catch (error) {
-      console.error(error);
-      sendMessage(senderId, { text: `❌ An error occurred: ${error.message}` }, pageAccessToken);
+      console.error('Error:', error);
+      await sendMessage(senderId, { text: 'Error: Unexpected error occurred.' }, pageAccessToken);
     }
   }
 };

@@ -1,61 +1,42 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
 
-// Define and export module
 module.exports = {
-  // Metadata for the command
-  name: 'art', // Command name
-  description: 'generate art based on the provided prompt.', // Description
-  usage: 'generateart <prompt>', // Usage
-  author: 'Co', // Author of the command
+  name: 'youtube',
+  description: 'search video based on youtube',
+  author: 'Dale Mekumi', 
+  usage: 'ytmp3 songtitle',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
 
-  // Main function that executes the command
-  async execute(senderId, args, pageAccessToken) {
-    // Check if prompt arguments are provided
-    if (!args || args.length === 0) {
-      // Send message requesting a prompt if missing
-      await sendMessage(senderId, {
-        text: '❌ Please provide a prompt to generate an image.'
-      }, pageAccessToken);
-      return; // Exit the function if no prompt is provided
-    }
-
-    // Concatenate arguments to form the prompt
     const prompt = args.join(' ');
-    const apiUrl = `https://api.joshweb.click/api/art?prompt=${encodeURIComponent(prompt)}`; // API endpoint with the prompt
-
-    // Notify user that the image is being generated
-    await sendMessage(senderId, { text: '⌛ Generating image... Please wait.' }, pageAccessToken);
+    if (!prompt) return sendMessage(senderId, { text: "❌ Please provide song or video title" }, pageAccessToken);
 
     try {
-      // Request the image URL from the API
-      const response = await axios.get(apiUrl);
+      const response = await axios.get(`https://apiv2.kenliejugarap.com/ytsearch?title=${encodeURIComponent(prompt)}`);
+      const info = response.data.videos[0];
+      const title = info.title;
+      const url = info.url;
 
-      // Validate API response
-      if (response.data && response.data.image) {
-        const imageUrl = response.data.image; // Extract image URL from the API response
-
-        // Send the generated image to the user as an attachment
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: {
-              url: imageUrl // URL of the generated image
-            }
-          }
-        }, pageAccessToken);
-      } else {
-        throw new Error('Invalid API response.');
-      }
-
-    } catch (error) {
-      // Handle and log any errors during image generation
-      console.error('Error generating image:', error);
-
-      // Notify user of the error
-      await sendMessage(senderId, {
-        text: 'An error occurred while generating the image. Please try again later.'
+      sendMessage(senderId, { 
+        text: `📃Video Title: ${title}\n🔗 Youtube URL: ${url}\n⌛ Downloading video please wait..` 
       }, pageAccessToken);
+
+
+      const responses = await axios.get(`https://apiv2.kenliejugarap.com/video?url=${url}`);
+      const dlink = responses.data.response;
+     // const url = info.url;
+
+      const audiomessage = {
+    attachment: {
+      type: 'video',
+      payload: {
+        url: dlink,
+      },
+    },
+  };
+  await sendMessage(senderId, audiomessage, pageAccessToken);
+    } catch (error) {
+      console.error(error);
+      sendMessage(senderId, { text: `❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱: ${error.message}` }, pageAccessToken);
     }
   }
 };

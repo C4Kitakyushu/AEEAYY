@@ -175,10 +175,6 @@ if (messageText === 'remini') {
   return;
 }
 
-const lastImageByUser = new Map(); // Store the last image sent by each user
-const commands = new Map();
-commands.set("xmascap", require("./commands/xmasCap"));
-
 if (messageText.startsWith("xmascap")) {
   const lastImage = lastImageByUser.get(senderId);
   const args = messageText.split(" ").slice(1); // Get the arguments after the command

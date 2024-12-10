@@ -4,10 +4,10 @@ module.exports = {
   name: 'xmaslist',
   description: 'xmaslist <text1> <text2> <text3> <text4>',
   usage: 'xmaslist <text1> <text2> <text3> <text4>',
-  author: 'Santa  Clause (Saint Nicholas)',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken) {
     if (!args || !Array.isArray(args) || args.length < 4) {
-      await sendMessage(senderId, { text: '❌ Please provide four text values separated by commas. Example: 'xmaslist pera, money, kwarta, arep'' }, pageAccessToken);
+      await sendMessage(senderId, { text: '❌ Please provide four texts as parameters.' }, pageAccessToken);
       return;
     }
 

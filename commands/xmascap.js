@@ -2,7 +2,7 @@ const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: "xmasCap",
+  name: "xmascap",
   description: "Add a Christmas cap to an image",
   author: "developer",
   usage: 'Send any picture first, then type "xmascap <color>" to apply a Christmas cap.',

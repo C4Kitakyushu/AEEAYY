@@ -175,37 +175,8 @@ if (messageText === 'remini') {
   return;
 }
 
-if (messageText.startsWith("xmascap")) {
-  const lastImage = lastImageByUser.get(senderId);
-  const args = messageText.split(" ").slice(1); // Get the arguments after the command
-  if (lastImage) {
-    try {
-      await commands.get("xmascap").execute(senderId, args, pageAccessToken, lastImage);
-      lastImageByUser.delete(senderId); // Remove the image from memory after processing
-    } catch (error) {
-      await sendMessage(senderId, {
-        text: "❌ An error occurred while processing the image.",
-      }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, {
-      text: '❌ Please send an image first, then type "xmascap <color>" to apply a Christmas cap.',
-    }, pageAccessToken);
-  }
-  return;
-}
 
-// Handle image attachments and store the last image URL for the user
-if (attachments?.[0]?.type === "image") {
-  lastImageByUser.set(senderId, attachments[0].payload.url);
-  await sendMessage(senderId, {
-    text: "✅ Image received! Now type `xmascap <color>` to add a Christmas cap.",
-  }, pageAccessToken);
-}
-
-
-    // Other command processing logic...
-    let commandName, args;
+    // Other command processing logic....    let commandName, args;
     if (messageText.startsWith(prefix)) {
       const argsArray = messageText.slice(prefix.length).split(' ');
       commandName = argsArray.shift().toLowerCase();

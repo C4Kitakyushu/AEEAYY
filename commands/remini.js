@@ -3,9 +3,9 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "remini",
-  description: "Enhances the quality of a provided image using the Remini API.",
+  description: "image enhancer",
   author: "developer",
-  usage: "Send an image and type 'remini' to enhance it.",
+  usage: "Send any picture first then reply enhancev2",
 
   async execute(senderId, args, pageAccessToken, imageUrl) {
     // Check if an image URL is provided
@@ -20,15 +20,10 @@ module.exports = {
 
     try {
       // Fetch the enhanced image from the API
-      const response = await axios.get(`https://betadash-uploader.vercel.app/remini?url=${encodeURIComponent(imageUrl)}`);
+      const response = await axios.get(`https://api.kenliejugarap.com/imgrestore/?imgurl=${encodeURIComponent(imageUrl)}`);
       const processedImageURL = response.data.response;
 
-      // Check if a valid image URL is returned
-      if (!processedImageURL) {
-        throw new Error("No image URL returned from the API.");
-      }
-
-      // Send the enhanced image back to the user
+      // Send the enhanced image URL back to the user
       await sendMessage(senderId, {
         attachment: {
           type: "image",
@@ -37,8 +32,9 @@ module.exports = {
           }
         }
       }, pageAccessToken);
+
     } catch (error) {
-      console.error("❌ Error processing image:", error.message || error);
+      console.error("❌ Error processing image:", error);
       await sendMessage(senderId, {
         text: `❌ An error occurred while processing the image. Please try again later.`
       }, pageAccessToken);

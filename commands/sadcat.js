@@ -2,8 +2,8 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'sadcat',
-  description: 'sadcat <text>',
-  usage: 'malongcote <text>',
+  description: 'sadcay <text>',
+  usage: 'sad <text>',
   author: 'developer',
   async execute(senderId, args, pageAccessToken) {
     if (!args || !Array.isArray(args) || args.length === 0) {
@@ -23,7 +23,7 @@ module.exports = {
       }, pageAccessToken);
     } catch (error) {
       console.error('Error:', error);
-      await sendMessage(senderId, { text: 'Error: Could not generate billboard image.' }, pageAccessToken);
+      await sendMessage(senderId, { text: 'Error: Could not generate canvas image.' }, pageAccessToken);
     }
   }
 };

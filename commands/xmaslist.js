@@ -7,8 +7,7 @@ module.exports = {
   author: 'Santa  Clause (Saint Nicholas)',
   async execute(senderId, args, pageAccessToken) {
     if (!args || !Array.isArray(args) || args.length < 4) {
-      await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 4 𝘄𝗶𝘀𝗵𝗲𝘀 𝘀𝗲𝗽𝗮𝗿𝗮𝘁𝗲 𝗯𝘆 𝗰𝗼𝗺𝗺𝗮𝘀.\n\n𝗘𝘅𝗮𝗺𝗽𝗹𝗲:\n
-𝘅𝗺𝗮𝘀𝗹𝗶𝘀𝘁 𝗱𝗼𝗴𝗳𝗼𝗼𝗱, 𝗱𝗶𝗹𝗱𝗼, 𝘁𝗮𝗹𝗼𝗻𝗴, 𝘀𝗰𝗮𝘁𝘁𝗲𝗿' }, pageAccessToken);
+      await sendMessage(senderId, { text: '❌ Please provide four text values separated by commas. Example: 'xmaslist pera, money, kwarta, arep'' }, pageAccessToken);
       return;
     }
 

@@ -50,7 +50,9 @@ const handleChatResponse = async (senderId, input, pageAccessToken) => {
 ━━━━━━━━━━━━━━━━ 
 ✅ Answer: ${response}
 ━━━━━━━━━━━━━━━━ 
-⏰ Response: ${responseTime}`;
+⏰ Response: ${responseTime}
+use ai3 or gemini if no response 
+━━━━━━━━━━━━━━━━ `;
 
     const formattedMessage = useFontFormatting ? formatResponse(defaultMessage) : defaultMessage;
 

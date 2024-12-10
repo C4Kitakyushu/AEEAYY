@@ -140,6 +140,29 @@ if (messageText.startsWith('gemini')) {
   return;
 }
 
+// Handling "xmascap" command
+if (messageText.startsWith('xmascap')) {
+  const lastImage = lastImageByUser.get(senderId);
+  const args = messageText.split(' ').slice(1); // Extract arguments (e.g., color)
+
+  if (lastImage) {
+    try {
+      await commands.get('xmascap').execute(senderId, args, pageAccessToken, lastImage);
+      lastImageByUser.delete(senderId); // Remove the image from memory after processing
+    } catch (error) {
+      await sendMessage(senderId, {
+        text: '❌ An error occurred while processing the image. Please try again later.',
+      }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, {
+      text: '❌ Please send an image first, then type "xmascap <red|blue>" to add a Christmas hat.',
+    }, pageAccessToken);
+  }
+  return;
+}
+
+
 
 if (messageText === 'imgur') {
       const lastImage = lastImageByUser.get(senderId);

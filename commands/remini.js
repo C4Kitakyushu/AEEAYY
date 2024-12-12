@@ -20,7 +20,7 @@ module.exports = {
 
     try {
       // Fetch the enhanced image from the API
-      const response = await axios.get(`https://api.kenliejugarap.com/imgrestore/?imgurl=${encodeURIComponent(imageUrl)}`);
+      const response = await axios.get(`https://apis-markdevs69v2.onrender.com/new/api/remini?inputImage=${encodeURIComponent(imageUrl)}`);
       const processedImageURL = response.data.response;
 
       // Send the enhanced image URL back to the user
@@ -36,7 +36,7 @@ module.exports = {
     } catch (error) {
       console.error("❌ Error processing image:", error);
       await sendMessage(senderId, {
-        text: `❌ An error occurred while processing the image. Please try again later.`
+        text: `❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗽𝗿𝗼𝗰𝗲𝘀𝘀𝗶𝗻𝗴 𝘁𝗵𝗲 𝗶𝗺𝗮𝗴𝗲. 𝗣𝗹𝗲𝗮𝘀𝗲 𝘁𝗿𝘆 𝗮𝗴𝗮𝗶𝗻 𝗹𝗮𝘁𝗲𝗿.`
       }, pageAccessToken);
     }
   }

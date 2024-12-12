@@ -1,112 +1,60 @@
-const axios = require("axios");
+const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
+// Define and export module
 module.exports = {
-  name: "test",
-  description: "Interact with Gemini AI Advanced ft. Vision",
-  author: "developer",
+  name: 'test', // Command name
+  description: 'Fetch images from Pinterest based on a query.', // Description
+  usage: 'pinterest <query>', // Usage
+  author: 'Ali', // Author of the command
 
-  async execute(senderId, args, pageAccessToken, event, imageUrl) {
-    const userPrompt = args.join(" ").trim().toLowerCase();
-
-    if (!userPrompt && !imageUrl) {
-      return sendMessage(
-        senderId,
-        { 
-          text: `❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝗮 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻 𝗳𝗼𝗿 𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗱𝘃𝗮𝗻𝗰𝗲𝗱 𝗼𝗿 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝘄𝗶𝘁𝗵 𝗮 𝗱𝗲𝘀𝗰𝗿𝗶𝗽𝘁𝗶𝗼𝗻 𝗳𝗼𝗿 𝗙𝗹𝗮𝘀𝗵 𝗩𝗶𝘀𝗶𝗼𝗻.` 
-        }, 
-        pageAccessToken
-      );
+  async execute(senderId, args, pageAccessToken) {
+    if (!args || args.length === 0) {
+      // If no query is provided, notify the user
+      await sendMessage(senderId, {
+        text: 'Please provide a query to search for Pinterest images. Usage: pinterest <query>'
+      }, pageAccessToken);
+      return;
     }
 
-    sendMessage(
-      senderId,
-      { text: "⌛ 𝗚𝗲𝗺𝗶𝗻𝗶 𝗶𝘀 𝘁𝗵𝗶𝗻𝗸𝗶𝗻𝗴, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁... " },
-      pageAccessToken
-    );
+    const query = args.join(' '); // Combine arguments into a query
+    const apiUrl = `https://api.joshweb.click/api/pinterest?q=${encodeURIComponent(query)}`;
+
+    await sendMessage(senderId, {
+      text: `Searching for images related to "${query}"... Please wait.`
+    }, pageAccessToken);
 
     try {
-      if (!imageUrl) {
-        if (event.message?.reply_to?.mid) {
-          imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
-        } else if (event.message?.attachments?.[0]?.type === 'image') {
-          imageUrl = event.message.attachments[0].payload.url;
-        }
-      }
+      const response = await axios.get(apiUrl);
+      const { status, result } = response.data;
 
-      const textApiUrl = "http://sgp1.hmvhostings.com:25721/gemini";
-      const imageRecognitionUrl = "https://api.joshweb.click/gemini";
+      if (status === 200 && result && result.length > 0) {
+        // Send the first image URL as an attachment
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'image',
+            payload: {
+              url: result[0] // Sending the first image URL
+            }
+          }
+        }, pageAccessToken);
 
-      const useImageRecognition =
-        imageUrl || 
-        ["recognize", "analyze", "analyst", "answer", "analysis"].some(term => userPrompt.includes(term)); 
-
-      let responseMessage;
-
-      if (useImageRecognition) {
-        // Fetch from Gemini Flash Vision (image recognition)
-        const imageApiResponse = await axios.get(imageRecognitionUrl, {
-          params: { prompt: userPrompt, url: imageUrl || "" }
-        });
-        const imageRecognitionResponse = imageApiResponse.data.gemini || "❌ No response from Gemini Flash Vision.";
-        responseMessage = `${imageRecognitionResponse}`;
+        // Pretty-print the results for the user
+        const prettyResults = result.map((url, index) => `${index + 1}. ${url}`).join('\n');
+        await sendMessage(senderId, {
+          text: `Found ${result.length} images:\n\n${prettyResults}`
+        }, pageAccessToken);
       } else {
-        // Fetch from Gemini Advanced (text)
-        const textApiResponse = await axios.get(textApiUrl, { params: { question: userPrompt } });
-        const textResponse = textApiResponse.data.answer || "❌ No response from Gemini Advanced.";
-        responseMessage = `${textResponse}`;
+        await sendMessage(senderId, {
+          text: 'No images were found for your query. Please try a different search term.'
+        }, pageAccessToken);
       }
-
-      const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
-
-      // Final formatted response
-      const finalResponse = `✨• 𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗱𝘃𝗮𝗻𝗰𝗲𝗱  𝗔𝗜\n━━━━━━━━━━━━━━━━━━
-${responseMessage}
-━━━━━━━━━━━━━━━━━━\n📅 𝗗𝗮𝘁𝗲/𝗧𝗶𝗺𝗲: ${responseTime}`;
-
-      await sendConcatenatedMessage(senderId, finalResponse, pageAccessToken);
 
     } catch (error) {
-      console.error("❌ Error in Gemini command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
+      console.error('Error fetching images:', error);
+      await sendMessage(senderId, {
+        text: 'An error occurred while fetching images. Please try again later.'
+      }, pageAccessToken);
     }
   }
 };
-
-async function getRepliedImage(mid, pageAccessToken) {
-  const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
-    params: { access_token: pageAccessToken }
-  });
-
-  if (data?.data?.[0]?.image_data?.url) {
-    return data.data[0].image_data.url;
-  }
-  return "";
-}
-
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-}
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}

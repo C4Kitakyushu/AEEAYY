@@ -3,37 +3,68 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "test",
-  description: "Generate AI responses using the Gemini API",
+  description: "Interact with Gemini API for both text and image recognition",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
     const userPrompt = args.join(" ").trim();
 
-    if (!userPrompt) {
+    if (!userPrompt && !imageUrl) {
       return sendMessage(
         senderId,
-        {
-          text: `❌ Please provide a question or prompt.`
-        },
+        { 
+          text: `❌ Please provide a question for Gemini Advanced or an image with a description for Flash Vision.` 
+        }, 
         pageAccessToken
       );
     }
 
     sendMessage(
       senderId,
-      {
-        text: "⌛ Processing your request, please wait..."
-      },
+      { text: "⌛ Processing your request, please wait..." },
       pageAccessToken
     );
 
     try {
+      // Handle image input if not directly provided
+      if (!imageUrl) {
+        if (event.message?.reply_to?.mid) {
+          imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
+        } else if (event.message?.attachments?.[0]?.type === 'image') {
+          imageUrl = event.message.attachments[0].payload.url;
+        }
+      }
+
       const apiUrl = "http://sgp1.hmvhostings.com:25721/gemini";
-      const response = await handleGeminiRequest(apiUrl, userPrompt);
+      const imageRecognitionUrl = "https://api.joshweb.click/gemini";
 
-      const result = response.answer || "❌ No response received from the Gemini API.";
+      // Prepare response variables
+      let textResponse = "";
+      let imageRecognitionResponse = "";
 
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
+      // Fetch from Gemini Advanced (text)
+      if (userPrompt) {
+        const textApiResponse = await axios.get(apiUrl, { params: { question: userPrompt } });
+        textResponse = textApiResponse.data.answer || "❌ No response from Gemini Advanced.";
+      }
+
+      // Fetch from Gemini Flash Vision (image recognition)
+      if (imageUrl) {
+        const imageApiResponse = await axios.get(imageRecognitionUrl, { params: { prompt: userPrompt, url: imageUrl } });
+        imageRecognitionResponse = imageApiResponse.data.gemini || "❌ No response from Gemini Flash Vision.";
+      }
+
+      // Get current response time in Manila timezone
+      const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+
+      // Format the combined response
+      const combinedResponse = `𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗣𝗜 ♊\n━━━━━━━━━━━━━━━━━━\n${
+        textResponse ? `📖 𝗔𝗱𝘃𝗮𝗻𝗰𝗲𝗱 𝗔𝗜 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲:\n${textResponse}\n\n` : ""
+      }${
+        imageRecognitionResponse ? `🖼️ 𝗙𝗹𝗮𝘀𝗵 𝗩𝗶𝘀𝗶𝗼𝗻 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲:\n${imageRecognitionResponse}\n` : ""
+      }━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
+
+      await sendConcatenatedMessage(senderId, combinedResponse, pageAccessToken);
 
     } catch (error) {
       console.error("Error in Gemini command:", error);
@@ -46,12 +77,15 @@ module.exports = {
   }
 };
 
-async function handleGeminiRequest(apiUrl, query) {
-  const { data } = await axios.get(apiUrl, {
-    params: { question: query }
+async function getRepliedImage(mid, pageAccessToken) {
+  const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
+    params: { access_token: pageAccessToken }
   });
 
-  return data;
+  if (data?.data?.[0]?.image_data?.url) {
+    return data.data[0].image_data.url;
+  }
+  return "";
 }
 
 async function sendConcatenatedMessage(senderId, text, pageAccessToken) {

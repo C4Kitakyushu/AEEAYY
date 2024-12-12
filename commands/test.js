@@ -39,7 +39,7 @@ module.exports = {
 
       const useImageRecognition =
         imageUrl || 
-        ["recognize", "analyze", "analyst", "analysis"].some(term => userPrompt.includes(term)); 
+        ["recognize", "analyze", "analyst", "answer", "analysis"].some(term => userPrompt.includes(term)); 
 
       let responseMessage;
 

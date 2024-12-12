@@ -39,7 +39,7 @@ module.exports = {
 
       const useImageRecognition =
         imageUrl || 
-        ["recognize", "analyze", "analyst", "analysis"].some(term => userPrompt.includes(term)); // Check trigger words
+        ["recognize", "analyze", "analyst", "analysis"].some(term => userPrompt.includes(term)); 
 
       let responseMessage;
 
@@ -49,7 +49,7 @@ module.exports = {
           params: { prompt: userPrompt, url: imageUrl || "" }
         });
         const imageRecognitionResponse = imageApiResponse.data.gemini || "❌ No response from Gemini Flash Vision.";
-        responseMessage = `{imageRecognitionResponse}`;
+        responseMessage = `${imageRecognitionResponse}`;
       } else {
         // Fetch from Gemini Advanced (text)
         const textApiResponse = await axios.get(textApiUrl, { params: { question: userPrompt } });

@@ -44,7 +44,6 @@ module.exports = {
       let responseMessage;
 
       if (useImageRecognition) {
-          (image recognition)
         const imageApiResponse = await axios.get(imageRecognitionUrl, {
           params: { prompt: userPrompt, url: imageUrl || "" }
         });

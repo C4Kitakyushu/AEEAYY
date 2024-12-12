@@ -117,7 +117,7 @@ if (messageText === 'upscale') {
 }
 
     // Handling "geminiv2" command
-if (messageText.startsWith('geminivw')) {
+if (messageText.startsWith('geminiv2')) {
   const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
   const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
 

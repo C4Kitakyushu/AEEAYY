@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "test",
-  description: "Interact with Gemini API for both text and image recognition",
+  description: "Interact with Gemini AI Advanced ft. Vision",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
@@ -13,7 +13,7 @@ module.exports = {
       return sendMessage(
         senderId,
         { 
-          text: `❌ Please provide a question for Gemini Advanced or an image with a description for Flash Vision.` 
+          text: `❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝗮 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻 𝗳𝗼𝗿 𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗱𝘃𝗮𝗻𝗰𝗲𝗱 𝗼𝗿 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝘄𝗶𝘁𝗵 𝗮 𝗱𝗲𝘀𝗰𝗿𝗶𝗽𝘁𝗶𝗼𝗻 𝗳𝗼𝗿 𝗙𝗹𝗮𝘀𝗵 𝗩𝗶𝘀𝗶𝗼𝗻.` 
         }, 
         pageAccessToken
       );
@@ -21,7 +21,7 @@ module.exports = {
 
     sendMessage(
       senderId,
-      { text: "⌛ Processing your request, please wait..." },
+      { text: "⌛ 𝗚𝗲𝗺𝗶𝗻𝗶 𝗶𝘀 𝘁𝗵𝗶𝗻𝗸𝗶𝗻𝗴, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁... " },
       pageAccessToken
     );
 
@@ -62,12 +62,12 @@ module.exports = {
       // Final formatted response
       const finalResponse = `✨• 𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗱𝘃𝗮𝗻𝗰𝗲𝗱  𝗔𝗜\n━━━━━━━━━━━━━━━━━━
 ${responseMessage}
-━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
+━━━━━━━━━━━━━━━━━━\n📅 𝗗𝗮𝘁𝗲/𝗧𝗶𝗺𝗲: ${responseTime}`;
 
       await sendConcatenatedMessage(senderId, finalResponse, pageAccessToken);
 
     } catch (error) {
-      console.error("Error in Gemini command:", error);
+      console.error("❌ Error in Gemini command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },

@@ -26,7 +26,6 @@ module.exports = {
     );
 
     try {
-      // Handle image input if not directly provided
       if (!imageUrl) {
         if (event.message?.reply_to?.mid) {
           imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
@@ -38,10 +37,9 @@ module.exports = {
       const textApiUrl = "http://sgp1.hmvhostings.com:25721/gemini";
       const imageRecognitionUrl = "https://api.joshweb.click/gemini";
 
-      // Determine API to use
       const useImageRecognition =
-        imageUrl || // If an image is provided
-        ["recognize", "analyze", "analyst", "analysis"].some(term => userPrompt.includes(term)); // Check trigger words
+        imageUrl || 
+        ["recognize", "analyze", "please", "answer", "analyst", "analysis"].some(term => userPrompt.includes(term)); // Check trigger words
 
       let responseMessage;
 
@@ -51,19 +49,20 @@ module.exports = {
           params: { prompt: userPrompt, url: imageUrl || "" }
         });
         const imageRecognitionResponse = imageApiResponse.data.gemini || "❌ No response from Gemini Flash Vision.";
-        responseMessage = `🖼️ 𝗙𝗹𝗮𝘀𝗵 𝗩𝗶𝘀𝗶𝗼𝗻 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲:\n${imageRecognitionResponse}`;
+        responseMessage = `{imageRecognitionResponse}`;
       } else {
         // Fetch from Gemini Advanced (text)
         const textApiResponse = await axios.get(textApiUrl, { params: { question: userPrompt } });
         const textResponse = textApiResponse.data.answer || "❌ No response from Gemini Advanced.";
-        responseMessage = `📖 𝗔𝗱𝘃𝗮𝗻𝗰𝗲𝗱 𝗔𝗜 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲:\n${textResponse}`;
+        responseMessage = `${textResponse}`;
       }
 
-      // Get current response time in Manila timezone
       const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
       // Final formatted response
-      const finalResponse = `𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗣𝗜 ♊\n━━━━━━━━━━━━━━━━━━\n${responseMessage}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
+      const finalResponse = `✨• 𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗱𝘃𝗮𝗻𝗰𝗲𝗱  𝗔𝗜\n━━━━━━━━━━━━━━━━━━
+${responseMessage}
+━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝘀𝗲 𝗧𝗶𝗺𝗲: ${responseTime}`;
 
       await sendConcatenatedMessage(senderId, finalResponse, pageAccessToken);
 

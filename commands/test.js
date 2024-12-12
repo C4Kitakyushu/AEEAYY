@@ -39,7 +39,7 @@ module.exports = {
 
       const useImageRecognition =
         imageUrl || 
-        ["recognize", "analyze", "please", "answer", "analyst", "analysis"].some(term => userPrompt.includes(term)); // Check trigger words
+        ["recognize", "analyze", "analyst", "analysis"].some(term => userPrompt.includes(term)); // Check trigger words
 
       let responseMessage;
 

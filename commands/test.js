@@ -1,5 +1,7 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+const path = require('path');
 
 // Define and export module
 module.exports = {
@@ -17,20 +19,42 @@ module.exports = {
     await sendMessage(senderId, { text: 'Fetching a random hentai video... Please wait.' }, pageAccessToken);
 
     try {
-      // Call the API to fetch the video URL
+      // Fetch the video URL from the API
       const response = await axios.get(apiUrl);
 
       // Check if the response contains a valid video URL
       if (response.data && response.data.url) {
-        // Send the generated video to the user as an attachment
+        const videoUrl = response.data.url;
+
+        // Download the video file locally
+        const videoPath = path.resolve(__dirname, 'temp_video.mp4');
+        const videoStream = fs.createWriteStream(videoPath);
+
+        await axios({
+          method: 'get',
+          url: videoUrl,
+          responseType: 'stream',
+        }).then((res) => {
+          res.data.pipe(videoStream);
+          return new Promise((resolve, reject) => {
+            videoStream.on('finish', resolve);
+            videoStream.on('error', reject);
+          });
+        });
+
+        // Send the video as an attachment
         await sendMessage(senderId, {
           attachment: {
             type: 'video',
             payload: {
-              url: response.data.url  // URL of the generated video
-            }
-          }
+              is_reusable: true,
+              filedata: fs.createReadStream(videoPath),
+            },
+          },
         }, pageAccessToken);
+
+        // Clean up the temporary video file
+        fs.unlinkSync(videoPath);
       } else {
         throw new Error('Invalid response from API');
       }
@@ -40,8 +64,8 @@ module.exports = {
 
       // Notify user of the error
       await sendMessage(senderId, {
-        text: 'An error occurred while fetching the video. Please try again later.'
+        text: 'An error occurred while fetching the video. Please try again later.',
       }, pageAccessToken);
     }
-  }
+  },
 };

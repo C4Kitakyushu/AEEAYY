@@ -77,14 +77,14 @@ if (messageText.startsWith('ai3')) {
 }
 
 
-// Handling "test" command
-if (messageText.startsWith('test')) {
+// Handling "geminiv3" command
+if (messageText.startsWith('geminiv3')) {
   const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
   const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
 
   try {
-    // Execute the "test" command
-    await commands.get('test').execute(senderId, args, pageAccessToken, event, lastImage);
+    // Execute the "geminiv3" command
+    await commands.get('geminiv3').execute(senderId, args, pageAccessToken, event, lastImage);
     
     // Clear the stored image after processing
     lastImageByUser.delete(senderId);

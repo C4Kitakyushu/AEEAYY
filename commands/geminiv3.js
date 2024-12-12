@@ -44,7 +44,7 @@ module.exports = {
       let responseMessage;
 
       if (useImageRecognition) {
-        // Fetch from Gemini Flash Vision (image recognition)
+          (image recognition)
         const imageApiResponse = await axios.get(imageRecognitionUrl, {
           params: { prompt: userPrompt, url: imageUrl || "" }
         });
@@ -60,9 +60,10 @@ module.exports = {
       const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
       // Final formatted response
-      const finalResponse = `✨• 𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗱𝘃𝗮𝗻𝗰𝗲𝗱  𝗔𝗜\n━━━━━━━━━━━━━━━━━━
+      const finalResponse = `✨• 𝗚𝗲𝗺𝗶𝗻𝗶 𝗔𝗱𝘃𝗮𝗻𝗰𝗲𝗱 𝗔𝗜\n━━━━━━━━━━━━━━━━━━
 ${responseMessage}
-━━━━━━━━━━━━━━━━━━\n📅 𝗗𝗮𝘁𝗲/𝗧𝗶𝗺𝗲: ${responseTime}`;
+━━━━━━━━━━━━━━━━━━
+📅 𝗗𝗮𝘁𝗲/𝗧𝗶𝗺𝗲: ${responseTime}`;
 
       await sendConcatenatedMessage(senderId, finalResponse, pageAccessToken);
 

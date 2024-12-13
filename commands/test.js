@@ -2,23 +2,52 @@ const axios = require('axios');
 
 module.exports = {
   name: 'test',
-  description: 'fetch a random cat fact!',
-  author: 'developer', // Replace 'YourName' with the desired author name
+  description: 'Search videos based on YouTube',
+  author: 'Dale Mekumi', 
+  usage: 'youtube <search query>',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗰𝗮𝘁 𝗳𝗮𝗰𝘁..." }, pageAccessToken);
+
+    const searchQuery = args.join(' ');
+    if (!searchQuery) {
+      return sendMessage(senderId, { text: "❌ Please provide a video title or keyword." }, pageAccessToken);
+    }
 
     try {
-      const response = await axios.get('https://aryanchauhanapi.onrender.com/api/catfact');
-      const { fact } = response.data;
+      // Step 1: Search for videos
+      const searchResponse = await axios.get(`https://apis-markdevs69v2.onrender.com/new/api/youtube?q=${encodeURIComponent(searchQuery)}`);
+      const video = searchResponse.data.data.videos[0]; // Get the first video
 
-      if (!fact) {
-        return sendMessage(senderId, { text: "🥺 𝗦𝗼𝗿𝗿𝘆, 𝗜 𝗰𝗼𝘂𝗹𝗱𝗻'𝘁 𝗳𝗶𝗻𝗱 𝗮 𝗰𝗮𝘁 𝗳𝗮𝗰𝘁." }, pageAccessToken);
+      if (!video) {
+        return sendMessage(senderId, { text: "❌ No videos found for the given search query." }, pageAccessToken);
       }
 
-      sendMessage(senderId, { text: `🐱 𝗛𝗲𝗿𝗲 𝗶𝘀 𝘁𝗵𝗲 𝗰𝗮𝘁 𝗳𝗮𝗰𝘁:\n\n${fact}` }, pageAccessToken);
+      const title = video.title;
+      const url = video.url;
+
+      // Step 2: Send initial message with video details
+      sendMessage(senderId, { 
+        text: `📃 Video Title: ${title}\n🔗 YouTube URL: ${url}\n⌛ Downloading video, please wait...` 
+      }, pageAccessToken);
+
+      // Step 3: Fetch video download link
+      const downloadResponse = await axios.get(`https://apis-markdevs69v2.onrender.com/new/api/youtube/download?url=${encodeURIComponent(url)}`);
+      const downloadLink = downloadResponse.data.response;
+
+      // Step 4: Send the downloadable video link
+      const videoMessage = {
+        attachment: {
+          type: 'video',
+          payload: {
+            url: downloadLink,
+          },
+        },
+      };
+
+      await sendMessage(senderId, videoMessage, pageAccessToken);
+
     } catch (error) {
       console.error(error);
-      sendMessage(senderId, { text: `❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱: ${error.message}` }, pageAccessToken);
+      sendMessage(senderId, { text: `❌ An error occurred: ${error.message}` }, pageAccessToken);
     }
   }
 };

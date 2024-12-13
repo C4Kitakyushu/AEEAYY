@@ -1,19 +1,51 @@
+const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const fs = require('fs');
 
-const pageAccessToken = fs.readFileSync('token.txt', 'utf8');
+// Read the token once at the top level
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'uid',
-  description: 'retrieve your uid',
-  author: 'developer',
+  description: 'fb uid retriever',
+  role: 1,
+  author: 'develoepr',
 
-  async execute(senderId) {
-    try {
-      await sendMessage(senderId, { text: `🪪 : ${senderId}` }, pageAccessToken);
-    } catch (error) {
-      console.error('❌ Error sending UID:', error);
-      await sendMessage(senderId, { text: 'Error: Unable to retrieve your UID.' }, pageAccessToken);
+  async execute(senderId, args) {
+    const pageAccessToken = token;
+
+    if (!Array.isArray(args) || args.length === 0) {
+      return await sendError(senderId, 'Usage: retrieve [Facebook profile URL]', pageAccessToken);
     }
+
+    const profileUrl = args.join(' ').trim();
+    await handleFindFacebookId(senderId, profileUrl, pageAccessToken);
   },
+};
+
+// Function to retrieve Facebook ID from profile URL
+const handleFindFacebookId = async (senderId, profileUrl, pageAccessToken) => {
+  try {
+    const res = await axios.get('https://api.joshweb.click/api/findid', {
+      params: { url: profileUrl },
+    });
+
+    const { status, result } = res.data;
+
+    if (status && result) {
+      await sendMessage(senderId, {
+        text: `Facebook ID: ${result}`,
+      }, pageAccessToken);
+    } else {
+      throw new Error('Unable to retrieve Facebook ID');
+    }
+  } catch (error) {
+    console.error('Error retrieving Facebook ID:', error);
+    await sendError(senderId, 'Error retrieving Facebook ID. Please try again or check your input.', pageAccessToken);
+  }
+};
+
+// Centralized error handler for sending error messages
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
 };

@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "geminiv3",
-  description: "Interact with Gemini AI Advanced ft. Vision",
+  description: "interact with gemini ai Advanced ft. vision",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {

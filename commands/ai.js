@@ -5,10 +5,10 @@ const fs = require('fs');
 const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: 'ai',
-  description: 'starling gpt4 helper',
-  usage: 'ai <your message>',
-  author: 'developer',
+  name: 'gpt4',
+  description: 'Interact with GPT-4o',
+  usage: 'gpt4 [your message]',
+  author: 'coffee',
 
   async execute(senderId, args) {
     const pageAccessToken = token;
@@ -19,23 +19,21 @@ module.exports = {
 };
 
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const systemRole = 'You Tr1pZzey AI, an AI assistant.';
+  const systemRole = 'You are Tr1pZzey AI, a helpful and friendly assistant.';
   const prompt = `${systemRole}\n${input}`;
-  const apiUrl = `https://api.joshweb.click/ai/starling-lm-7b?q=${encodeURIComponent(prompt)}&uid=${senderId}`;
+  const apiUrl = `https://kaiz-apis.gleeze.com/api/gpt-4o?q=${encodeURIComponent(prompt)}&uid=${senderId}`;
 
   try {
-    const { data } = await axios.get(apiUrl);
-    const responseText = data.result || '☹️ No response from the API.';
+    const { data: { response } } = await axios.get(apiUrl);
 
-    // Split the response into chunks if it exceeds 2000 characters
-    const maxMessageLength = 2000;
-    if (responseText.length > maxMessageLength) {
-      const messages = splitMessageIntoChunks(responseText, maxMessageLength);
-      for (const message of messages) {
-        await sendMessage(senderId, { text: message }, pageAccessToken);
-      }
-    } else {
-      await sendMessage(senderId, { text: responseText }, pageAccessToken);
+    const parts = [];
+    for (let i = 0; i < response.length; i += 1999) {
+      parts.push(response.substring(i, i + 1999));
+    }
+
+    for (const part of parts) {
+      const formattedMessage = `${part}`;
+      await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
     }
   } catch (error) {
     console.error('Error reaching the API:', error);
@@ -46,12 +44,4 @@ const handleChatResponse = async (senderId, input, pageAccessToken) => {
 const sendError = async (senderId, errorMessage, pageAccessToken) => {
   const formattedMessage = `${errorMessage}`;
   await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
-};
-
-const splitMessageIntoChunks = (message, chunkSize) => {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
 };

@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "geminiv3",
-  description: "interact with gemini ai Advanced ft. vision",
+  description: "interact with gemini ai advanced ft. vision",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
@@ -26,22 +26,6 @@ module.exports = {
     );
 
     try {
-      // Check if result contains an image URL to send
-      if (result.includes('KUPAL KABA WLNG IMAGE MANAHIMIK KANA: generateImage')) {
-        const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
-
-        if (imageUrlMatch && imageUrlMatch[1]) {
-          const imageUrl = imageUrlMatch[1];
-          await sendMessage(senderId, {
-            attachment: {
-              type: 'image',
-              payload: { url: imageUrl }
-            }
-          }, pageAccessToken);
-          return;
-        }
-      }
-
       if (!imageUrl) {
         if (event.message?.reply_to?.mid) {
           imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
@@ -71,7 +55,7 @@ module.exports = {
         const textResponse = textApiResponse.data.answer || "❌ No response from Gemini Advanced.";
         responseMessage = `${textResponse}`;
       }
-           
+
       const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
       // Final formatted response

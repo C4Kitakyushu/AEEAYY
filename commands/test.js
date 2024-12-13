@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'weather',
+  name: 'test',
   description: 'Fetch and display weather information',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {

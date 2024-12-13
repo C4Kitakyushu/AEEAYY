@@ -1,54 +1,49 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'test',
-  description: 'Fetch a random hentai video with details.',
-  usage: 'rand-hentai-video',
-  author: 'Ali',
+  description: 'Detect AI-generated content from a given text.',
+  author: 'Deku (rest api)',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    const prompt = args.join(' ');
 
-  execute: async (senderId) => {
-    const pageAccessToken = token;
-    const apiUrl = 'https://api.joshweb.click/api/randhntai';
+    if (!prompt) {
+      return sendMessage(
+        senderId,
+        { text: '❌ Please provide some text to analyze.' },
+        pageAccessToken
+      );
+    }
 
     try {
-      // Fetch data from the API
-      const { data } = await axios.get(apiUrl);
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/aidetector-v2?q=${encodeURIComponent(prompt)}`;
+      const response = await axios.get(apiUrl);
+      const { ai, human, message } = response.data;
 
-      if (data && data.result && data.result.length > 0) {
-        // Select the first video from the result
-        const video = data.result[0];
+      // Build the response message
+      const resultMessage = `🎯 **AI Detector Results** 🎯\n\n📊 AI Likelihood: ${ai}%\n👤 Human Likelihood: ${human}%\n\n💡 Message: ${message}`;
 
-        // Prepare a message with the video details
-        const videoMessage = {
-          text: `**Title:** ${video.title}\n**Category:** ${video.category}\n**Views:** ${video.views_count}\n**Shares:** ${video.share_count}\n**Link:** ${video.link}`,
-        };
-
-        // Send the details message
-        await sendMessage(senderId, videoMessage, pageAccessToken);
-
-        // Send the video
-        const videoAttachment = {
-          attachment: {
-            type: 'video',
-            payload: { url: video.video_1 }, // Use the first video URL
-          },
-        };
-        await sendMessage(senderId, videoAttachment, pageAccessToken);
+      // Split the response into chunks if it exceeds 2000 characters
+      const maxMessageLength = 2000;
+      if (resultMessage.length > maxMessageLength) {
+        const messages = splitMessageIntoChunks(resultMessage, maxMessageLength);
+        for (const chunk of messages) {
+          sendMessage(senderId, { text: chunk }, pageAccessToken);
+        }
       } else {
-        sendError(senderId, 'Error: No videos found in the API response.', pageAccessToken);
+        sendMessage(senderId, { text: resultMessage }, pageAccessToken);
       }
     } catch (error) {
-      console.error('Error fetching video:', error);
-      sendError(senderId, 'Error: Unexpected error occurred.', pageAccessToken);
+      console.error('Error calling AI Detector API:', error);
+      sendMessage(senderId, { text: '❌ Sorry, there was an error processing your request.' }, pageAccessToken);
     }
-  },
+  }
 };
 
-// Helper function to send error messages
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
-};
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+}

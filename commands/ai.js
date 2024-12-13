@@ -5,8 +5,8 @@ const fs = require('fs');
 const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: 'gpt4',
-  description: 'Interact with GPT-4o',
+  name: 'ai',
+  description: 'interact to ai assistant',
   usage: 'gpt4 [your message]',
   author: 'coffee',
 

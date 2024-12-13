@@ -1,49 +1,48 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'test',
-  description: 'Detect AI-generated content from a given text.',
-  author: 'Deku (rest api)',
+  name: 'weather',
+  description: 'Fetch and display weather information',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    const prompt = args.join(' ');
-
-    if (!prompt) {
-      return sendMessage(
-        senderId,
-        { text: '❌ Please provide some text to analyze.' },
-        pageAccessToken
-      );
-    }
-
     try {
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/aidetector-v2?q=${encodeURIComponent(prompt)}`;
+      // Define the API URL
+      const apiUrl = 'https://ccprojectapis.ddns.net/api/weather';
       const response = await axios.get(apiUrl);
-      const { ai, human, message } = response.data;
+      const data = response.data;
 
-      // Build the response message
-      const resultMessage = `🎯 **AI Detector Results** 🎯\n\n📊 AI Likelihood: ${ai}%\n👤 Human Likelihood: ${human}%\n\n💡 Message: ${message}`;
+      // Extract key parameters from the API response
+      const synopsis = data.synopsis || 'No synopsis available.';
+      const issuedAt = data.issuedAt || 'No issuance time provided.';
+      const temperatureMax = data.temperature?.max?.value || 'N/A';
+      const temperatureMaxTime = data.temperature?.max?.time || 'N/A';
+      const temperatureMin = data.temperature?.min?.value || 'N/A';
+      const temperatureMinTime = data.temperature?.min?.time || 'N/A';
+      const humidityMax = data.humidity?.max?.value || 'N/A';
+      const humidityMaxTime = data.humidity?.max?.time || 'N/A';
+      const humidityMin = data.humidity?.min?.value || 'N/A';
+      const humidityMinTime = data.humidity?.min?.time || 'N/A';
 
-      // Split the response into chunks if it exceeds 2000 characters
-      const maxMessageLength = 2000;
-      if (resultMessage.length > maxMessageLength) {
-        const messages = splitMessageIntoChunks(resultMessage, maxMessageLength);
-        for (const chunk of messages) {
-          sendMessage(senderId, { text: chunk }, pageAccessToken);
-        }
-      } else {
-        sendMessage(senderId, { text: resultMessage }, pageAccessToken);
-      }
+      // Construct the message to send
+      const weatherMessage = `
+🌤️ **Weather Update** 🌤️
+- **Synopsis:** ${synopsis}
+- **Issued At:** ${issuedAt}
+
+🌡️ **Temperature:**
+  - Max: ${temperatureMax} at ${temperatureMaxTime}
+  - Min: ${temperatureMin} at ${temperatureMinTime}
+
+💧 **Humidity:**
+  - Max: ${humidityMax} at ${humidityMaxTime}
+  - Min: ${humidityMin} at ${humidityMinTime}
+      `.trim();
+
+      // Send the message
+      sendMessage(senderId, { text: weatherMessage }, pageAccessToken);
     } catch (error) {
-      console.error('Error calling AI Detector API:', error);
-      sendMessage(senderId, { text: '❌ Sorry, there was an error processing your request.' }, pageAccessToken);
+      console.error('Error calling weather API:', error);
+      sendMessage(senderId, { text: 'Sorry, there was an error fetching the weather data.' }, pageAccessToken);
     }
   }
 };
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}

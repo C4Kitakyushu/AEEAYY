@@ -1,12 +1,9 @@
 const axios = require("axios");
 const { sendMessage } = require("../handles/message");
 
-console.log("sendMessage function:", sendMessage); 
-
 module.exports = {
   name: "test",
   description: "Generate a voice message based on the prompt",
-  role: 1,
   author: "developer",
 
   async execute(senderId, args, pageAccessToken) {

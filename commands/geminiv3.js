@@ -55,6 +55,20 @@ module.exports = {
         const textResponse = textApiResponse.data.answer || "❌ No response from Gemini Advanced.";
         responseMessage = `${textResponse}`;
       }
+           if (result.includes('KUPAL KABA: generateImage')) {
+        const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
+
+        if (imageUrlMatch && imageUrlMatch[1]) {
+          const imageUrl = imageUrlMatch[1];
+          await sendMessage(senderId, {
+            attachment: {
+              type: 'image',
+              payload: { url: imageUrl }
+            }
+          }, pageAccessToken);
+          return;
+        }
+      }
 
       const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 

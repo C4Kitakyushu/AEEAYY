@@ -1,30 +1,57 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'aidetector',
-  description: 'detect if the generated text is an ai or human!',
-  admin: false,
-  async execute(senderId, args, pageAccessToken, sendMessage) {
+  description: 'detect if a text was written by an ai or a human',
+  usage: 'aidetector [your text]',
+  author: 'developer',
 
-    const prompt = args.join(' ');
-    if (!prompt) return sendMessage(senderId, { text: "❌ Provide text" }, pageAccessToken);
+  async execute(senderId, args) {
+    const pageAccessToken = token;
 
-    sendMessage(senderId, { text: "⌛ Searching please wait..." }, pageAccessToken);
+    const input = (args.join(' ') || 'test').trim();
+    await handleAIDetection(senderId, input, pageAccessToken);
+  },
+};
 
-    try {
-      const response = await axios.get(`https://kaiz-apis.gleeze.com/api/mal?title=${encodeURIComponent(prompt)}`);
-      const ai = response.data.ai;
-      const human = response.data.human;
-      const message = response.data.message;
+const handleAIDetection = async (senderId, input, pageAccessToken) => {
+  const apiUrl = `https://kaiz-apis.gleeze.com/api/aidetector-v2?q=${encodeURIComponent(input)}`;
 
-      const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+  try {
+    const { data: { ai, human, message } } = await axios.get(apiUrl);
 
-      sendMessage(senderId, { 
-        text: `Ai detector\n\nAi: ${ai}\n\nHuman: ${human}\n\nMessage: ${message}\n` 
-      }, pageAccessToken);
-    } catch (error) {
-      console.error(error);
-      sendMessage(senderId, { text: `❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱: ${error.message}` }, pageAccessToken);
-    }
+    const fullResponse = ` 🤖 AI Generated: ${ai}\n🧑‍🎓 Human Generated: ${human}\n📃 Message: ${message}`;
+    await sendResponseInChunks(senderId, fullResponse, pageAccessToken);
+  } catch (error) {
+    console.error('❌ Error reaching the AI Detection API:', error);
+    await sendError(senderId, '❌ An error occurred while trying to process your request.', pageAccessToken);
   }
+};
+
+const sendResponseInChunks = async (senderId, text, pageAccessToken) => {
+  const maxMessageLength = 2000;
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+    for (const message of messages) {
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
+  }
+};
+
+const splitMessageIntoChunks = (text, chunkSize) => {
+  const chunks = [];
+  for (let i = 0; i < text.length; i += chunkSize) {
+    chunks.push(text.substring(i, i + chunkSize));
+  }
+  return chunks;
+};
+
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
 };

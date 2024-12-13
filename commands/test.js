@@ -1,53 +1,80 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+// Reading the page access token from 'token.txt'
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: 'test',
-  description: 'Search videos based on YouTube',
-  author: 'Dale Mekumi', 
-  usage: 'youtube <search query>',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
+  name: 'test', // Updated name based on the API
+  description: 'Summarize the provided text into a concise form', // Updated description
+  usage: 'summarize [your text]', // Updated usage based on API functionality
+  author: 'developer', // Author name
 
-    const searchQuery = args.join(' ');
-    if (!searchQuery) {
-      return sendMessage(senderId, { text: "❌ Please provide a video title or keyword." }, pageAccessToken);
-    }
+  // Main execution function for the command
+  async execute(senderId, args) {
+    const pageAccessToken = token;
 
-    try {
-      // Step 1: Search for videos
-      const searchResponse = await axios.get(`https://apis-markdevs69v2.onrender.com/new/api/youtube?q=${encodeURIComponent(searchQuery)}`);
-      const video = searchResponse.data.data.videos[0]; // Get the first video
+    // Combine all arguments into a single text and use it as input
+    const input = (args.join(' ') || 'test').trim();
+    await handleSummarize(senderId, input, pageAccessToken);
+  },
+};
 
-      if (!video) {
-        return sendMessage(senderId, { text: "❌ No videos found for the given search query." }, pageAccessToken);
-      }
+// Function to handle the summarizing logic
+const handleSummarize = async (senderId, input, pageAccessToken) => {
+  // Encode the input text and append it to the summarize API URL
+  const apiUrl = `https://kaiz-apis.gleeze.com/api/summarize?text=${encodeURIComponent(input)}`;
 
-      const title = video.title;
-      const url = video.url;
+  try {
+    // Make a GET request to the API
+    const { data: { response } } = await axios.get(apiUrl);
 
-      // Step 2: Send initial message with video details
-      sendMessage(senderId, { 
-        text: `📃 Video Title: ${title}\n🔗 YouTube URL: ${url}\n⌛ Downloading video, please wait...` 
-      }, pageAccessToken);
+    // Send the summarized response to the user in manageable chunks
+    await sendResponseInChunks(senderId, response, pageAccessToken);
+  } catch (error) {
+    console.error('Error calling Summarize API:', error);
 
-      // Step 3: Fetch video download link
-      const downloadResponse = await axios.get(`https://apis-markdevs69v2.onrender.com/new/api/youtube/download?url=${encodeURIComponent(url)}`);
-      const downloadLink = downloadResponse.data.response;
-
-      // Step 4: Send the downloadable video link
-      const videoMessage = {
-        attachment: {
-          type: 'video',
-          payload: {
-            url: downloadLink,
-          },
-        },
-      };
-
-      await sendMessage(senderId, videoMessage, pageAccessToken);
-
-    } catch (error) {
-      console.error(error);
-      sendMessage(senderId, { text: `❌ An error occurred: ${error.message}` }, pageAccessToken);
-    }
+    // Notify the user about the error
+    await sendError(senderId, 'An error occurred while summarizing your text.', pageAccessToken);
   }
+};
+
+// Function to split and send the response text in chunks
+const sendResponseInChunks = async (senderId, text, pageAccessToken) => {
+  const maxMessageLength = 2000;
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+    for (const message of messages) {
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
+  }
+};
+
+// Function to split a message into smaller chunks
+const splitMessageIntoChunks = (message, chunkSize) => {
+  const chunks = [];
+  let chunk = '';
+  const words = message.split(' ');
+
+  for (const word of words) {
+    if ((chunk + word).length > chunkSize) {
+      chunks.push(chunk.trim());
+      chunk = '';
+    }
+    chunk += `${word} `;
+  }
+
+  if (chunk) {
+    chunks.push(chunk.trim());
+  }
+
+  return chunks;
+};
+
+// Function to send an error message to the user
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
 };

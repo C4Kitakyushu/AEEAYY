@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "ai3",
-  description: "Recognize or generate images using AI",
+  description: "recognize or generate images using ai",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {

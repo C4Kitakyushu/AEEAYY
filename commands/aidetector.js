@@ -24,7 +24,7 @@ const handleAIDetection = async (senderId, input, pageAccessToken) => {
   try {
     const { data: { ai, human, message } } = await axios.get(apiUrl);
 
-    const fullResponse = ` 🤖 AI Generated: ${ai}\n🧑‍🎓 Human Generated: ${human}\n📃 Message: ${message}`;
+    const fullResponse = ` 🤖 AI Generated: ${ai}\n\n🧑‍🎓 Human Generated: ${human}\n\n📃 Message: ${message}`;
     await sendResponseInChunks(senderId, fullResponse, pageAccessToken);
   } catch (error) {
     console.error('❌ Error reaching the AI Detection API:', error);

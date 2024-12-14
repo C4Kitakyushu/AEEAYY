@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗿𝗶𝗱𝗱𝗹𝗲..." }, pageAccessToken);
 
     try {
-      const response = await axios.get('https://riddles-api.vercel.app/random');
+      const response = await axios.get('https://fetching-riddle-api.vercel.app/random');
       const data = response.data;
 
       if (!data || !data.riddle) {

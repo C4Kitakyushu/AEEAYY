@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'bible',
+  name: 'test',
   description: 'fetch a random bible verse!',
   author: 'Ali', // Replace 'Ali' with your desired author name
   async execute(senderId, args, pageAccessToken, sendMessage) {

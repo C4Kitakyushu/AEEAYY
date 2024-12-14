@@ -4,46 +4,48 @@ const { sendMessage } = require('../handles/sendMessage');
 // Define and export module
 module.exports = {
   // Metadata for the command
-  name: 'test', // Command name
-  description: 'Random waifu image', // Description
-  usage: 'waifu', // Usage
-  author: 'developer', // Author of the command
+  name: 'test',  // Command name
+  description: 'Generate a waifu image.',  // Description
+  usage: 'waifu <prompt>',  // Usage
+  author: 'Ali',  // Author of the command
 
   // Main function that executes the command
   async execute(senderId, args, pageAccessToken) {
-    try {
-      // Fetch the waifu image from the API
-      const response = await axios.get('https://nash-api.onrender.com/api/waifu1');
-      const imageUrl = response.data.url; // Assuming the API response has a 'url' property
-
-      if (!imageUrl) {
-        // If the API did not return a URL, notify the user
-        await sendMessage(senderId, { text: '❌ No image received from the API.' }, pageAccessToken);
-        return;
-      }
-
-      // Notify the user with a stylistic message
+    // Check if prompt arguments are provided
+    if (!args || args.length === 0) {
+      // Send message requesting a prompt if missing
       await sendMessage(senderId, {
-        text: '✨ 𝐇𝐞𝐫𝐞 𝐢𝐬 𝐲𝐨𝐮𝐫 𝐫𝐚𝐧𝐝𝐨𝐦 𝐰𝐚𝐢𝐟𝐮 𝐢𝐦𝐚𝐠𝐞! ✨',
+        text: 'Please provide a prompt to generate a waifu image.'
       }, pageAccessToken);
+      return;  // Exit the function if no prompt is provided
+    }
 
-      // Send the waifu image as an attachment
+    // Concatenate arguments to form the prompt
+    const prompt = args.join(' ');
+    const apiUrl = `https://nash-api.onrender.com/api/waifu1?prompt=${encodeURIComponent(prompt)}`;  // API endpoint with the prompt
+
+    // Notify user that the image is being generated
+    await sendMessage(senderId, { text: 'Generating waifu image... Please wait.' }, pageAccessToken);
+
+    try {
+      // Send the generated image to the user as an attachment
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: imageUrl, // URL of the image to be sent
-            is_reusable: true, // Optional: makes the image reusable
-          },
-        },
+            url: apiUrl  // URL of the generated image
+          }
+        }
       }, pageAccessToken);
 
     } catch (error) {
-      // Handle and log any errors
-      console.error('❌ Error fetching or sending the waifu image:', error.response?.data || error.message);
-
+      // Handle and log any errors during image generation
+      console.error('Error generating waifu image:', error);
+      
       // Notify user of the error
-      await sendMessage(senderId, { text: '❌ An error occurred while fetching the waifu image.' }, pageAccessToken);
+      await sendMessage(senderId, {
+        text: 'An error occurred while generating the image. Please try again later.'
+      }, pageAccessToken);
     }
-  },
+  }
 };

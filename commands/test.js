@@ -1,24 +1,45 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'test',
-  description: 'fetch a random bible verse!',
-  author: 'Ali', // Replace 'Ali' with your desired author name
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲..." }, pageAccessToken);
+  description: 'Interact with the AI assistant',
+  usage: 'gpt4 [your message]',
+  author: 'coffee',
 
-    try {
-      const response = await axios.get('https://mekumi-rest-api.onrender.com/api/bible?');
-      const { verse } = response.data;
+  async execute(senderId, args) {
+    const pageAccessToken = token;
 
-      if (!verse) {
-        return sendMessage(senderId, { text: "🥺 𝗦𝗼𝗿𝗿𝘆, 𝗜 𝗰𝗼𝘂𝗹𝗱𝗻'𝘁 𝗳𝗶𝗻𝗱 𝗮 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲." }, pageAccessToken);
-      }
+    const input = (args.join(' ') || 'hello').trim();
+    await handleChatResponse(senderId, input, pageAccessToken);
+  },
+};
 
-      sendMessage(senderId, { text: `📖 𝗛𝗲𝗿𝗲 𝗶𝘀 𝘁𝗵𝗲 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲:\n\n${verse}` }, pageAccessToken);
-    } catch (error) {
-      console.error(error);
-      sendMessage(senderId, { text: `❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱: ${error.message}` }, pageAccessToken);
+const handleChatResponse = async (senderId, input, pageAccessToken) => {
+  const apiUrl = `https://jerome-web.onrender.com/service/api/gpt4o-chat?message=${encodeURIComponent(input)}`;
+
+  try {
+    const { data: { response } } = await axios.get(apiUrl);
+
+    const parts = [];
+    for (let i = 0; i < response.length; i += 1999) {
+      parts.push(response.substring(i, i + 1999));
     }
+
+    for (const part of parts) {
+      const formattedMessage = `${part}`;
+      await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
+    }
+  } catch (error) {
+    console.error('Error reaching the API:', error);
+    await sendError(senderId, 'An error occurred while trying to reach the API.', pageAccessToken);
   }
+};
+
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  const formattedMessage = `${errorMessage}`;
+  await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

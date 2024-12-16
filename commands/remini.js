@@ -16,23 +16,26 @@ module.exports = {
     }
 
     // Notify the user that the enhancement is in progress
-    sendMessage(senderId, { text: "⌛ 𝗬𝗼𝘂𝗿 𝗽𝗵𝗼𝘁𝗼 𝗶𝘀 𝗯𝗲𝗶𝗻𝗴 𝗲𝗻𝗵𝗮𝗻𝗰𝗲𝗱. 𝗣𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...." }, pageAccessToken);
+    sendMessage(senderId, { text: "⌛ Enhancing image, please wait..." }, pageAccessToken);
 
     try {
       // Fetch the enhanced image from the API
-      const response = await axios.get(`https://ccexplorerapisjonell.vercel.app/api/remini?imageUrl=${encodeURIComponent(imageUrl)}`);
-      const processedImageURL = response.data.image_data;
+      const upscaleUrl = `https://ccprojectapis.ddns.net/api/upscale?url=${encodeURIComponent(imageUrl)}`;
+      const response = await axios.get(upscaleUrl, { responseType: "arraybuffer" });
+      const imageBuffer = Buffer.from(response.data, "utf-8");
+
+      // Create a base64-encoded data URI for the enhanced image
+      const base64Image = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
 
       // Send the enhanced image back to the user
       await sendMessage(senderId, {
         attachment: {
           type: "image",
           payload: {
-            url: processedImageURL
+            url: base64Image
           }
         }
       }, pageAccessToken);
-
     } catch (error) {
       console.error("❌ Error processing image:", error.message);
       await sendMessage(senderId, {

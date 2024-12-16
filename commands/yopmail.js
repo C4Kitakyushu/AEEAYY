@@ -4,8 +4,8 @@ const axios = require('axios');
 module.exports = {
   name: "yopmail",
   description: "generate YOPMail email, check inbox, and read messages.",
-  usage: "yopmail <generate|inbox|read> [options]",
-  category: "Tools ⚒️",
+  usage: "yopmail <gen|inbox|read> [options]",
+  author: "Rhy",
 
   async execute(senderId, args, pageAccessToken) {
     if (args.length === 0) {

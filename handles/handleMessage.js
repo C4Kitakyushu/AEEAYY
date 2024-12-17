@@ -101,11 +101,11 @@ if (messageText.startsWith('geminiv3')) {
 }
 
     // Handling "upscale" command
-if (messageText === 'upscales') {
+if (messageText === 'upscale') {
   const lastImage = lastImageByUser.get(senderId);
   if (lastImage) {
     try {
-      await commands.get('upscales').execute(senderId, [], pageAccessToken, lastImage);
+      await commands.get('upscale').execute(senderId, [], pageAccessToken, lastImage);
       lastImageByUser.delete(senderId); // Remove the image from memory after processing
     } catch (error) {
       await sendMessage(senderId, { text: '❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗽𝗿𝗼𝗰𝗲𝘀𝘀𝗶𝗻𝗴 𝘁𝗵𝗲 𝗶𝗺𝗮𝗴𝗲.' }, pageAccessToken);

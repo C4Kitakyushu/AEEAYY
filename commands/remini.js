@@ -2,7 +2,7 @@ const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: "remini",
+  name: "upscale",
   description: "Enhanced photo",
   author: "Jonell Magallanes",
   usage: "Reply to an image with 'remini' to enhance it",

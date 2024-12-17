@@ -15,27 +15,24 @@ module.exports = {
       }, pageAccessToken);
     }
 
-    // Notify the user that the enhancement is in progress
+    // Notify the user that enhancement is in progress
     sendMessage(senderId, { text: "⌛ Enhancing image, please wait..." }, pageAccessToken);
 
     try {
       // Fetch the enhanced image from the API
-      const upscaleUrl = `https://ccprojectapis.ddns.net/api/upscale?url=${encodeURIComponent(imageUrl)}`;
-      const response = await axios.get(upscaleUrl, { responseType: "arraybuffer" });
-      const imageBuffer = Buffer.from(response.data, "utf-8");
+      const response = await axios.get(`https://ccprojectapis.ddns.net/api/upscale?url=${encodeURIComponent(imageUrl)}`);
+      const processedImageURL = response.data.response;
 
-      // Create a base64-encoded data URI for the enhanced image
-      const base64Image = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
-
-      // Send the enhanced image back to the user
+      // Send the enhanced image URL back to the user
       await sendMessage(senderId, {
         attachment: {
           type: "image",
           payload: {
-            url: base64Image
+            url: processedImageURL
           }
         }
       }, pageAccessToken);
+
     } catch (error) {
       console.error("❌ Error processing image:", error.message);
       await sendMessage(senderId, {

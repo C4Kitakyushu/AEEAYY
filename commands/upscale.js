@@ -2,7 +2,7 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'upscale',
+  name: 'up',
   description: 'upscale an image.',
   author: 'Harith',
 

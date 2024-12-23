@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲..." }, pageAccessToken);
 
     try {
-      const response = await axios.get('https://aryanchauhanapi.onrender.com/api/bible');
+      const response = await axios.get('https://mekumi-rest-api.onrender.com/api/bible?');
       const { verse } = response.data;
 
       if (!verse) {

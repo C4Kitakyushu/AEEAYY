@@ -8,7 +8,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     // Validate input arguments
     if (!args || !Array.isArray(args) || args.length === 0) {
-      await sendMessage(senderId, { text: '❌ Please provide the text for the billboard.' }, pageAccessToken);
+      await sendMessage(senderId, { text: '❌ Please provide the text for the canvas.' }, pageAccessToken);
       return;
     }
 
@@ -28,7 +28,7 @@ module.exports = {
     } catch (error) {
       // Log the error and send a failure message
       console.error('Error:', error);
-      await sendMessage(senderId, { text: '⚠️ Error: Unable to generate the billboard image.' }, pageAccessToken);
+      await sendMessage(senderId, { text: '⚠️ Error: Unable to generate the canvas image.' }, pageAccessToken);
     }
   }
 };

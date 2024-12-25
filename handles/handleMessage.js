@@ -217,6 +217,26 @@ if (messageText === 'remini') {
   return;
 }
 
+if (messageText === 'zombie') {
+  const lastImage = lastImageByUser.get(senderId);
+  const mediaToUpload = lastImage;
+
+  if (mediaToUpload) {
+    try {
+      await commands.get('zombie').execute(senderId, [], pageAccessToken, mediaToUpload);
+      lastImageByUser.delete(senderId);
+    } catch (error) {
+      await sendMessage(senderId, {
+        text: '❌ An error occurred while processing your request. Please try again.',
+      }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, {
+      text: '❌ Please send an image first, then type "zombie" to transform it.',
+    }, pageAccessToken);
+  }
+  return;
+}
 
     // Other command processing logic....    let commandName, args;
     if (messageText.startsWith(prefix)) {

@@ -76,6 +76,26 @@ if (messageText.startsWith('ai3')) {
   return;
 }
 
+if (messageText === 'imgbb') {
+  const lastImage = lastImageByUser.get(senderId);
+  const lastVideo = lastVideoByUser.get(senderId);
+  const mediaToUpload = lastImage || lastVideo;
+
+  if (mediaToUpload) {
+    try {
+      await commands.get('imgbb').execute(senderId, [], pageAccessToken, mediaToUpload);
+      lastImageByUser.delete(senderId);
+      lastVideoByUser.delete(senderId);
+    } catch (error) {
+      await sendMessage(senderId, { text: '❌ An error occurred while processing your request. Please try again later.' }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, {
+      text: '❌ Please send an image or video first, then type "imgbb" to upload and get the link.',
+    }, pageAccessToken);
+  }
+  return;
+}
 
 // Handling "geminiv3" command
 if (messageText.startsWith('geminiv3')) {

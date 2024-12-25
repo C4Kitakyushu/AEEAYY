@@ -1,45 +1,29 @@
-const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'test',
-  description: 'Interact with the AI assistant',
-  usage: 'gpt4 [your message]',
-  author: 'coffee',
-
-  async execute(senderId, args) {
-    const pageAccessToken = token;
-
-    const input = (args.join(' ') || 'hello').trim();
-    await handleChatResponse(senderId, input, pageAccessToken);
-  },
-};
-
-const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = `https://jerome-web.onrender.com/service/api/gpt4o-chat?message=${encodeURIComponent(input)}`;
-
-  try {
-    const { data: { response } } = await axios.get(apiUrl);
-
-    const parts = [];
-    for (let i = 0; i < response.length; i += 1999) {
-      parts.push(response.substring(i, i + 1999));
+  description: 'Generate a Facebook cover image using the Canvas API.',
+  usage: 'fbcover <name> <subname> <sdt> <address> <email> <color>',
+  author: 'developer',
+  async execute(senderId, args, pageAccessToken) {
+    if (!args || !Array.isArray(args) || args.length < 6) {
+      await sendMessage(senderId, { text: '❌ Please provide all necessary details: name | subname | sdt | address | email | color' }, pageAccessToken);
+      return;
     }
 
-    for (const part of parts) {
-      const formattedMessage = `${part}`;
-      await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
+    const [name, subname, sdt, address, email, color] = args;
+    const apiUrl = `https://api.joshweb.click/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(subname)}&sdt=${encodeURIComponent(sdt)}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&uid=${encodeURIComponent(senderId)}&color=${encodeURIComponent(color)}`;
+
+    try {
+      await sendMessage(senderId, { 
+        attachment: { 
+          type: 'image', 
+          payload: { url: apiUrl } 
+        } 
+      }, pageAccessToken);
+    } catch (error) {
+      console.error('Error:', error);
+      await sendMessage(senderId, { text: 'Error: Could not generate the Facebook cover image.' }, pageAccessToken);
     }
-  } catch (error) {
-    console.error('Error reaching the API:', error);
-    await sendError(senderId, 'An error occurred while trying to reach the API.', pageAccessToken);
   }
-};
-
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  const formattedMessage = `${errorMessage}`;
-  await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

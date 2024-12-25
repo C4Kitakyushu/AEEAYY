@@ -1,45 +1,47 @@
+const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const axios = require("axios");
+const fs = require('fs');
+
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'tests',
-  description: 'fbcover <name> <gender> <birthday> <love> <follower> <location> <hometown>',
-  usage: 'fbcover <name> <gender> <birthday> <love> <follower> <location> <hometown>',
-  author: 'developer',
-  async execute(senderId, args, pageAccessToken) {
-    if (!args || !Array.isArray(args) || args.length < 7) {
-      await sendMessage(senderId, {
-        text: '❌ Please provide all required parameters: name, gender, birthday, love, follower, location, hometown.',
-      }, pageAccessToken);
-      return;
-    }
+  description: 'Interact with Lily AI',
+  usage: 'lily [your message]',
+  author: 'coffee',
 
-    const [name, gender, birthday, love, follower, location, hometown] = args;
+  async execute(senderId, args) {
+    const pageAccessToken = token;
 
-    // Retain the profile picture URL
-    const userProfileUrl = `https://graph.facebook.com/${senderId}/picture?type=large`;
-
-    try {
-      // Generate the API URL
-      const apiUrl = `https://api.joshweb.click/canvas/fbcoverv7?uid=${senderId}&name=${encodeURIComponent(name)}&gender=${encodeURIComponent(gender)}&birthday=${encodeURIComponent(birthday)}&love=${encodeURIComponent(love)}&follower=${encodeURIComponent(follower)}&location=${encodeURIComponent(location)}&hometown=${encodeURIComponent(hometown)}`;
-
-      // Notify the user that the cover photo is being generated
-      await sendMessage(senderId, {
-        text: 'Generating Facebook cover photo, please wait...',
-      }, pageAccessToken);
-
-      // Send the generated Facebook cover photo
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'image',
-          payload: { url: apiUrl },
-        },
-      }, pageAccessToken);
-    } catch (error) {
-      console.error('Error:', error);
-      await sendMessage(senderId, {
-        text: 'Error: Could not generate the Facebook cover image.',
-      }, pageAccessToken);
-    }
+    const input = (args.join(' ') || 'hello').trim();
+    await handleChatResponse(senderId, input, pageAccessToken);
   },
+};
+
+const handleChatResponse = async (senderId, input, pageAccessToken) => {
+  const systemRole = 'You are Lily AI, a helpful and friendly assistant.';
+  const prompt = `${systemRole}\n${input}`;
+  const apiUrl = `http://sgp1.hmvhostings.com:25743/lily?q=${encodeURIComponent(prompt)}&uid=${senderId}`;
+
+  try {
+    const { data: { response } } = await axios.get(apiUrl);
+
+    const parts = [];
+    for (let i = 0; i < response.length; i += 1999) {
+      parts.push(response.substring(i, i + 1999));
+    }
+
+    for (const part of parts) {
+      const formattedMessage = `${part}`;
+      await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
+    }
+  } catch (error) {
+    console.error('Error reaching the API:', error);
+    await sendError(senderId, 'An error occurred while trying to reach the API.', pageAccessToken);
+  }
+};
+
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  const formattedMessage = `${errorMessage}`;
+  await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
 };

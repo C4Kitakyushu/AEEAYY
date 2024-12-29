@@ -7,7 +7,7 @@ module.exports = {
   usage: 'get cdp pics',
   author: 'developer',
   async execute(senderId, args, pageAccessToken) {
-    const apiUrl = 'https://aryanchauhanapi.onrender.com/v1/cdp/get';
+    const apiUrl = 'https://aryanchauhanapi2.onrender.com/v1/cdp/get';
 
     try {
       // Send a message indicating that the image is being fetched

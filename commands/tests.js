@@ -2,7 +2,7 @@ const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: "tests",
+  name: "tint",
   description: "Generate AI response using the Gemini-Pro API",
   author: "developer",
 

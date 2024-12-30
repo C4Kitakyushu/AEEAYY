@@ -31,18 +31,14 @@ module.exports = {
       const apiUrl = "https://jerome-web.gleeze.com/service/api/gemini-pro";
       const response = await handleGeminiRequest(apiUrl, userPrompt);
 
-      if (response.error) {
-        throw new Error(response.error.message || "API error occurred.");
+      if (!response || !response.response) {
+        throw new Error("No valid response received from the API.");
       }
 
       const result = response.response;
 
-      // Handle the result and send back to the user
-      if (result) {
-        await sendConcatenatedMessage(senderId, result, pageAccessToken);
-      } else {
-        throw new Error("No response received from the API.");
-      }
+      // Send the result back to the user
+      await sendConcatenatedMessage(senderId, result, pageAccessToken);
     } catch (error) {
       console.error("Error in Gemini command:", error);
       sendMessage(
@@ -55,14 +51,21 @@ module.exports = {
 };
 
 async function handleGeminiRequest(apiUrl, prompt) {
-  const { data } = await axios.get(apiUrl, {
-    params: {
-      prompt: prompt,
-      stream: false
-    }
-  });
+  try {
+    const { data } = await axios.get(apiUrl, {
+      params: {
+        prompt: prompt,
+        stream: false
+      },
+      timeout: 10000 // Add a timeout to prevent hanging requests
+    });
 
-  return data;
+    console.log("API Response:", data); // Log the API response for debugging
+    return data;
+  } catch (error) {
+    console.error("Error during API request:", error.response?.data || error.message);
+    throw new Error("Failed to fetch data from the Gemini-Pro API.");
+  }
 }
 
 async function sendConcatenatedMessage(senderId, text, pageAccessToken) {

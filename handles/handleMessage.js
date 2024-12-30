@@ -217,13 +217,13 @@ if (messageText === 'remini') {
   return;
 }
 
-if (messageText.startsWith('tests')) {
+if (messageText.startsWith('tint')) {
   const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
   const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
 
   try {
     // Execute the "" command
-    await commands.get('test').execute(senderId, args, pageAccessToken, event, lastImage);
+    await commands.get('tint').execute(senderId, args, pageAccessToken, event, lastImage);
 
     // Clear the stored image after processing
     lastImageByUser.delete(senderId);

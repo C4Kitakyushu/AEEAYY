@@ -1,47 +1,89 @@
-const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
+const axios = require("axios");
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: 'tests',
-  description: 'Interact with Lily AI',
-  usage: 'lily [your message]',
-  author: 'coffee',
+  name: "tests",
+  description: "Generate AI response using the Gemini-Pro API",
+  author: "developer",
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
+  async execute(senderId, args, pageAccessToken, event, imageUrl) {
+    const userPrompt = args.join(" ").trim();
 
-    const input = (args.join(' ') || 'hello').trim();
-    await handleChatResponse(senderId, input, pageAccessToken);
-  },
-};
-
-const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const systemRole = 'You are Lily AI, a helpful and friendly assistant.';
-  const prompt = `${systemRole}\n${input}`;
-  const apiUrl = `http://sgp1.hmvhostings.com:25743/lily?q=${encodeURIComponent(prompt)}&uid=${senderId}`;
-
-  try {
-    const { data: { response } } = await axios.get(apiUrl);
-
-    const parts = [];
-    for (let i = 0; i < response.length; i += 1999) {
-      parts.push(response.substring(i, i + 1999));
+    if (!userPrompt) {
+      return sendMessage(
+        senderId,
+        {
+          text: `❌ Please provide a prompt for processing.`
+        },
+        pageAccessToken
+      );
     }
 
-    for (const part of parts) {
-      const formattedMessage = `${part}`;
-      await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
+    sendMessage(
+      senderId,
+      {
+        text: "⌛ Processing your request, please wait..."
+      },
+      pageAccessToken
+    );
+
+    try {
+      const apiUrl = "https://jerome-web.gleeze.com/service/api/gemini-pro";
+      const response = await handleGeminiRequest(apiUrl, userPrompt);
+
+      if (response.error) {
+        throw new Error(response.error.message || "API error occurred.");
+      }
+
+      const result = response.response;
+
+      // Handle the result and send back to the user
+      if (result) {
+        await sendConcatenatedMessage(senderId, result, pageAccessToken);
+      } else {
+        throw new Error("No response received from the API.");
+      }
+    } catch (error) {
+      console.error("Error in Gemini command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
     }
-  } catch (error) {
-    console.error('Error reaching the API:', error);
-    await sendError(senderId, 'An error occurred while trying to reach the API.', pageAccessToken);
   }
 };
 
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  const formattedMessage = `${errorMessage}`;
-  await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
-};
+async function handleGeminiRequest(apiUrl, prompt) {
+  const { data } = await axios.get(apiUrl, {
+    params: {
+      prompt: prompt,
+      stream: false
+    }
+  });
+
+  return data;
+}
+
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+  const maxMessageLength = 2000;
+
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+
+    for (const message of messages) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
+  }
+}
+
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+}

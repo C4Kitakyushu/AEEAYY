@@ -1,92 +1,55 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: "tint",
-  description: "Generate AI response using the Gemini-Pro API",
-  author: "developer",
+  name: 'tests',
+  description: 'Search for videos using the Pinayflix API',
+  usage: 'pinaysearch <search text>',
+  author: 'developer',
 
-  async execute(senderId, args, pageAccessToken, event, imageUrl) {
-    const userPrompt = args.join(" ").trim();
-
-    if (!userPrompt) {
-      return sendMessage(
-        senderId,
-        {
-          text: `❌ Please provide a prompt for processing.`
-        },
-        pageAccessToken
-      );
+  execute: async (senderId, args) => {
+    const pageAccessToken = token;
+    const searchQuery = args.join(' ');
+    if (!searchQuery) {
+      return sendMessage(senderId, { text: 'Usage: pinaysearch <search text>' }, pageAccessToken);
     }
 
-    sendMessage(
-      senderId,
-      {
-        text: "⌛ Processing your request, please wait..."
-      },
-      pageAccessToken
-    );
+    const apiUrl = `http://sgp1.hmvhostings.com:25743/pinay?search=${encodeURIComponent(searchQuery)}&page=2`;
 
     try {
-      const apiUrl = "https://jerome-web.gleeze.com/service/api/gemini-pro";
-      const response = await handleGeminiRequest(apiUrl, userPrompt);
+      const { data } = await axios.get(apiUrl);
 
-      if (!response || !response.response) {
-        throw new Error("No valid response received from the API.");
+      if (!data || data.length === 0) {
+        return sendMessage(senderId, { text: 'No videos found for the given search query.' }, pageAccessToken);
       }
 
-      const result = response.response;
+      const videoData = data[0]; // Get the first video as a sample
+      const message = `🎥 **Search Result** 🎥\n\n` +
+        `**Title**: ${videoData.title}\n` +
+        `🔗 **Link**: ${videoData.link}\n` +
+        `📄 **Preview**: ${videoData.img}\n\n` +
+        `Enjoy watching!`;
 
-      // Send the result back to the user
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
+      sendMessage(senderId, { text: message }, pageAccessToken);
+
+      const videoMessage = {
+        attachment: {
+          type: 'video',
+          payload: {
+            url: videoData.video,
+            is_reusable: true
+          }
+        }
+      };
+
+      sendMessage(senderId, videoMessage, pageAccessToken);
+
     } catch (error) {
-      console.error("Error in Gemini command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
+      console.error('Error:', error);
+      sendMessage(senderId, { text: 'An error occurred while processing the request.' }, pageAccessToken);
     }
-  }
+  },
 };
-
-async function handleGeminiRequest(apiUrl, prompt) {
-  try {
-    const { data } = await axios.get(apiUrl, {
-      params: {
-        prompt: prompt,
-        stream: false
-      },
-      timeout: 10000 // Add a timeout to prevent hanging requests
-    });
-
-    console.log("API Response:", data); // Log the API response for debugging
-    return data;
-  } catch (error) {
-    console.error("Error during API request:", error.response?.data || error.message);
-    throw new Error("Failed to fetch data from the Gemini-Pro API.");
-  }
-}
-
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-}
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}

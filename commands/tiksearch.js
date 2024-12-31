@@ -17,7 +17,7 @@ module.exports = {
       return sendMessage(senderId, { text: 'Usage: tiksearch <search text>' }, pageAccessToken);
     }
 
-    const apiUrl = `https://apis-markdevs69v2.onrender.com/new/api/tiksearch?search=${encodeURIComponent(searchQuery)}`;
+    const apiUrl = `https://markdevs-last-api-vtjp.onrender.com/api/tiksearch?search=${encodeURIComponent(searchQuery)}`;
 
     try {
       const { data } = await axios.get(apiUrl);

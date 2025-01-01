@@ -16,26 +16,22 @@ module.exports = {
       return sendMessage(senderId, { text: 'Usage: pinaysearch <search text> [page]' }, pageAccessToken);
     }
 
-    // Extract search query and optional page number
+    // Extract search query and optional `${page}`
     const searchQuery = args.slice(0, -1).join(' '); // Everything except the last argument
-    const page = parseInt(args[args.length - 1], 10); // Last argument as page number
-    const isPageNumber = !isNaN(page);
-    const apiPage = isPageNumber ? page : 1;
-    const query = isPageNumber ? searchQuery : args.join(' ');
-
-    const apiUrl = `http://sgp1.hmvhostings.com:25743/pinay?search=${encodeURIComponent(query)}&page=${apiPage}`;
+    const page = args[args.length - 1]; // Assume the last argument is `${page}`
+    const apiUrl = `http://sgp1.hmvhostings.com:25743/pinay?search=${encodeURIComponent(searchQuery)}&page=${page}`;
 
     try {
       const { data } = await axios.get(apiUrl);
 
       if (!data || data.length === 0) {
-        return sendMessage(senderId, { text: `No videos found for page ${apiPage} and query "${query}".` }, pageAccessToken);
+        return sendMessage(senderId, { text: `No videos found for page ${page} and query "${searchQuery}".` }, pageAccessToken);
       }
 
       // Only use the first video from the results
       const video = data[0];
 
-      const message = `🎥 **Search Result (Page ${apiPage})** 🎥\n\n` +
+      const message = `🎥 **Search Result (Page ${page})** 🎥\n\n` +
         `**Title**: ${video.title}\n` +
         `🔗 **Link**: ${video.link}\n` +
         `🖼 **Preview Image**: ${video.img}\n\n` +

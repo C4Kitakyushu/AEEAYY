@@ -6,51 +6,56 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'tests',
-  description: 'Search for videos using the Pinayflix API',
-  usage: 'pinaysearch <search text>',
+  description: 'Search for videos using the Pinayflix API with pagination',
+  usage: 'pinaysearch <search text> [page]',
   author: 'developer',
 
   execute: async (senderId, args) => {
     const pageAccessToken = token;
-    const searchQuery = args.join(' ');
-    
-    if (!searchQuery) {
-      return sendMessage(senderId, { text: 'Usage: pinaysearch <search text>' }, pageAccessToken);
+    if (args.length === 0) {
+      return sendMessage(senderId, { text: 'Usage: pinaysearch <search text> [page]' }, pageAccessToken);
     }
 
-    const apiUrl = `http://sgp1.hmvhostings.com:25743/pinay?search=${encodeURIComponent(searchQuery)}&page=2`;
+    // Extract search query and optional page number
+    const searchQuery = args.slice(0, -1).join(' '); // Everything except the last argument
+    const page = parseInt(args[args.length - 1], 10); // Last argument as page number
+    const isPageNumber = !isNaN(page);
+    const apiPage = isPageNumber ? page : 1;
+    const query = isPageNumber ? searchQuery : args.join(' ');
+
+    const apiUrl = `http://sgp1.hmvhostings.com:25743/pinay?search=${encodeURIComponent(query)}&page=${apiPage}`;
 
     try {
       const { data } = await axios.get(apiUrl);
 
       if (!data || data.length === 0) {
-        return sendMessage(senderId, { text: 'No videos found for the given search query.' }, pageAccessToken);
+        return sendMessage(senderId, { text: `No videos found for page ${apiPage} and query "${query}".` }, pageAccessToken);
       }
 
-      // Build response messages for each video
-      for (const video of data) {
-        const message = `🎥 **Search Result** 🎥\n\n` +
-          `**Title**: ${video.title}\n` +
-          `🔗 **Link**: ${video.link}\n` +
-          `🖼 **Preview Image**: ${video.img}\n\n` +
-          `Enjoy watching!`;
+      // Only use the first video from the results
+      const video = data[0];
 
-        // Send text message
-        await sendMessage(senderId, { text: message }, pageAccessToken);
+      const message = `🎥 **Search Result (Page ${apiPage})** 🎥\n\n` +
+        `**Title**: ${video.title}\n` +
+        `🔗 **Link**: ${video.link}\n` +
+        `🖼 **Preview Image**: ${video.img}\n\n` +
+        `Enjoy watching!`;
 
-        // Send video message
-        const videoMessage = {
-          attachment: {
-            type: 'video',
-            payload: {
-              url: video.video,
-              is_reusable: true
-            }
+      // Send text message
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+
+      // Send video message
+      const videoMessage = {
+        attachment: {
+          type: 'video',
+          payload: {
+            url: video.video,
+            is_reusable: true
           }
-        };
+        }
+      };
 
-        await sendMessage(senderId, videoMessage, pageAccessToken);
-      }
+      await sendMessage(senderId, videoMessage, pageAccessToken);
 
     } catch (error) {
       console.error('Error:', error.message);

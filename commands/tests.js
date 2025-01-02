@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: 'tes',
-  description: 'fbreaction <token> <postLink> <reaction>.',
+  description: 'fbreaction <token> <postLink> <reaction>',
   author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const userToken = args[0];
@@ -23,9 +23,12 @@ module.exports = {
           react: reaction
         }
       });
+
+      // Handle successful response
       console.log('Response:', response.data);
       sendMessage(senderId, { text: `Reaction "${reaction}" has been successfully posted! ✅` }, pageAccessToken);
     } catch (error) {
+      // Handle error
       console.error('Error:', error);
       sendMessage(senderId, { text: 'Failed to send the reaction. Please try again later.' }, pageAccessToken);
     }

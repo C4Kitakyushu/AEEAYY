@@ -1,7 +1,7 @@
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'fbcover',
+  name: 'tes',
   description: 'Generate a Facebook cover image using user details.',
   usage: 'fbcover <name> <lastname> <phone> <country> <email> <color>',
   author: 'KA TIAN JHYY',
@@ -14,7 +14,7 @@ module.exports = {
     }
 
     const [name, lastname, phone, country, email, color] = args;
-    const apiUrl = `https://deku-rest-apis.ooguy.com/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(lastname)}&sdt=${encodeURIComponent(phone)}&address=${encodeURIComponent(country)}&email=${encodeURIComponent(email)}&uid=${encodeURIComponent(senderId)}&color=${encodeURIComponent(color)}`;
+    const apiUrl = `https:/api.joshweb.click/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(lastname)}&sdt=${encodeURIComponent(phone)}&address=${encodeURIComponent(country)}&email=${encodeURIComponent(email)}&uid=${encodeURIComponent(senderId)}&color=${encodeURIComponent(color)}`;
 
     try {
       // Send the Facebook cover image as an attachment

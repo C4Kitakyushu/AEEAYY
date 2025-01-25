@@ -23,7 +23,7 @@ module.exports = {
         if (!inbox.length) return sendMessage(senderId, { text: 'Inbox is empty.' }, pageAccessToken);
 
         const { id, from, subject, date } = inbox[0];
-        const { textBody } = (await axios.get(`https://www.1secmail.com/api/v1/?action=readMessage&login=${username}&domain=${domain}&id=${id}`)).data;
+        const { textBody } = (await axios.get(`https://betadash-uploader.vercel.app/tempmail/message?email=${username}&domain=${domain}&id=${id}`)).data;
         return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📧 From: ${from}\n📄 Subject: ${subject}\n🗓️ Date: ${date}\n━━━━━━━━━━━━━━━━` }, pageAccessToken);
       } catch {
         return sendMessage(senderId, { text: 'Error: Unable to fetch inbox or email content.' }, pageAccessToken);

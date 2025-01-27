@@ -26,7 +26,7 @@ module.exports = {
 // Function to retrieve Facebook ID from profile URL
 const handleFindFacebookId = async (senderId, profileUrl, pageAccessToken) => {
   try {
-    const res = await axios.get('https://api.joshweb.click/api/findid', {
+    const res = await axios.get('https://api.zetsu.xyz/api/findid', {
       params: { url: profileUrl },
     });
 

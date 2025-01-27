@@ -26,7 +26,7 @@ module.exports = {
         }
       }
 
-      const apiUrl = `https://api.joshweb.click/gemini`;
+      const apiUrl = `https://api.zetsu.xyz/gemini`;
       const response = await handleImageRecognition(apiUrl, userPrompt, imageUrl);
       const result = response.gemini;
 

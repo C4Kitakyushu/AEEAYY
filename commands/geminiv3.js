@@ -35,7 +35,7 @@ module.exports = {
       }
 
       const textApiUrl = "http://sgp1.hmvhostings.com:25721/gemini";
-      const imageRecognitionUrl = "https://api.joshweb.click/gemini";
+      const imageRecognitionUrl = "https://api.zetsu.xyz/gemini";
 
       const useImageRecognition =
         imageUrl || 

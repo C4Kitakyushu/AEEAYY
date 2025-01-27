@@ -22,7 +22,7 @@ module.exports = {
     }
 
     const encodedEmoji = encodeURIComponent(emoji);
-    const apiUrl = `https://api.joshweb.click/emoji2gif?q=${encodedEmoji}`;
+    const apiUrl = `https://api.zetsu.xyz/emoji2gif?q=${encodedEmoji}`;
 
     await sendMessage(senderId, { text: '⌛ 𝗖𝗼𝗻𝘃𝗲𝗿𝘁𝗶𝗻𝗴 𝗘𝗺𝗼𝗷𝗶 𝘁𝗼 𝗚𝗜𝗙, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
 

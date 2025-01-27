@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: '🙏 Fetching a random Bible verse, please wait...' }, pageAccessToken);
 
     try {
-      const response = await axios.get('https://api.joshweb.click/bible');
+      const response = await axios.get('https://api.zetsu.xyz/bible');
       const verse = response.data.verse;
       const reference = response.data.reference;
 

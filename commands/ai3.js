@@ -1,9 +1,9 @@
 const axios = require("axios");
-const { sendMessage } = require('../handles/sendMessage');
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "ai3",
-  description: "recognize or generate images using ai",
+  description: "Recognize or generate images using AI",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
@@ -12,18 +12,14 @@ module.exports = {
     if (!userPrompt && !imageUrl) {
       return sendMessage(
         senderId,
-        {
-          text: `❌ Provide a description for image generation or an image URL for recognition.`
-        },
+        { text: "❌ Provide a description for image generation or an image URL for recognition." },
         pageAccessToken
       );
     }
 
     sendMessage(
       senderId,
-      {
-        text: "⌛ Processing your request, please wait..."
-      },
+      { text: "⌛ Processing your request, please wait..." },
       pageAccessToken
     );
 
@@ -36,29 +32,23 @@ module.exports = {
         }
       }
 
-      const apiUrl = "https://kaiz-apis.gleeze.com/api/gpt-4o-pro";
+      const apiUrl = "http://sgp1.hmvhostings.com:25721/geminiv";
       const response = await handleAI3Request(apiUrl, userPrompt, imageUrl);
 
-      const result = response.response;
+      const result = response.response || "";
 
-      if (result.includes('TOOL_CALL: generateImage')) {
-        const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
-
+      if (result.includes("TOOL_CALL: generateImage")) {
+        const imageUrlMatch = result.match(/\!.*?(https:\/\/.*?)/);
         if (imageUrlMatch && imageUrlMatch[1]) {
           const imageUrl = imageUrlMatch[1];
           await sendMessage(senderId, {
-            attachment: {
-              type: 'image',
-              payload: { url: imageUrl }
-            }
+            attachment: { type: "image", payload: { url: imageUrl } }
           }, pageAccessToken);
           return;
         }
       }
 
-      const message = `${result}`;
-
-      await sendConcatenatedMessage(senderId, message, pageAccessToken);
+      await sendConcatenatedMessage(senderId, result, pageAccessToken);
 
     } catch (error) {
       console.error("Error in AI3 command:", error);
@@ -71,13 +61,9 @@ module.exports = {
   }
 };
 
-async function handleAI3Request(apiUrl, query, imageUrl) {
+async function handleAI3Request(apiUrl, prompt, imageUrl) {
   const { data } = await axios.get(apiUrl, {
-    params: {
-      q: query || "",
-      uid: "conversational",
-      imageUrl: imageUrl || ""
-    }
+    params: { prompt: prompt || "", image_url: imageUrl || "" }
   });
 
   return data;
@@ -100,7 +86,6 @@ async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
 
   if (text.length > maxMessageLength) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
-
     for (const message of messages) {
       await new Promise(resolve => setTimeout(resolve, 500));
       await sendMessage(senderId, { text: message }, pageAccessToken);

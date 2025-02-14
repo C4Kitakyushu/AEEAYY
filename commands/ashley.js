@@ -2,33 +2,29 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'ashley',
-  description: 'talk to ashley masarap',
-  usage: 'ashley <your message>',
+  name: 'deepseek',
+  description: 'Talk to DeepSeek AI',
+  usage: 'deepseek <your message>',
   author: 'developer',
   version: '1.0.0',
   async execute(senderId, args, pageAccessToken) {
-    const ashley = args.join(' ');
+    const query = args.join(' ');
 
-    if (!ashley) {
-      return sendMessage(senderId, { text: 'hello baby nigga😼' }, pageAccessToken);
+    if (!query) {
+      return sendMessage(senderId, { text: 'Please enter a message to send to DeepSeek AI.' }, pageAccessToken);
     }
 
-    const typingNotification = await sendMessage(senderId, { text: 'ۦۦ' }, pageAccessToken);
+    const typingNotification = await sendMessage(senderId, { text: 'Typing...' }, pageAccessToken);
 
-    const apiUrl = `https://markdevs-last-api-t48o.onrender.com/api/ashley?query=${encodeURIComponent(ashley)}`;
+    const apiUrl = `https://kaiz-apis.gleeze.com/api/deepseek-r1?ask=${encodeURIComponent(query)}`;
 
     try {
       const response = await axios.get(apiUrl);
-      const ashleyResponse = response.data.result || 'No response from Ashley.';
+      const aiResponse = response.data.result || 'No response from DeepSeek AI.';
 
-      const formattedResponse = 
-`${ashleyResponse}`;
-
-      await sendMessage(senderId, { text: formattedResponse }, pageAccessToken);
-
-    } catch (maasim) {
-      console.error('Error:', maasim);
+      await sendMessage(senderId, { text: aiResponse }, pageAccessToken);
+    } catch (error) {
+      console.error('Error:', error);
 
       await sendMessage(senderId, { text: '❌ An error occurred. Please try again later.' }, pageAccessToken);
     }

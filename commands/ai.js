@@ -1,41 +1,68 @@
-const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
+const axios = require("axios");
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: 'ai',
-  description: 'Chat with GPT-4',
-  usage: 'ai <your message>',
-  author: 'develoepr',
+  name: "ai",
+  description: "interact to ai",
+  author: "developer",
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
+  async execute(senderId, args, pageAccessToken) {
+    const userPrompt = args.join(" ").trim();
 
-    const input = (args.join(' ') || 'hello').trim();
-    await handleChatResponse(senderId, input, pageAccessToken);
-  },
-};
+    // Check if the user provided a prompt
+    if (!userPrompt) {
+      return sendMessage(
+        senderId,
+        { text: "❌ Please provide a question." },
+        pageAccessToken
+      );
+    }
 
-const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const systemRole = 'you are Hershey AI. an AI assistant.';
-  const prompt = `${systemRole}\n${input}`;
-  const apiUrl = `https://api.zetsu.xyz/gpt4?prompt=${encodeURIComponent(prompt)}&uid=${senderId}`;
+    try {
+      // Generate a random ID
+      const randomIDs = Math.floor(Math.random() * 9) + 1;
 
-  try {
-    const { data } = await axios.get(apiUrl);
-    const responseText = data.gpt4 || 'No response from the API.';
-    const formattedMessage = `${responseText}`;
+      // Construct the API URL with the user's prompt
+      const apiUrl = `https://ccprojectapis.ddns.net/api/gptconvo?ask=${encodeURIComponent(userPrompt)}&id=${randomIDs}`;
 
-    await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
-  } catch (error) {
-    console.error('Error reaching the API:', error);
-    await sendError(senderId, 'An error occurred while trying to reach the API.', pageAccessToken);
+      // Make the API request
+      const response = await axios.get(apiUrl);
+      const result = response.data.response || "No response from the AI.";
+
+      // Send the response back to the user
+      await sendConcatenatedMessage(senderId, result, pageAccessToken);
+    } catch (error) {
+      console.error("Error in AI command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
+    }
   }
 };
 
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  const formattedMessage = `${errorMessage}`;
-  await sendMessage(senderId, { text: formattedMessage }, pageAccessToken);
-};
+// Helper function to send long messages in chunks
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+  const maxMessageLength = 2000;
+
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 500)); // Delay to avoid rate limits
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
+  }
+}
+
+// Helper function to split long messages into chunks
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+}

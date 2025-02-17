@@ -17,6 +17,14 @@ module.exports = {
       );
     }
 
+    try {
+      // Show loading animation message
+      const loadingMessageId = await sendMessage(
+        senderId,
+        { text: "⏳ Gemini AI is generating a response, please wait..." },
+        pageAccessToken
+      );
+
       const API_KEY = "AIzaSyCRgVWxdX2sY9b4NdnXGn5P91vDwSWdpQM"; // Replace with your actual API key
       const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${API_KEY}`;
 

@@ -3,36 +3,40 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "ai",
-  description: "interact to ai",
+  description: "Interact with Gemini AI for text-based conversations.",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken) {
-    const userPrompt = args.join(" ").trim();
+    const userMessage = args.join(" ").trim();
 
-    // Check if the user provided a prompt
-    if (!userPrompt) {
+    if (!userMessage) {
       return sendMessage(
         senderId,
-        { text: "❌ Please provide a question." },
+        { text: "❌ Please provide a question for Gemini AI." },
         pageAccessToken
       );
     }
 
-    try {
-      // Generate a random ID
-      const randomIDs = Math.floor(Math.random() * 9) + 1;
+      const API_KEY = "AIzaSyCRgVWxdX2sY9b4NdnXGn5P91vDwSWdpQM"; // Replace with your actual API key
+      const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${API_KEY}`;
 
-      // Construct the API URL with the user's prompt
-      const apiUrl = `https://ccprojectapis.ddns.net/api/gptconvo?ask=${encodeURIComponent(userPrompt)}&id=${randomIDs}`;
+      // Send request to the API
+      const response = await axios.post(API_URL, {
+        contents: [{ role: "user", parts: [{ text: userMessage }] }]
+      });
 
-      // Make the API request
-      const response = await axios.get(apiUrl);
-      const result = response.data.response || "No response from the AI.";
+      const data = response.data;
+      if (!response.data || !data.candidates || !data.candidates[0].content.parts[0].text) {
+        throw new Error("No response from Gemini AI.");
+      }
 
-      // Send the response back to the user
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
+      // Extract response and format text
+      let aiResponse = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1");
+
+      // Send AI-generated response
+      await sendConcatenatedMessage(senderId, aiResponse, pageAccessToken);
     } catch (error) {
-      console.error("Error in AI command:", error);
+      console.error("❌ Error in Gemini command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },
@@ -48,9 +52,8 @@ async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
 
   if (text.length > maxMessageLength) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
-
     for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Delay to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 500));
       await sendMessage(senderId, { text: message }, pageAccessToken);
     }
   } else {
@@ -58,7 +61,7 @@ async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   }
 }
 
-// Helper function to split long messages into chunks
+// Helper function to split long messages
 function splitMessageIntoChunks(message, chunkSize) {
   const chunks = [];
   for (let i = 0; i < message.length; i += chunkSize) {

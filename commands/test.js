@@ -3,21 +3,20 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Generate AI responses or images based on user prompt",
+  description: "Recognize or generate images using AI",
   author: "developer",
 
-  async execute(senderId, args, pageAccessToken, event) {
-    if (!args || !Array.isArray(args) || args.length === 0) {
+  async execute(senderId, args, pageAccessToken, event, imageUrl) {
+    const userPrompt = args.join(" ").trim();
+
+    if (!userPrompt && !imageUrl) {
       return sendMessage(
         senderId,
-        { text: "❌ Please provide a prompt for AI." },
+        { text: "❌ Provide a description for image generation or an image URL for recognition." },
         pageAccessToken
       );
     }
 
-    const userPrompt = args.join(" ").trim();
-
-    // Notify the user that the request is being processed
     sendMessage(
       senderId,
       { text: "⌛ Processing your request, please wait..." },
@@ -25,65 +24,76 @@ module.exports = {
     );
 
     try {
-      // **Check if user wants to generate an image**
-      if (userPrompt.toLowerCase().startsWith("generate")) {
-        const imagePrompt = userPrompt.replace(/^generate\s+/i, "");
-        const imageUrl = `https://ccprojectapis.ddns.net/api/generate-art?prompt=${encodeURIComponent(imagePrompt)}`;
-
-        return sendMessage(
-          senderId,
-          {
-            attachment: {
-              type: "image",
-              payload: { url: imageUrl },
-            },
-          },
-          pageAccessToken
-        );
+      // Check if an image is replied to or attached
+      if (!imageUrl) {
+        if (event.message?.reply_to?.mid) {
+          imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
+        } else if (event.message?.attachments?.[0]?.type === "image") {
+          imageUrl = event.message.attachments[0].payload.url;
+        }
       }
 
-      // **Default AI Text Response Handling**
-      const apiUrl = `https://echoai.zetsu.xyz/ask?q=${encodeURIComponent(userPrompt)}`;
-      const response = await axios.get(apiUrl);
-      const result = response.data;
+      // API URL
+      const apiUrl = "https://kaiz-apis.gleeze.com/api/chipp-ai";
+      const response = await handleAIRequest(apiUrl, userPrompt, imageUrl);
 
-      if (!result || typeof result !== "string") {
-        throw new Error("Invalid response from AI.");
-      }
+      // Extract API response
+      const result = response.response;
 
-      // **Tool Call Handling**
+      // Check if the response includes an image generation tool call
       if (result.includes("TOOL_CALL: generateImage")) {
         const imageUrlMatch = result.match(/\!.*?(https:\/\/.*?)/);
 
         if (imageUrlMatch && imageUrlMatch[1]) {
           const imageUrl = imageUrlMatch[1];
-          return sendMessage(
+          await sendMessage(
             senderId,
             {
-              attachment: {
-                type: "image",
-                payload: { url: imageUrl },
-              },
+              attachment: { type: "image", payload: { url: imageUrl } }
             },
             pageAccessToken
           );
+          return;
         }
       }
 
-      // **Send AI Text Response**
+      // Send the text response
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
+
     } catch (error) {
-      console.error("Error in ai3 command:", error);
+      console.error("Error in AI3 command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },
         pageAccessToken
       );
     }
-  },
+  }
 };
 
-// **Helper Functions**
+// Function to handle API request
+async function handleAIRequest(apiUrl, query, imageUrl) {
+  const { data } = await axios.get(apiUrl, {
+    params: {
+      ask: query || "",
+      uid: "1",  // Using UID 1 as per API
+      imageUrl: imageUrl || ""
+    }
+  });
+
+  return data;
+}
+
+// Function to retrieve an image from a replied message
+async function getRepliedImage(mid, pageAccessToken) {
+  const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
+    params: { access_token: pageAccessToken }
+  });
+
+  return data?.data?.[0]?.image_data?.url || "";
+}
+
+// Function to send long messages in chunks
 async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   const maxMessageLength = 2000;
 
@@ -99,6 +109,7 @@ async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   }
 }
 
+// Function to split long messages
 function splitMessageIntoChunks(message, chunkSize) {
   const chunks = [];
   for (let i = 0; i < message.length; i += chunkSize) {

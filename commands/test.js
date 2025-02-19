@@ -1,102 +1,60 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: "test",
-  description: "Interact with CatGPT for AI-generated responses",
-  author: "developer",
+  name: 'test',
+  description: 'Search for YouTube videos and send multiple results',
+  usage: 'ytsearch <search text>',
+  author: 'Rized',
 
-  async execute(senderId, args, pageAccessToken, event, imageUrl) {
-    const userPrompt = args.join(" ").trim();
+  execute: async (senderId, args) => {
+    const pageAccessToken = token;
+    const searchQuery = args.join(' ');
 
-    if (!userPrompt && !imageUrl) {
-      return sendMessage(
-        senderId,
-        {
-          text: `❌ Please provide a query for CatGPT to respond to.`
-        },
-        pageAccessToken
-      );
+    if (!searchQuery) {
+      return sendMessage(senderId, { text: 'Usage: ytsearch <search text>' }, pageAccessToken);
     }
 
-    sendMessage(
-      senderId,
-      {
-        text: "⌛ Processing your request, please wait..."
-      },
-      pageAccessToken
-    );
+    const apiUrl = `https://kaiz-apis.gleeze.com/api/ytsearch?query=${encodeURIComponent(searchQuery)}`;
 
     try {
-      // Check if an image is attached or replied to
-      if (!imageUrl) {
-        if (event.message?.reply_to?.mid) {
-          imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
-        } else if (event.message?.attachments?.[0]?.type === "image") {
-          imageUrl = event.message.attachments[0].payload.url;
-        }
+      const { data } = await axios.get(apiUrl);
+
+      if (!data || !data.results || data.results.length === 0) {
+        return sendMessage(senderId, { text: '❌ No videos found for the given search query.' }, pageAccessToken);
       }
 
-      const apiUrl = "https://markdevs-last-api-p2y6.onrender.com/catgpt";
-      const response = await handleCatGPTRequest(apiUrl, userPrompt, imageUrl);
+      // Send multiple video results
+      for (const video of data.results) {
+        const message = `🎥 **YouTube Search Result** 🎥\n\n` +
+          `**Title**: ${video.title}\n` +
+          `🔗 **Link**: ${video.url}\n` +
+          `🖼 **Thumbnail**: ${video.thumbnail}\n\n` +
+          `Enjoy watching!`;
 
-      const result = response.response;
+        // Send text message
+        await sendMessage(senderId, { text: message }, pageAccessToken);
 
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
-
+        // Send video message (if a direct video link is available)
+        if (video.video_url) {
+          const videoMessage = {
+            attachment: {
+              type: 'video',
+              payload: {
+                url: video.video_url,
+                is_reusable: true
+              }
+            }
+          };
+          await sendMessage(senderId, videoMessage, pageAccessToken);
+        }
+      }
     } catch (error) {
-      console.error("Error in CatGPT command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
+      console.error('Error:', error.message);
+      sendMessage(senderId, { text: 'An error occurred while processing the request. Please try again later.' }, pageAccessToken);
     }
-  }
+  },
 };
-
-async function handleCatGPTRequest(apiUrl, query, imageUrl) {
-  const { data } = await axios.get(apiUrl, {
-    params: {
-      query: query || "",
-      imageUrl: imageUrl || ""
-    }
-  });
-
-  return data;
-}
-
-async function getRepliedImage(mid, pageAccessToken) {
-  const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
-    params: { access_token: pageAccessToken }
-  });
-
-  if (data?.data?.[0]?.image_data?.url) {
-    return data.data[0].image_data.url;
-  }
-
-  return "";
-}
-
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-}
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}

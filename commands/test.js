@@ -3,7 +3,7 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Recognize or generate images using AI",
+  description: "Generate or recognize images using AI",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
@@ -24,7 +24,7 @@ module.exports = {
     );
 
     try {
-      // Check if an image is replied to or attached
+      // Check if an image is attached or replied to
       if (!imageUrl) {
         if (event.message?.reply_to?.mid) {
           imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
@@ -37,27 +37,22 @@ module.exports = {
       const apiUrl = "https://kaiz-apis.gleeze.com/api/chipp-ai";
       const response = await handleAIRequest(apiUrl, userPrompt, imageUrl);
 
-      // Extract API response
+      // Extract response data
       const result = response.response;
 
-      // Check if the response includes an image generation tool call
-      if (result.includes("TOOL_CALL: generateImage")) {
-        const imageUrlMatch = result.match(/\!.*?(https:\/\/.*?)/);
-
-        if (imageUrlMatch && imageUrlMatch[1]) {
-          const imageUrl = imageUrlMatch[1];
-          await sendMessage(
-            senderId,
-            {
-              attachment: { type: "image", payload: { url: imageUrl } }
-            },
-            pageAccessToken
-          );
-          return;
-        }
+      // Check if the API generated an image
+      if (response.imageUrl) {
+        await sendMessage(
+          senderId,
+          {
+            attachment: { type: "image", payload: { url: response.imageUrl } }
+          },
+          pageAccessToken
+        );
+        return;
       }
 
-      // Send the text response
+      // Otherwise, send the text response
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
 
     } catch (error) {

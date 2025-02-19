@@ -1,47 +1,80 @@
-const axios = require('axios');
+const axios = require("axios");
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: 'test',
-  description: 'Search for YouTube videos and send multiple results',
-  author: 'Rized',
-  usage: 'ytsearch <search text>',
+  name: "test",
+  description: "Interact with Claude 3 Haiku AI for text-based responses",
+  author: "developer",
 
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    const searchQuery = args.join(' ');
+  async execute(senderId, args, pageAccessToken, event, imageUrl) {
+    const userPrompt = args.join(" ").trim();
 
-    if (!searchQuery) {
-      return sendMessage(senderId, { text: "𝑼𝒔𝒂𝒈𝒆: 𝒚𝒕𝒔𝒆𝒂𝒓𝒄𝒉 <𝒕𝒊𝒕𝒍𝒆>" }, pageAccessToken);
+    if (!userPrompt) {
+      return sendMessage(
+        senderId,
+        {
+          text: `❌ Please provide a prompt for Claude AI to respond to.`
+        },
+        pageAccessToken
+      );
     }
 
-    sendMessage(senderId, { text: "⚙ 𝑺𝒆𝒂𝒓𝒄𝒉𝒊𝒏𝒈 𝑭𝒐𝒓 𝒀𝒐𝒖𝑻𝒖𝒃𝒆 𝑽𝒊𝒅𝒆𝒐𝒔, 𝑷𝒍𝒆𝒂𝒔𝒆 𝑾𝒂𝒊𝒕..." }, pageAccessToken);
+    sendMessage(
+      senderId,
+      {
+        text: "⌛ Processing your request, please wait..."
+      },
+      pageAccessToken
+    );
 
     try {
-      const response = await axios.get(`https://kaiz-apis.gleeze.com/api/ytsearch?query=${encodeURIComponent(searchQuery)}`);
-      const results = response.data.results;
+      const apiUrl = "https://kaiz-apis.gleeze.com/api/claude3-haiku";
+      const response = await handleClaudeRequest(apiUrl, userPrompt);
 
-      if (!results || results.length === 0) {
-        return sendMessage(senderId, { text: '❌ 𝑵𝒐 𝒗𝒊𝒅𝒆𝒐𝒔 𝒇𝒐𝒖𝒏𝒅 𝒇𝒐𝒓 𝒕𝒉𝒊𝒔 𝒔𝒆𝒂𝒓𝒄𝒉.' }, pageAccessToken);
-      }
+      const result = response.response;
 
-      const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+      await sendConcatenatedMessage(senderId, result, pageAccessToken);
 
-      for (const video of results) {
-        const title = video.title;
-        const url = video.url;
-        const thumbnail = video.thumbnail;
-
-        sendMessage(senderId, {
-          text: `🎥 **𝒀𝒐𝒖𝑻𝒖𝒃𝒆 𝑺𝒆𝒂𝒓𝒄𝒉 𝑹𝒆𝒔𝒖𝒍𝒕** 🎥\n\n` +
-                `🤖 **𝑻𝒊𝒕𝒍𝒆**: ${title}\n` +
-                `🔗 **𝑼𝒓𝒍**: ${url}\n` +
-                `🖼 **𝑻𝒉𝒖𝒎𝒃𝒏𝒂𝒊𝒍**: ${thumbnail}\n\n` +
-                `⏰ **𝑨𝒔𝒊𝒂/𝑴𝒂𝒏𝒊𝒍𝒂 𝑻𝒊𝒎𝒆**: ${responseTime}\n\n` +
-                `📽 **𝑬𝒏𝒋𝒐𝒚 𝑾𝒂𝒕𝒄𝒉𝒊𝒏𝒈!**`
-        }, pageAccessToken);
-      }
     } catch (error) {
-      console.error(error);
-      sendMessage(senderId, { text: `❌ 𝑨𝒏 𝒆𝒓𝒓𝒐𝒓 𝒐𝒄𝒄𝒖𝒓𝒓𝒆𝒅: ${error.message}` }, pageAccessToken);
+      console.error("Error in Claude command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
     }
   }
 };
+
+async function handleClaudeRequest(apiUrl, query) {
+  const { data } = await axios.get(apiUrl, {
+    params: {
+      ask: query || ""
+    }
+  });
+
+  return data;
+}
+
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+  const maxMessageLength = 2000;
+
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
+  }
+}
+
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+}

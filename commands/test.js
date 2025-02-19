@@ -1,22 +1,23 @@
 const axios = require("axios");
-const { sendMessage } = require('../handles/sendMessage');
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Generate AI responses or images using EchoAI and Zetsu Art API",
+  description: "Generate AI responses or images based on user prompt",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event) {
-    const userPrompt = args.join(" ").trim().toLowerCase();
-
-    if (!userPrompt) {
+    if (!args || !Array.isArray(args) || args.length === 0) {
       return sendMessage(
         senderId,
-        { text: "❌ Please provide a question or an image description." },
+        { text: "❌ Please provide a prompt for AI." },
         pageAccessToken
       );
     }
 
+    const userPrompt = args.join(" ").trim();
+
+    // Notify the user that the request is being processed
     sendMessage(
       senderId,
       { text: "⌛ Processing your request, please wait..." },
@@ -24,42 +25,24 @@ module.exports = {
     );
 
     try {
-      // **Check if user wants an image**
-      if (userPrompt.startsWith("generate ") || userPrompt.startsWith("imagine ")) {
-        const promptText = args.slice(1).join(" ").trim(); // Remove "generate" or "imagine"
+      // **Check if user wants to generate an image**
+      if (userPrompt.toLowerCase().startsWith("generate")) {
+        const imagePrompt = userPrompt.replace(/^generate\s+/i, "");
+        const imageUrl = `https://ccprojectapis.ddns.net/api/generate-art?prompt=${encodeURIComponent(imagePrompt)}`;
 
-        if (!promptText) {
-          return sendMessage(
-            senderId,
-            { text: "❌ Please provide a description for the image." },
-            pageAccessToken
-          );
-        }
-
-        const imageUrl = await generateImage(promptText);
-
-        if (imageUrl) {
-          await sendMessage(
-            senderId,
-            {
-              attachment: {
-                type: "image",
-                payload: { url: imageUrl },
-              },
+        return sendMessage(
+          senderId,
+          {
+            attachment: {
+              type: "image",
+              payload: { url: imageUrl },
             },
-            pageAccessToken
-          );
-          return;
-        } else {
-          return sendMessage(
-            senderId,
-            { text: "❌ Failed to generate an image. Please try again." },
-            pageAccessToken
-          );
-        }
+          },
+          pageAccessToken
+        );
       }
 
-      // **Text AI Response Handling**
+      // **Default AI Text Response Handling**
       const apiUrl = `https://echoai.zetsu.xyz/ask?q=${encodeURIComponent(userPrompt)}`;
       const response = await axios.get(apiUrl);
       const result = response.data;
@@ -74,7 +57,7 @@ module.exports = {
 
         if (imageUrlMatch && imageUrlMatch[1]) {
           const imageUrl = imageUrlMatch[1];
-          await sendMessage(
+          return sendMessage(
             senderId,
             {
               attachment: {
@@ -84,39 +67,21 @@ module.exports = {
             },
             pageAccessToken
           );
-          return;
         }
       }
 
-      // **Send AI Response**
+      // **Send AI Text Response**
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
     } catch (error) {
-      console.error("Error in AI3 command:", error);
+      console.error("Error in ai3 command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },
         pageAccessToken
       );
     }
-  }
+  },
 };
-
-// **Image Generation Function**
-async function generateImage(prompt) {
-  try {
-    const apiUrl = `https://api.zetsu.xyz/api/art?prompt=${encodeURIComponent(prompt)}`;
-    const response = await axios.get(apiUrl);
-    
-    if (response.data && response.data.image_url) {
-      return response.data.image_url;
-    }
-    
-    return null;
-  } catch (error) {
-    console.error("Error generating image:", error);
-    return null;
-  }
-}
 
 // **Helper Functions**
 async function sendConcatenatedMessage(senderId, text, pageAccessToken) {

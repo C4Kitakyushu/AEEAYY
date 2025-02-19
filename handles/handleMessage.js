@@ -53,14 +53,14 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-  // Handling "ai" command
-if (messageText.startsWith('ai')) {
+  // Handling "deepseek" command
+if (messageText.startsWith('deepseek')) {
   const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
   const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
 
   try {
-    // Execute the "ai" command
-    await commands.get('ai').execute(senderId, args, pageAccessToken, event, lastImage);
+    // Execute the "deepseek" command
+    await commands.get('deepseek').execute(senderId, args, pageAccessToken, event, lastImage);
 
     // Clear the stored image after processing
     lastImageByUser.delete(senderId);

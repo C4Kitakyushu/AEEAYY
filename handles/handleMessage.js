@@ -97,29 +97,6 @@ if (messageText === 'imgbb') {
   return;
 }
 
-// Handling "test" command
-if (messageText.startsWith('test')) {
-  const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
-  const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
-
-  try {
-    // Execute the "test" command
-    await commands.get('test').execute(senderId, args, pageAccessToken, event, lastImage);
-    
-    // Clear the stored image after processing
-    lastImageByUser.delete(senderId);
-  } catch (error) {
-    console.error('Error while processing the Gemini command:', error);
-    // Send error feedback to the user
-    await sendMessage(
-      senderId, 
-      { text: '❌ An error occurred while processing your Gemini request. Please try again later.' }, 
-      pageAccessToken
-    );
-  }
-  return;
-}
-
     // Handling "upscale" command
 if (messageText === 'upscale') {
   const lastImage = lastImageByUser.get(senderId);

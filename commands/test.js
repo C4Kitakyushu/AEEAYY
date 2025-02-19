@@ -1,76 +1,90 @@
-const axios = require('axios');
-const fs = require('fs');
-const cheerio = require('cheerio');
+const axios = require("axios");
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "test",
-  description: "Search for images on Pinterest.",
-  author: "Developer",
+  description: "Generate AI responses using echoAI with tool call support",
+  author: "developer",
 
-  async execute(senderId, args, pageAccessToken, sendMessage) {
+  async execute(senderId, args, pageAccessToken, event) {
+    const userPrompt = args.join(" ").trim();
+
+    if (!userPrompt) {
+      return sendMessage(
+        senderId,
+        { text: "❌ Please provide a question or prompt for AI to respond." },
+        pageAccessToken
+      );
+    }
+
+    sendMessage(
+      senderId,
+      { text: "⌛ Processing your request, please wait..." },
+      pageAccessToken
+    );
+
     try {
-      if (args.length === 0) {
-        return sendMessage(senderId, {
-          text: `🖼️• Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest Soyeon - 10`
-        }, pageAccessToken);
+      const apiUrl = `https://echoai.zetsu.xyz/ask?q=${encodeURIComponent(userPrompt)}`;
+      const response = await axios.get(apiUrl);
+      const result = response.data;
+
+      if (!result || typeof result !== "string") {
+        throw new Error("Invalid response from AI.");
       }
 
-      const [searchTerm, count] = args.join(" ").split(" - ");
-      if (!searchTerm) {
-        return sendMessage(senderId, {
-          text: `🖼️• Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest Soyeon - 10`
-        }, pageAccessToken);
+      // **Tool Call Handling**
+      if (result.includes("TOOL_CALL: generateImage")) {
+        const imageUrlMatch = result.match(/\!.*?(https:\/\/.*?)/);
+
+        if (imageUrlMatch && imageUrlMatch[1]) {
+          const imageUrl = imageUrlMatch[1];
+          await sendMessage(
+            senderId,
+            {
+              attachment: {
+                type: "image",
+                payload: { url: imageUrl },
+              },
+            },
+            pageAccessToken
+          );
+          return;
+        }
       }
 
-      const numOfImages = parseInt(count) || 6;
-      const images = await getPinterest(searchTerm);
-
-      if (!images || images.length === 0) {
-        return sendMessage(senderId, { text: `No images found for "${searchTerm}".` }, pageAccessToken);
-      }
-
-      const imageUrls = images.slice(0, numOfImages);
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      let fileAttachments = [];
-
-      for (let i = 0; i < imageUrls.length; i++) {
-        const path = `./script/cache/${timestamp}_${i + 1}.jpg`;
-        const download = (await axios.get(imageUrls[i], { responseType: 'arraybuffer' })).data;
-        fs.writeFileSync(path, Buffer.from(download, 'utf-8'));
-        fileAttachments.push(fs.createReadStream(path));
-      }
-
-      await sendMessage(senderId, { attachment: fileAttachments, body: "" }, pageAccessToken);
-
-      // Clean up downloaded images
-      for (let i = 0; i < imageUrls.length; i++) {
-        fs.unlinkSync(`./script/cache/${timestamp}_${i + 1}.jpg`);
-      }
+      // **Send AI Response**
+      await sendConcatenatedMessage(senderId, result, pageAccessToken);
     } catch (error) {
-      console.error("Failed to retrieve images from Pinterest:", error);
-      sendMessage(senderId, { text: `❌ Failed to retrieve images from Pinterest. Error: ${error.message || error}` }, pageAccessToken);
+      console.error("Error in AI3 command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
     }
   }
 };
 
-async function getPinterest(query) {
-  try {
-    const { data } = await axios.get(`https://id.pinterest.com/search/pins/?autologin=true&q=${encodeURIComponent(query)}`, {
-      headers: {
-        cookie: "_auth=1; _b=\"AVna7S1p7l1C5I9u0+nR3YzijpvXOPc6d09SyCzO+DcwpersQH36SmGiYfymBKhZcGg=\"; _pinterest_sess=TWc9PSZHamJOZ0JobUFiSEpSN3Z4a2NsMk9wZ3gxL1NSc2k2NkFLaUw5bVY5cXR5alZHR0gxY2h2MVZDZlNQalNpUUJFRVR5L3NlYy9JZkthekp3bHo5bXFuaFZzVHJFMnkrR3lTbm56U3YvQXBBTW96VUgzVUhuK1Z4VURGKzczUi9hNHdDeTJ5Y2pBTmxhc2owZ2hkSGlDemtUSnYvVXh5dDNkaDN3TjZCTk8ycTdHRHVsOFg2b2NQWCtpOWxqeDNjNkk3cS85MkhhSklSb0hwTnZvZVFyZmJEUllwbG9UVnpCYVNTRzZxOXNJcmduOVc4aURtM3NtRFo3STlmWjJvSjlWTU5ITzg0VUg1NGhOTEZzME9SNFNhVWJRWjRJK3pGMFA4Q3UvcHBnWHdaYXZpa2FUNkx6Z3RNQjEzTFJEOHZoaHRvazc1c1UrYlRuUmdKcDg3ZEY4cjNtZlBLRTRBZjNYK0lPTXZJTzQ5dU8ybDdVS015bWJKT0tjTWYyRlBzclpiamdsNmtpeUZnRjlwVGJXUmdOMXdTUkFHRWloVjBMR0JlTE5YcmhxVHdoNzFHbDZ0YmFHZ1VLQXU1QnpkM1FqUTNMTnhYb3VKeDVGbnhNSkdkNXFSMXQybjRGL3pyZXRLR0ZTc0xHZ0JvbTJCNnAzQzE0cW1WTndIK0trY05HV1gxS09NRktadnFCSDR2YzBoWmRiUGZiWXFQNjcwWmZhaDZQRm1UbzNxc21pV1p5WDlabm1UWGQzanc1SGlrZXB1bDVDWXQvUis3elN2SVFDbm1DSVE5Z0d4YW1sa2hsSkZJb1h0MTFpck5BdDR0d0lZOW1Pa2RDVzNySWpXWmUwOUFhQmFSVUpaOFQ3WlhOQldNMkExeDIvMjZHeXdnNjdMYWdiQUhUSEFBUlhUVTdBMThRRmh1ekJMYWZ2YTJkNlg0cmFCdnU2WEpwcXlPOVZYcGNhNkZDd051S3lGZmo0eHV0ZE42NW8xRm5aRWpoQnNKNnNlSGFad1MzOHNkdWtER0xQTFN5Z3lmRERsZnZWWE5CZEJneVRlMDd2VmNPMjloK0g5eCswZUVJTS9CRkFweHc5RUh6K1JocGN6clc1JmZtL3JhRE1sc0NMTFlpMVErRGtPcllvTGdldz0="
-      }
-    });
+// **Helper Functions**
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+  const maxMessageLength = 2000;
 
-    const $ = cheerio.load(data);
-    const results = [];
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
 
-    $("div > a img").each((_, element) => {
-      const link = $(element).attr("src");
-      if (link) results.push(link.replace(/236/g, "736"));
-    });
-
-    return results;
-  } catch (error) {
-    throw error;
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
   }
+}
+
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
 }

@@ -40,19 +40,26 @@ module.exports = {
       // Extract response data
       const result = response.response;
 
-      // Check if the API generated an image
-      if (response.imageUrl) {
-        await sendMessage(
-          senderId,
-          {
-            attachment: { type: "image", payload: { url: response.imageUrl } }
-          },
-          pageAccessToken
-        );
-        return;
+      // Detect TOOL_CALL for image generation
+      if (result.includes("TOOL_CALL: generateImage")) {
+        const imageUrlMatch = result.match(/\!.*?(https:\/\/.*?)/);
+
+        if (imageUrlMatch && imageUrlMatch[1]) {
+          const generatedImageUrl = imageUrlMatch[1];
+
+          // Send the generated image
+          await sendMessage(
+            senderId,
+            {
+              attachment: { type: "image", payload: { url: generatedImageUrl } }
+            },
+            pageAccessToken
+          );
+          return;
+        }
       }
 
-      // Otherwise, send the text response
+      // If no image was generated, send text response
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
 
     } catch (error) {

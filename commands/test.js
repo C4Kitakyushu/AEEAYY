@@ -1,60 +1,47 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'test',
   description: 'Search for YouTube videos and send multiple results',
-  usage: 'ytsearch <search text>',
   author: 'Rized',
+  usage: 'ytsearch <search text>',
 
-  execute: async (senderId, args) => {
-    const pageAccessToken = token;
+  async execute(senderId, args, pageAccessToken, sendMessage) {
     const searchQuery = args.join(' ');
 
     if (!searchQuery) {
-      return sendMessage(senderId, { text: 'Usage: ytsearch <search text>' }, pageAccessToken);
+      return sendMessage(senderId, { text: "𝑼𝒔𝒂𝒈𝒆: 𝒚𝒕𝒔𝒆𝒂𝒓𝒄𝒉 <𝒕𝒊𝒕𝒍𝒆>" }, pageAccessToken);
     }
 
-    const apiUrl = `https://kaiz-apis.gleeze.com/api/ytsearch?query=${encodeURIComponent(searchQuery)}`;
+    sendMessage(senderId, { text: "⚙ 𝑺𝒆𝒂𝒓𝒄𝒉𝒊𝒏𝒈 𝑭𝒐𝒓 𝒀𝒐𝒖𝑻𝒖𝒃𝒆 𝑽𝒊𝒅𝒆𝒐𝒔, 𝑷𝒍𝒆𝒂𝒔𝒆 𝑾𝒂𝒊𝒕..." }, pageAccessToken);
 
     try {
-      const { data } = await axios.get(apiUrl);
+      const response = await axios.get(`https://kaiz-apis.gleeze.com/api/ytsearch?query=${encodeURIComponent(searchQuery)}`);
+      const results = response.data.results;
 
-      if (!data || !data.results || data.results.length === 0) {
-        return sendMessage(senderId, { text: '❌ No videos found for the given search query.' }, pageAccessToken);
+      if (!results || results.length === 0) {
+        return sendMessage(senderId, { text: '❌ 𝑵𝒐 𝒗𝒊𝒅𝒆𝒐𝒔 𝒇𝒐𝒖𝒏𝒅 𝒇𝒐𝒓 𝒕𝒉𝒊𝒔 𝒔𝒆𝒂𝒓𝒄𝒉.' }, pageAccessToken);
       }
 
-      // Send multiple video results
-      for (const video of data.results) {
-        const message = `🎥 **YouTube Search Result** 🎥\n\n` +
-          `**Title**: ${video.title}\n` +
-          `🔗 **Link**: ${video.url}\n` +
-          `🖼 **Thumbnail**: ${video.thumbnail}\n\n` +
-          `Enjoy watching!`;
+      const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
 
-        // Send text message
-        await sendMessage(senderId, { text: message }, pageAccessToken);
+      for (const video of results) {
+        const title = video.title;
+        const url = video.url;
+        const thumbnail = video.thumbnail;
 
-        // Send video message (if a direct video link is available)
-        if (video.video_url) {
-          const videoMessage = {
-            attachment: {
-              type: 'video',
-              payload: {
-                url: video.video_url,
-                is_reusable: true
-              }
-            }
-          };
-          await sendMessage(senderId, videoMessage, pageAccessToken);
-        }
+        sendMessage(senderId, {
+          text: `🎥 **𝒀𝒐𝒖𝑻𝒖𝒃𝒆 𝑺𝒆𝒂𝒓𝒄𝒉 𝑹𝒆𝒔𝒖𝒍𝒕** 🎥\n\n` +
+                `🤖 **𝑻𝒊𝒕𝒍𝒆**: ${title}\n` +
+                `🔗 **𝑼𝒓𝒍**: ${url}\n` +
+                `🖼 **𝑻𝒉𝒖𝒎𝒃𝒏𝒂𝒊𝒍**: ${thumbnail}\n\n` +
+                `⏰ **𝑨𝒔𝒊𝒂/𝑴𝒂𝒏𝒊𝒍𝒂 𝑻𝒊𝒎𝒆**: ${responseTime}\n\n` +
+                `📽 **𝑬𝒏𝒋𝒐𝒚 𝑾𝒂𝒕𝒄𝒉𝒊𝒏𝒈!**`
+        }, pageAccessToken);
       }
     } catch (error) {
-      console.error('Error:', error.message);
-      sendMessage(senderId, { text: 'An error occurred while processing the request. Please try again later.' }, pageAccessToken);
+      console.error(error);
+      sendMessage(senderId, { text: `❌ 𝑨𝒏 𝒆𝒓𝒓𝒐𝒓 𝒐𝒄𝒄𝒖𝒓𝒓𝒆𝒅: ${error.message}` }, pageAccessToken);
     }
-  },
+  }
 };

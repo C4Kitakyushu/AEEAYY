@@ -1,52 +1,82 @@
 const axios = require("axios");
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Generate a temporary email and check its inbox",
-  author: "YourName",
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    
-    if (!args[0]) {
-      return sendMessage(senderId, { text: "❌ Please use 'create' to generate an email or 'inbox {token}' to check inbox." }, pageAccessToken);
+  description: "Interact with DeepSeek AI for text-based responses",
+  author: "developer",
+
+  async execute(senderId, args, pageAccessToken) {
+    const userPrompt = args.join(" ").trim();
+
+    if (!userPrompt) {
+      return sendMessage(
+        senderId,
+        { text: "❌ Please provide a prompt for the AI to respond to." },
+        pageAccessToken
+      );
     }
 
-    if (args[0].toLowerCase() === "create") {
-      try {
-        const response = await axios.get("https://kaiz-apis.gleeze.com/api/tempmail-create", { timeout: 3000 });
-        const { email, token } = response.data;
+    sendMessage(
+      senderId,
+      { text: "⌛ Processing your request, please wait..." },
+      pageAccessToken
+    );
 
-        sendMessage(senderId, { 
-          text: `✅ Your temporary email:\n\n✉️ Email: ${email}\n🔑 Token: ${token}\n\nUse 'inbox ${token}' to check your inbox.` 
-        }, pageAccessToken);
+    try {
+      // API URL
+      const apiUrl = "https://kaiz-apis.gleeze.com/api/deepseek-r1";
+      const response = await handleDeepSeekRequest(apiUrl, userPrompt);
 
-      } catch (error) {
-        console.error("Error generating email:", error);
-        sendMessage(senderId, { text: "⚠️ Failed to generate an email. Please try again later." }, pageAccessToken);
-      }
+      // Extract response data
+      const result = response.response;
 
-    } else if (args[0].toLowerCase() === "inbox" && args[1]) {
-      const token = args[1];
-      try {
-        const response = await axios.get(`https://kaiz-apis.gleeze.com/api/tempmail-inbox?token=${token}`, { timeout: 3000 });
-        const messages = response.data;
+      // Send the AI's response
+      await sendConcatenatedMessage(senderId, result, pageAccessToken);
 
-        if (messages.length > 0) {
-          const messageList = messages.map((msg, index) => 
-            `📩 #${index + 1}\nFrom: ${msg.from}\nSubject: ${msg.subject}\nDate: ${msg.date}`
-          ).join('\n\n');
-
-          sendMessage(senderId, { text: `📬 Inbox Messages:\n\n${messageList}` }, pageAccessToken);
-        } else {
-          sendMessage(senderId, { text: "📭 No messages found in this inbox yet." }, pageAccessToken);
-        }
-
-      } catch (error) {
-        console.error("Error fetching inbox:", error);
-        sendMessage(senderId, { text: "⚠️ Failed to fetch inbox messages. Please check your token and try again." }, pageAccessToken);
-      }
-
-    } else {
-      sendMessage(senderId, { text: "❌ Invalid command! Use 'create' to generate an email or 'inbox {token}' to check inbox." }, pageAccessToken);
+    } catch (error) {
+      console.error("Error in DeepSeek command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
     }
   }
 };
+
+// Function to handle API request
+async function handleDeepSeekRequest(apiUrl, query) {
+  const { data } = await axios.get(apiUrl, {
+    params: {
+      ask: query || ""
+    }
+  });
+
+  return data;
+}
+
+// Function to send long messages in chunks
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+  const maxMessageLength = 2000;
+
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
+  }
+}
+
+// Function to split long messages
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+}

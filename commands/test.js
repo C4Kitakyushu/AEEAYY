@@ -3,7 +3,7 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Interact with Claude 3 Haiku AI for text-based responses",
+  description: "Interact with Pixtral 12B AI for text-based responses",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
@@ -13,7 +13,7 @@ module.exports = {
       return sendMessage(
         senderId,
         {
-          text: `❌ Please provide a prompt for Claude AI to respond to.`
+          text: `❌ Please provide a prompt for Pixtral AI to respond to.`
         },
         pageAccessToken
       );
@@ -28,15 +28,15 @@ module.exports = {
     );
 
     try {
-      const apiUrl = "https://kaiz-apis.gleeze.com/api/claude3-haiku";
-      const response = await handleClaudeRequest(apiUrl, userPrompt);
+      const apiUrl = "https://kaiz-apis.gleeze.com/api/pixtral-12b";
+      const response = await handlePixtralRequest(apiUrl, userPrompt);
 
       const result = response.response;
 
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
 
     } catch (error) {
-      console.error("Error in Claude command:", error);
+      console.error("Error in Pixtral command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },
@@ -46,10 +46,11 @@ module.exports = {
   }
 };
 
-async function handleClaudeRequest(apiUrl, query) {
+async function handlePixtralRequest(apiUrl, query) {
   const { data } = await axios.get(apiUrl, {
     params: {
-      ask: query || ""
+      q: query || "",
+      uid: "1"
     }
   });
 

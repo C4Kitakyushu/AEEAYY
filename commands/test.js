@@ -1,121 +1,52 @@
 const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Generate or recognize images using AI",
-  author: "developer",
-
-  async execute(senderId, args, pageAccessToken, event, imageUrl) {
-    const userPrompt = args.join(" ").trim();
-
-    if (!userPrompt && !imageUrl) {
-      return sendMessage(
-        senderId,
-        { text: "❌ Provide a description for image generation or an image URL for recognition." },
-        pageAccessToken
-      );
+  description: "Generate a temporary email and check its inbox",
+  author: "YourName",
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    
+    if (!args[0]) {
+      return sendMessage(senderId, { text: "❌ Please use 'create' to generate an email or 'inbox {token}' to check inbox." }, pageAccessToken);
     }
 
-    sendMessage(
-      senderId,
-      { text: "⌛ Processing your request, please wait..." },
-      pageAccessToken
-    );
+    if (args[0].toLowerCase() === "create") {
+      try {
+        const response = await axios.get("https://kaiz-apis.gleeze.com/api/tempmail-create", { timeout: 3000 });
+        const { email, token } = response.data;
 
-    try {
-      // Check if an image is attached or replied to
-      if (!imageUrl) {
-        if (event.message?.reply_to?.mid) {
-          imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
-        } else if (event.message?.attachments?.[0]?.type === "image") {
-          imageUrl = event.message.attachments[0].payload.url;
-        }
+        sendMessage(senderId, { 
+          text: `✅ Your temporary email:\n\n✉️ Email: ${email}\n🔑 Token: ${token}\n\nUse 'inbox ${token}' to check your inbox.` 
+        }, pageAccessToken);
+
+      } catch (error) {
+        console.error("Error generating email:", error);
+        sendMessage(senderId, { text: "⚠️ Failed to generate an email. Please try again later." }, pageAccessToken);
       }
 
-      // API URL
-      const apiUrl = "https://kaiz-apis.gleeze.com/api/chipp-ai";
-      const response = await handleAIRequest(apiUrl, userPrompt, imageUrl);
+    } else if (args[0].toLowerCase() === "inbox" && args[1]) {
+      const token = args[1];
+      try {
+        const response = await axios.get(`https://kaiz-apis.gleeze.com/api/tempmail-inbox?token=${token}`, { timeout: 3000 });
+        const messages = response.data;
 
-      // Extract response data
-      const result = response.response;
+        if (messages.length > 0) {
+          const messageList = messages.map((msg, index) => 
+            `📩 #${index + 1}\nFrom: ${msg.from}\nSubject: ${msg.subject}\nDate: ${msg.date}`
+          ).join('\n\n');
 
-      // Detect TOOL_CALL for image generation
-      if (result.includes("TOOL_CALL: generateImage")) {
-        const imageUrlMatch = result.match(/\!.*?(https:\/\/.*?)/);
-
-        if (imageUrlMatch && imageUrlMatch[1]) {
-          const generatedImageUrl = imageUrlMatch[1];
-
-          // Send the generated image
-          await sendMessage(
-            senderId,
-            {
-              attachment: { type: "image", payload: { url: generatedImageUrl } }
-            },
-            pageAccessToken
-          );
-          return;
+          sendMessage(senderId, { text: `📬 Inbox Messages:\n\n${messageList}` }, pageAccessToken);
+        } else {
+          sendMessage(senderId, { text: "📭 No messages found in this inbox yet." }, pageAccessToken);
         }
+
+      } catch (error) {
+        console.error("Error fetching inbox:", error);
+        sendMessage(senderId, { text: "⚠️ Failed to fetch inbox messages. Please check your token and try again." }, pageAccessToken);
       }
 
-      // If no image was generated, send text response
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
-
-    } catch (error) {
-      console.error("Error in AI3 command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
+    } else {
+      sendMessage(senderId, { text: "❌ Invalid command! Use 'create' to generate an email or 'inbox {token}' to check inbox." }, pageAccessToken);
     }
   }
 };
-
-// Function to handle API request
-async function handleAIRequest(apiUrl, query, imageUrl) {
-  const { data } = await axios.get(apiUrl, {
-    params: {
-      ask: query || "",
-      uid: "1",  // Using UID 1 as per API
-      imageUrl: imageUrl || ""
-    }
-  });
-
-  return data;
-}
-
-// Function to retrieve an image from a replied message
-async function getRepliedImage(mid, pageAccessToken) {
-  const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
-    params: { access_token: pageAccessToken }
-  });
-
-  return data?.data?.[0]?.image_data?.url || "";
-}
-
-// Function to send long messages in chunks
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-}
-
-// Function to split long messages
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}

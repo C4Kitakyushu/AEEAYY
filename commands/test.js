@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "test",
-  description: "Generate AI responses using echoAI with tool call support",
+  description: "Generate AI responses and images using echoAI and Zetsu Art API",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event) {
@@ -12,7 +12,7 @@ module.exports = {
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: "❌ Please provide a question or prompt for AI to respond." },
+        { text: "❌ Please provide a question or an image description." },
         pageAccessToken
       );
     }
@@ -24,6 +24,42 @@ module.exports = {
     );
 
     try {
+      // **Check if user wants an image**
+      if (userPrompt.toLowerCase().startsWith("generate image")) {
+        const promptText = userPrompt.replace(/generate image/gi, "").trim();
+        
+        if (!promptText) {
+          return sendMessage(
+            senderId,
+            { text: "❌ Please provide a description for the image." },
+            pageAccessToken
+          );
+        }
+
+        const imageUrl = await generateImage(promptText);
+
+        if (imageUrl) {
+          await sendMessage(
+            senderId,
+            {
+              attachment: {
+                type: "image",
+                payload: { url: imageUrl },
+              },
+            },
+            pageAccessToken
+          );
+          return;
+        } else {
+          return sendMessage(
+            senderId,
+            { text: "❌ Failed to generate an image. Please try again." },
+            pageAccessToken
+          );
+        }
+      }
+
+      // **Text AI Response Handling**
       const apiUrl = `https://echoai.zetsu.xyz/ask?q=${encodeURIComponent(userPrompt)}`;
       const response = await axios.get(apiUrl);
       const result = response.data;
@@ -64,6 +100,23 @@ module.exports = {
     }
   }
 };
+
+// **Image Generation Function**
+async function generateImage(prompt) {
+  try {
+    const apiUrl = `https://api.zetsu.xyz/api/art?prompt=${encodeURIComponent(prompt)}`;
+    const response = await axios.get(apiUrl);
+    
+    if (response.data && response.data.image_url) {
+      return response.data.image_url;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error generating image:", error);
+    return null;
+  }
+}
 
 // **Helper Functions**
 async function sendConcatenatedMessage(senderId, text, pageAccessToken) {

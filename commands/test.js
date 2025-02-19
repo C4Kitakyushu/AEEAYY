@@ -1,44 +1,76 @@
 const axios = require('axios');
+const fs = require('fs');
+const cheerio = require('cheerio');
 
 module.exports = {
-  name: 'test',
-  description: 'Fetches lyrics for a given song.',
-  author: 'developer',
+  name: "test",
+  description: "Search for images on Pinterest.",
+  author: "Developer",
+
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    const songName = args.join(" ").trim();
-
-    if (!songName) {
-      return sendMessage(senderId, { text: "Please provide a song name!" }, pageAccessToken);
-    }
-
     try {
-      await fetchLyrics(sendMessage, senderId, pageAccessToken, songName);
+      if (args.length === 0) {
+        return sendMessage(senderId, {
+          text: `🖼️• Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest Soyeon - 10`
+        }, pageAccessToken);
+      }
+
+      const [searchTerm, count] = args.join(" ").split(" - ");
+      if (!searchTerm) {
+        return sendMessage(senderId, {
+          text: `🖼️• Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest Soyeon - 10`
+        }, pageAccessToken);
+      }
+
+      const numOfImages = parseInt(count) || 6;
+      const images = await getPinterest(searchTerm);
+
+      if (!images || images.length === 0) {
+        return sendMessage(senderId, { text: `No images found for "${searchTerm}".` }, pageAccessToken);
+      }
+
+      const imageUrls = images.slice(0, numOfImages);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      let fileAttachments = [];
+
+      for (let i = 0; i < imageUrls.length; i++) {
+        const path = `./script/cache/${timestamp}_${i + 1}.jpg`;
+        const download = (await axios.get(imageUrls[i], { responseType: 'arraybuffer' })).data;
+        fs.writeFileSync(path, Buffer.from(download, 'utf-8'));
+        fileAttachments.push(fs.createReadStream(path));
+      }
+
+      await sendMessage(senderId, { attachment: fileAttachments, body: "" }, pageAccessToken);
+
+      // Clean up downloaded images
+      for (let i = 0; i < imageUrls.length; i++) {
+        fs.unlinkSync(`./script/cache/${timestamp}_${i + 1}.jpg`);
+      }
     } catch (error) {
-      console.error(`Error fetching lyrics for "${songName}":`, error);
-      sendMessage(senderId, { text: `Sorry, there was an error getting the lyrics for "${songName}"!` }, pageAccessToken);
+      console.error("Failed to retrieve images from Pinterest:", error);
+      sendMessage(senderId, { text: `❌ Failed to retrieve images from Pinterest. Error: ${error.message || error}` }, pageAccessToken);
     }
-  },
+  }
 };
 
-async function fetchLyrics(sendMessage, senderId, pageAccessToken, songName) {
-  const apiUrl = `https://betadash-api-swordslush.vercel.app/lyrics-finder?title=${encodeURIComponent(songName)}`;
-
+async function getPinterest(query) {
   try {
-    const response = await axios.get(apiUrl);
-    const { lyrics, title, artist } = response.data;
+    const { data } = await axios.get(`https://id.pinterest.com/search/pins/?autologin=true&q=${encodeURIComponent(query)}`, {
+      headers: {
+        cookie: "_auth=1; _b=\"AVna7S1p7l1C5I9u0+nR3YzijpvXOPc6d09SyCzO+DcwpersQH36SmGiYfymBKhZcGg=\"; _pinterest_sess=TWc9PSZHamJOZ0JobUFiSEpSN3Z4a2NsMk9wZ3gxL1NSc2k2NkFLaUw5bVY5cXR5alZHR0gxY2h2MVZDZlNQalNpUUJFRVR5L3NlYy9JZkthekp3bHo5bXFuaFZzVHJFMnkrR3lTbm56U3YvQXBBTW96VUgzVUhuK1Z4VURGKzczUi9hNHdDeTJ5Y2pBTmxhc2owZ2hkSGlDemtUSnYvVXh5dDNkaDN3TjZCTk8ycTdHRHVsOFg2b2NQWCtpOWxqeDNjNkk3cS85MkhhSklSb0hwTnZvZVFyZmJEUllwbG9UVnpCYVNTRzZxOXNJcmduOVc4aURtM3NtRFo3STlmWjJvSjlWTU5ITzg0VUg1NGhOTEZzME9SNFNhVWJRWjRJK3pGMFA4Q3UvcHBnWHdaYXZpa2FUNkx6Z3RNQjEzTFJEOHZoaHRvazc1c1UrYlRuUmdKcDg3ZEY4cjNtZlBLRTRBZjNYK0lPTXZJTzQ5dU8ybDdVS015bWJKT0tjTWYyRlBzclpiamdsNmtpeUZnRjlwVGJXUmdOMXdTUkFHRWloVjBMR0JlTE5YcmhxVHdoNzFHbDZ0YmFHZ1VLQXU1QnpkM1FqUTNMTnhYb3VKeDVGbnhNSkdkNXFSMXQybjRGL3pyZXRLR0ZTc0xHZ0JvbTJCNnAzQzE0cW1WTndIK0trY05HV1gxS09NRktadnFCSDR2YzBoWmRiUGZiWXFQNjcwWmZhaDZQRm1UbzNxc21pV1p5WDlabm1UWGQzanc1SGlrZXB1bDVDWXQvUis3elN2SVFDbm1DSVE5Z0d4YW1sa2hsSkZJb1h0MTFpck5BdDR0d0lZOW1Pa2RDVzNySWpXWmUwOUFhQmFSVUpaOFQ3WlhOQldNMkExeDIvMjZHeXdnNjdMYWdiQUhUSEFBUlhUVTdBMThRRmh1ekJMYWZ2YTJkNlg0cmFCdnU2WEpwcXlPOVZYcGNhNkZDd051S3lGZmo0eHV0ZE42NW8xRm5aRWpoQnNKNnNlSGFad1MzOHNkdWtER0xQTFN5Z3lmRERsZnZWWE5CZEJneVRlMDd2VmNPMjloK0g5eCswZUVJTS9CRkFweHc5RUh6K1JocGN6clc1JmZtL3JhRE1sc0NMTFlpMVErRGtPcllvTGdldz0="
+      }
+    });
 
-    if (!lyrics) {
-      throw new Error("Lyrics not found");
-    }
+    const $ = cheerio.load(data);
+    const results = [];
 
-    sendFormattedLyrics(sendMessage, senderId, pageAccessToken, title, artist, lyrics);
+    $("div > a img").each((_, element) => {
+      const link = $(element).attr("src");
+      if (link) results.push(link.replace(/236/g, "736"));
+    });
+
+    return results;
   } catch (error) {
-    console.error(`Error fetching lyrics from Primary API for "${songName}":`, error.message || error);
-    sendMessage(senderId, { text: `Sorry, lyrics for "${songName}" not found!` }, pageAccessToken);
+    throw error;
   }
-}
-
-function sendFormattedLyrics(sendMessage, senderId, pageAccessToken, title, artist, lyrics) {
-  const formattedLyrics = `🎧 | Title: ${title}\n🎤 | Artist: ${artist}\n━━━━━━━━━━━━━━━━\n${lyrics}\n━━━━━━━━━━━━━━━━`;
-  sendMessage(senderId, { text: formattedLyrics }, pageAccessToken);
 }

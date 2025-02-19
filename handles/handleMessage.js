@@ -53,14 +53,14 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-  // Handling "ai3" command
-if (messageText.startsWith('ai3')) {
+  // Handling "ai" command
+if (messageText.startsWith('ai')) {
   const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
   const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
 
   try {
-    // Execute the "ai3" command
-    await commands.get('ai3').execute(senderId, args, pageAccessToken, event, lastImage);
+    // Execute the "ai" command
+    await commands.get('ai').execute(senderId, args, pageAccessToken, event, lastImage);
 
     // Clear the stored image after processing
     lastImageByUser.delete(senderId);

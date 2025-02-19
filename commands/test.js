@@ -3,11 +3,11 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "test",
-  description: "Generate AI responses and images using echoAI and Zetsu Art API",
+  description: "Generate AI responses or images using EchoAI and Zetsu Art API",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event) {
-    const userPrompt = args.join(" ").trim();
+    const userPrompt = args.join(" ").trim().toLowerCase();
 
     if (!userPrompt) {
       return sendMessage(
@@ -25,9 +25,9 @@ module.exports = {
 
     try {
       // **Check if user wants an image**
-      if (userPrompt.toLowerCase().startsWith("generate image")) {
-        const promptText = userPrompt.replace(/generate image/gi, "").trim();
-        
+      if (userPrompt.startsWith("generate ") || userPrompt.startsWith("imagine ")) {
+        const promptText = args.slice(1).join(" ").trim(); // Remove "generate" or "imagine"
+
         if (!promptText) {
           return sendMessage(
             senderId,

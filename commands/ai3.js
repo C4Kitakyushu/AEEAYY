@@ -3,7 +3,7 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "aria",
-  description: "Interact with Aria AI for AI-generated responses",
+  description: "interact with aria ai",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {

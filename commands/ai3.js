@@ -1,49 +1,55 @@
-const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
+const axios = require("axios");
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: 'ai3',
-  description: 'interact with hershey ai',
-  usage: 'ai <your message>',
-  author: 'developer',
+  name: "aria",
+  description: "Interact with Aria AI for AI-generated responses",
+  author: "developer",
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
-    const userPrompt = (args.join(' ') || 'Hello').trim();
+  async execute(senderId, args, pageAccessToken, event, imageUrl) {
+    const userPrompt = args.join(" ").trim();
 
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: '❌ Please provide a question or prompt for AI to respond.' },
+        {
+          text: `❌ Please provide a prompt for Aria AI to respond to.`
+        },
         pageAccessToken
       );
     }
 
-    await handleChatResponse(senderId, userPrompt, pageAccessToken);
-  },
-};
+    try {
+      const apiUrl = "https://yt-video-production.up.railway.app/Aria";
+      const response = await handleAriaRequest(apiUrl, userPrompt);
 
-const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const systemRole = 'You are Hershy AI, an AI assistant designed to help users with various queries.';
-  const prompt = `${systemRole}\n${input}`;
-  const apiUrl = `https://echoai.zetsu.xyz/ask?q=${encodeURIComponent(prompt)}`;
+      const result = response.response;
 
-  try {
-    
-    const { data } = await axios.get(apiUrl);
-    const responseText = data || 'No response from the AI.';
+      await sendConcatenatedMessage(senderId, result, pageAccessToken);
 
-    await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
-  } catch (error) {
-    console.error('Error in Ai command:', error);
-    await sendError(senderId, '❌ Error: Something went wrong.', pageAccessToken);
+    } catch (error) {
+      console.error("Error in Aria command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
+    }
   }
 };
 
-const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
+async function handleAriaRequest(apiUrl, query) {
+  const { data } = await axios.get(apiUrl, {
+    params: {
+      q: query || "",
+      userid: "4"
+    }
+  });
+
+  return data;
+}
+
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   const maxMessageLength = 2000;
 
   if (text.length > maxMessageLength) {
@@ -56,16 +62,12 @@ const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
   } else {
     await sendMessage(senderId, { text }, pageAccessToken);
   }
-};
+}
 
-const splitMessageIntoChunks = (message, chunkSize) => {
+function splitMessageIntoChunks(message, chunkSize) {
   const chunks = [];
   for (let i = 0; i < message.length; i += chunkSize) {
     chunks.push(message.slice(i, i + chunkSize));
   }
   return chunks;
-};
-
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
-};
+}

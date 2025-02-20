@@ -3,7 +3,7 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Interact with Pixtral 12B AI for text-based responses",
+  description: "Interact with ChatGPT for AI-generated responses",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
@@ -13,7 +13,7 @@ module.exports = {
       return sendMessage(
         senderId,
         {
-          text: `❌ Please provide a prompt for Pixtral AI to respond to.`
+          text: `❌ Please provide a prompt for ChatGPT to respond to.`
         },
         pageAccessToken
       );
@@ -28,15 +28,15 @@ module.exports = {
     );
 
     try {
-      const apiUrl = "https://kaiz-apis.gleeze.com/api/pixtral-12b";
-      const response = await handlePixtralRequest(apiUrl, userPrompt);
+      const apiUrl = "https://mitski.onrender.com/api/chatgpt";
+      const response = await handleChatGPTRequest(apiUrl, userPrompt);
 
       const result = response.response;
 
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
 
     } catch (error) {
-      console.error("Error in Pixtral command:", error);
+      console.error("Error in ChatGPT command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },
@@ -46,11 +46,11 @@ module.exports = {
   }
 };
 
-async function handlePixtralRequest(apiUrl, query) {
+async function handleChatGPTRequest(apiUrl, query) {
   const { data } = await axios.get(apiUrl, {
     params: {
-      q: query || "",
-      uid: "1"
+      userId: "1",
+      question: query || ""
     }
   });
 

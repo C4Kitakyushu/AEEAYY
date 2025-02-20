@@ -6,8 +6,8 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'ai',
-  description: 'interact with 🍫 ai',
-  usage: 'aria <your message>',
+  description: 'interact with hershey ai',
+  usage: 'ai <your message>',
   author: 'developer',
 
   async execute(senderId, args) {
@@ -17,7 +17,7 @@ module.exports = {
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: '❌ Please provide a question❤️😊.' },
+        { text: '❌ Please provide a question or prompt for AI to respond.' },
         pageAccessToken
       );
     }
@@ -27,15 +27,18 @@ module.exports = {
 };
 
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = `https://yt-video-production.up.railway.app/Aria?q=${encodeURIComponent(input)}&userid=4`;
+  const systemRole = 'You are Hershy AI, an AI assistant designed to help users with various queries.';
+  const prompt = `${systemRole}\n${input}`;
+  const apiUrl = `https://echoai.zetsu.xyz/ask?q=${encodeURIComponent(prompt)}`;
 
   try {
+    
     const { data } = await axios.get(apiUrl);
-    const responseText = data.response || 'No response from Aria AI.';
+    const responseText = data || 'No response from the AI.';
 
     await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
   } catch (error) {
-    console.error('Error in Aria command:', error);
+    console.error('Error in Ai command:', error);
     await sendError(senderId, '❌ Error: Something went wrong.', pageAccessToken);
   }
 };

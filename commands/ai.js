@@ -6,7 +6,7 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'ai',
-  description: 'Interact with Aria AI for AI-generated responses',
+  description: 'interact with 🍫 ai',
   usage: 'aria <your message>',
   author: 'developer',
 
@@ -17,7 +17,7 @@ module.exports = {
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: '❌ Please provide a question 😊❤️.' },
+        { text: '❌ Please provide a question❤️😊.' },
         pageAccessToken
       );
     }
@@ -27,9 +27,7 @@ module.exports = {
 };
 
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const systemRole = 'You are Hershey🍫 AI, an AI assistant designed to help users with various queries.';
-  const prompt = `${systemRole}\n${input}`;
-  const apiUrl = `https://yt-video-production.up.railway.app/Aria?q=${encodeURIComponent(prompt)}&userid=4`;
+  const apiUrl = `https://yt-video-production.up.railway.app/Aria?q=${encodeURIComponent(input)}&userid=4`;
 
   try {
     const { data } = await axios.get(apiUrl);

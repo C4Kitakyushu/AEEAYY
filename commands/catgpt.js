@@ -1,45 +1,58 @@
 const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
-const fs = require("fs");
-
-const token = fs.readFileSync("token.txt", "utf8");
 
 module.exports = {
-  name: "catgpt",
-  description: "Interact with CatGPT AI for text-based responses",
+  name: "blackbox",
+  description: "Interact with BlackB AI for text-based responses",
   author: "developer",
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
+  async execute(senderId, args, pageAccessToken) {
     const userPrompt = args.join(" ").trim();
 
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: "❌ Please provide a message for CatGPT AI to respond to." },
+        { text: "❌ Please provide a message for BlackB AI to respond to." },
         pageAccessToken
       );
     }
 
-    await handleCatGPTRequest(senderId, userPrompt, pageAccessToken);
-  },
-};
+    sendMessage(
+      senderId,
+      { text: "⌛ Processing your request, please wait..." },
+      pageAccessToken
+    );
 
-const handleCatGPTRequest = async (senderId, input, pageAccessToken) => {
-  const apiUrl = `https://jerome-web.gleeze.com/service/api/catgpt?message=${encodeURIComponent(input)}`;
+    try {
+      const apiUrl = "https://ccprojectapis.ddns.net/api/blackb";
+      const response = await handleBlackBRequest(apiUrl, userPrompt);
 
-  try {
-    const { data } = await axios.get(apiUrl);
-    const responseText = data.response || "No response from CatGPT AI.";
+      const result = response.response;
 
-    await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
-  } catch (error) {
-    console.error("Error in CatGPT command:", error);
-    await sendError(senderId, "❌ Error: Something went wrong.", pageAccessToken);
+      await sendConcatenatedMessage(senderId, result, pageAccessToken);
+    } catch (error) {
+      console.error("Error in BlackB command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
+    }
   }
 };
 
-const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
+async function handleBlackBRequest(apiUrl, query) {
+  const { data } = await axios.get(apiUrl, {
+    params: {
+      ask: query || "",
+      id: "1"
+    }
+  });
+
+  return data;
+}
+
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   const maxMessageLength = 2000;
 
   if (text.length > maxMessageLength) {
@@ -52,16 +65,12 @@ const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
   } else {
     await sendMessage(senderId, { text }, pageAccessToken);
   }
-};
+}
 
-const splitMessageIntoChunks = (message, chunkSize) => {
+function splitMessageIntoChunks(message, chunkSize) {
   const chunks = [];
   for (let i = 0; i < message.length; i += chunkSize) {
     chunks.push(message.slice(i, i + chunkSize));
   }
   return chunks;
-};
-
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
-};
+}

@@ -2,7 +2,7 @@ const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: "dsv3",
+  name: "deepseekv3",
   description: "interact with deepseek v3",
   author: "developer",
 

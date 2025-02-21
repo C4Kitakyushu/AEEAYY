@@ -3,47 +3,33 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "deepseek",
-  description: "interact with deekseek ai r1 (china)",
-  author: "developer",
+  description: "iteract with deepseek ai",
+  author: "Julian",
 
-  async execute(senderId, args, pageAccessToken, event, imageUrl) {
+  async execute(senderId, args, pageAccessToken) {
     const userPrompt = args.join(" ").trim();
 
-    if (!userPrompt && !imageUrl) {
+    if (!userPrompt) {
       return sendMessage(
         senderId,
-        {
-          text: `❌ Please provide a prompt for the Deepseek service to respond to.`
-        },
+        { text: "❌ Please provide a message for DeepSeek AI to respond to." },
         pageAccessToken
       );
     }
 
     sendMessage(
       senderId,
-      {
-        text: "⌛ Deepseek AI R1 Processing your request, please wait..."
-      },
+      { text: "⌛ Deepseek AI processing your request, please wait..." },
       pageAccessToken
     );
 
     try {
-      // Check if an image is attached or replied to
-      if (!imageUrl) {
-        if (event.message?.reply_to?.mid) {
-          imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
-        } else if (event.message?.attachments?.[0]?.type === "image") {
-          imageUrl = event.message.attachments[0].payload.url;
-        }
-      }
-
-      const apiUrl = "https://kaiz-apis.gleeze.com/api/deepseek-r1";
-      const response = await handleDeepSeekRequest(apiUrl, userPrompt, imageUrl);
+      const apiUrl = "https://ccprojectapis.ddns.net/api/deepseek";
+      const response = await handleDeepSeekRequest(apiUrl, userPrompt);
 
       const result = response.response;
 
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
-
     } catch (error) {
       console.error("Error in DeepSeek command:", error);
       sendMessage(
@@ -55,27 +41,15 @@ module.exports = {
   }
 };
 
-async function handleDeepSeekRequest(apiUrl, query, imageUrl) {
+async function handleDeepSeekRequest(apiUrl, query) {
   const { data } = await axios.get(apiUrl, {
     params: {
       ask: query || "",
-      imageUrl: imageUrl || ""
+      id: "1"
     }
   });
 
   return data;
-}
-
-async function getRepliedImage(mid, pageAccessToken) {
-  const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
-    params: { access_token: pageAccessToken }
-  });
-
-  if (data?.data?.[0]?.image_data?.url) {
-    return data.data[0].image_data.url;
-  }
-
-  return "";
 }
 
 async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
@@ -85,7 +59,7 @@ async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
 
     for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await sendMessage(senderId, { text: message }, pageAccessToken);
     }
   } else {

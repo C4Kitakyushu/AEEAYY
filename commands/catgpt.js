@@ -2,8 +2,8 @@ const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: "blackbox",
-  description: "Interact with BlackB AI for text-based responses",
+  name: "ai4",
+  description: "interact with gpt4o",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken) {
@@ -12,26 +12,22 @@ module.exports = {
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: "❌ Please provide a message for BlackB AI to respond to." },
+        { text: "❌ Please provide a message for GPT-4o to respond to." },
         pageAccessToken
       );
     }
 
-    sendMessage(
-      senderId,
-      { text: "⌛ Processing your request, please wait..." },
-      pageAccessToken
-    );
+    
 
     try {
-      const apiUrl = "https://ccprojectapis.ddns.net/api/blackb";
-      const response = await handleBlackBRequest(apiUrl, userPrompt);
+      const apiUrl = "https://api.zetsu.xyz/api/gpt-4o";
+      const response = await handleGPT4oRequest(apiUrl, userPrompt);
 
       const result = response.response;
 
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
     } catch (error) {
-      console.error("Error in BlackB command:", error);
+      console.error("Error in GPT-4o command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },
@@ -41,11 +37,11 @@ module.exports = {
   }
 };
 
-async function handleBlackBRequest(apiUrl, query) {
+async function handleGPT4oRequest(apiUrl, query) {
   const { data } = await axios.get(apiUrl, {
     params: {
-      ask: query || "",
-      id: "1"
+      q: query || "",
+      uid: "1" // You can replace this with a dynamic user ID if needed
     }
   });
 

@@ -3,7 +3,7 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "ai4",
-  description: "interact with gpt4o",
+  description: "interact with gpt4-o",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken) {
@@ -17,10 +17,14 @@ module.exports = {
       );
     }
 
-    
+    sendMessage(
+      senderId,
+      { text: "⌛ Processing your request, please wait..." },
+      pageAccessToken
+    );
 
     try {
-      const apiUrl = "https://api.zetsu.xyz/api/gpt-4o";
+      const apiUrl = "https://kaiz-apis.gleeze.com/api/gpt-4o";
       const response = await handleGPT4oRequest(apiUrl, userPrompt);
 
       const result = response.response;
@@ -40,8 +44,9 @@ module.exports = {
 async function handleGPT4oRequest(apiUrl, query) {
   const { data } = await axios.get(apiUrl, {
     params: {
-      q: query || "",
-      uid: "1" // You can replace this with a dynamic user ID if needed
+      ask: query || "",
+      uid: "1",
+      webSearch: "off"
     }
   });
 

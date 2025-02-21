@@ -1,89 +1,59 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require("axios"); const { sendMessage } = require("../handles/sendMessage");
 
-module.exports = {
-  name: "deepseek",
-  description: "Interact with DeepSeek AI for text-based responses",
-  author: "developer",
+module.exports = { 
 
-  async execute(senderId, args, pageAccessToken) {
-    const userPrompt = args.join(" ").trim();
+name: "deepseek-v3", 
+description: "Interact with DeepSeek V3 AI for text-based responses", 
+author: "developer",
 
-    if (!userPrompt) {
-      return sendMessage(
-        senderId,
-        { text: "❌ Please provide a message for DeepSeek AI to respond to." },
-        pageAccessToken
-      );
-    }
+async execute(senderId, args, pageAccessToken) { const userPrompt = args.join(" ").trim();
 
-    sendMessage(
-      senderId,
-      { text: "⌛ Processing your request, please wait..." },
-      pageAccessToken
-    );
-
-    try {
-      const apiUrl = "https://ccprojectapis.ddns.net/api/deepseek";
-      const response = await handleDeepSeekRequest(apiUrl, userPrompt);
-
-      // Ensure response is valid
-      if (!response || !response.response) {
-        throw new Error("Invalid API response.");
-      }
-
-      const result = response.response.trim();
-
-      if (!result) {
-        throw new Error("AI returned an empty response.");
-      }
-
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
-    } catch (error) {
-      console.error("Error in DeepSeek command:", error.message);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
-    }
-  }
-};
-
-async function handleDeepSeekRequest(apiUrl, query) {
-  const { data } = await axios.get(apiUrl, {
-    params: {
-      ask: query || "",
-      id: "1"
-    }
-  });
-
-  return data || {};
+if (!userPrompt) {
+  return sendMessage(
+    senderId,
+    { text: "❌ Please provide a message for DeepSeek V3 to respond to." },
+    pageAccessToken
+  );
 }
 
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
-  const maxMessageLength = 2000;
+sendMessage(
+  senderId,
+  { text: "⌛ Processing your request, please wait..." },
+  pageAccessToken
+);
 
-  if (typeof text !== "string") {
-    text = "❌ Error: Received unexpected response format.";
-  }
+try {
+  const apiUrl = "https://kaiz-apis.gleeze.com/api/deepseek-v3";
+  const response = await handleDeepSeekV3Request(apiUrl, userPrompt);
 
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
+  const result = response.response;
 
-    for (const message of messages) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
+  await sendConcatenatedMessage(senderId, result, pageAccessToken);
+} catch (error) {
+  console.error("Error in DeepSeek V3 command:", error);
+  sendMessage(
+    senderId,
+    { text: `❌ Error: ${error.message || "Something went wrong."}` },
+    pageAccessToken
+  );
 }
 
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
+} };
+
+async function handleDeepSeekV3Request(apiUrl, query) { const { data } = await axios.get(apiUrl, { params: { ask: query || "" } });
+
+return data; }
+
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) { const maxMessageLength = 2000;
+
+if (text.length > maxMessageLength) { const messages = splitMessageIntoChunks(text, maxMessageLength);
+
+for (const message of messages) {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  await sendMessage(senderId, { text: message }, pageAccessToken);
 }
+
+} else { await sendMessage(senderId, { text }, pageAccessToken); } }
+
+function splitMessageIntoChunks(message, chunkSize) { const chunks = []; for (let i = 0; i < message.length; i += chunkSize) { chunks.push(message.slice(i, i + chunkSize)); } return chunks; }
+

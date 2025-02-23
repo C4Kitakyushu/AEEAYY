@@ -1,81 +1,37 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: "test",
-  description: "Interact with ChatGPT for AI-generated responses",
-  author: "developer",
+  name: 'test',
+  description: 'Generate an image using the FLUX-Pro API.',
+  usage: '-flux [image prompt]',
+  author: 'coffee',
 
-  async execute(senderId, args, pageAccessToken, event, imageUrl) {
-    const userPrompt = args.join(" ").trim();
-
-    if (!userPrompt) {
-      return sendMessage(
-        senderId,
-        {
-          text: `❌ Please provide a prompt for ChatGPT to respond to.`
-        },
-        pageAccessToken
-      );
+  async execute(senderId, args, pageAccessToken) {
+    const prompt = args.join(' ').trim();
+    if (!prompt) {
+      return sendMessage(senderId, { text: 'Please provide an image prompt.' }, pageAccessToken);
     }
 
-    sendMessage(
-      senderId,
-      {
-        text: "⌛ Processing your request, please wait..."
-      },
-      pageAccessToken
-    );
+    const apiUrl = `https://elevnnnx-rest-api.onrender.com/api/FLUX-pro?prompt=${encodeURIComponent(prompt)}`;
 
     try {
-      const apiUrl = "https://mitski.onrender.com/api/chatgpt";
-      const response = await handleChatGPTRequest(apiUrl, userPrompt);
-
-      const result = response.response;
-
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
-
+      const response = await axios.get(apiUrl);
+      
+      if (response.data.status) {
+        const imgUrl = response.data.response;
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'image',
+            payload: { url: imgUrl }
+          }
+        }, pageAccessToken);
+      } else {
+        sendMessage(senderId, { text: 'Failed to generate an image using the FLUX-Pro API.' }, pageAccessToken);
+      }
     } catch (error) {
-      console.error("Error in ChatGPT command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
+      console.error('Error generating image:', error);
+      sendMessage(senderId, { text: 'An error occurred while generating the image. Please try again later.' }, pageAccessToken);
     }
   }
 };
-
-async function handleChatGPTRequest(apiUrl, query) {
-  const { data } = await axios.get(apiUrl, {
-    params: {
-      userId: "1",
-      question: query || ""
-    }
-  });
-
-  return data;
-}
-
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-}
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}

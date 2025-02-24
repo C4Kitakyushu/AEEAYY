@@ -17,7 +17,7 @@ module.exports = {
 
     for (let i = 0; i < amount; i++) {
       try {
-        const response = await axios.get('https://rest-api.joshuaapostol.site/ngl-spam', {
+        const response = await axios.get('https://elevnnnx-rest-api.onrender.com/api/nglspam?', {
           params: {
             username,
             message,

@@ -1,75 +1,38 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
 
 module.exports = {
-  name: "test",
-  description: "Perform a search query using an external API",
-  author: "developer",
+  name: 'test',
+  description: 'nglspam <usn> <mess> <amount>.',
+  author: 'developer',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    const username = args[0];
+    const amount = parseInt(args[args.length - 1], 10);
+    const message = args.slice(1, args.length - 1).join(' ');
 
-  async execute(senderId, args, pageAccessToken) {
-    const userQuery = args.join(" ").trim();
-
-    if (!userQuery) {
-      return sendMessage(
-        senderId,
-        { text: "❌ Please provide a search query." },
-        pageAccessToken
-      );
+    if (!username || !message || isNaN(amount) || amount <= 0) {
+      return sendMessage(senderId, { text: 'Usage: nglspam [username] [message] [amount]' }, pageAccessToken);
     }
 
-    sendMessage(
-      senderId,
-      { text: "⌛ Searching, please wait..." },
-      pageAccessToken
-    );
+    sendMessage(senderId, { text: '⚙️ Processing your request to send messages to NGL username...' }, pageAccessToken);
 
-    try {
-      const apiUrl = "https://elevnnnx-rest-api.onrender.com/api/search";
-      const response = await handleSearchRequest(apiUrl, userQuery);
-
-      const result = response.result || "No results found.";
-
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
-    } catch (error) {
-      console.error("Error in search command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
+    for (let i = 0; i < amount; i++) {
+      try {
+        const response = await axios.get('https://elevnnnx-rest-api.onrender.com/api/nglspam?', {
+          params: {
+            username,
+            message,
+            deviceId: 'myDevice',
+            amount: 1
+          }
+        });
+        console.log('Response:', response.data);
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between requests
+      }
     }
+
+    sendMessage(senderId, { text: 'All messages successfully sent ✅.' }, pageAccessToken);
   }
 };
-
-async function handleSearchRequest(apiUrl, query) {
-  const { data } = await axios.get(apiUrl, {
-    params: {
-      query: query || ""
-    }
-  });
-
-  return data;
-}
-
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-}
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}

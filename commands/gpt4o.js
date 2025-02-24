@@ -1,14 +1,17 @@
 const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
+const fs = require("fs");
+
+const token = fs.readFileSync("token.txt", "utf8");
 
 module.exports = {
   name: "gpt4o",
   description: "Interact with GPT-4 Omni for text-based responses",
   author: "developer",
 
-  async execute(senderId, args, pageAccessToken, event) {
-    const userPrompt = args.join(" ").trim();
-    const userId = event.sender.id;
+  async execute(senderId, args) {
+    const pageAccessToken = token;
+    const userPrompt = (args.join(" ") || "Hello").trim();
 
     if (!userPrompt) {
       return sendMessage(
@@ -18,42 +21,35 @@ module.exports = {
       );
     }
 
-    sendMessage(
-      senderId,
-      { text: "⌛ Processing your request, please wait..." },
-      pageAccessToken
-    );
+    await handleChatResponse(senderId, userPrompt, pageAccessToken);
+  },
+};
 
-    try {
-      const apiUrl = "https://yt-video-production.up.railway.app/gpt4-omni";
-      const response = await handleGPT4OmniRequest(apiUrl, userPrompt, userId);
+const handleChatResponse = async (senderId, input, pageAccessToken) => {
+  const apiUrl = "https://yt-video-production.up.railway.app/gpt4-omni";
 
-      const result = response.response;
+  try {
+    const response = await handleGPT4OmniRequest(apiUrl, input, senderId);
+    const result = response.response;
 
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
-    } catch (error) {
-      console.error("Error in GPT-4 Omni command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
-    }
+    await sendConcatenatedMessage(senderId, result, pageAccessToken);
+  } catch (error) {
+    console.error("Error in GPT-4 Omni command:", error);
+    await sendError(senderId, "❌ Error: Something went wrong.", pageAccessToken);
   }
 };
 
-async function handleGPT4OmniRequest(apiUrl, query, userId) {
+const handleGPT4OmniRequest = async (apiUrl, query, userId) => {
   const { data } = await axios.get(apiUrl, {
     params: {
       ask: query || "",
-      userid: userId
-    }
+      userid: userId,
+    },
   });
-
   return data;
-}
+};
 
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
   const maxMessageLength = 2000;
 
   if (text.length > maxMessageLength) {
@@ -66,12 +62,16 @@ async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   } else {
     await sendMessage(senderId, { text }, pageAccessToken);
   }
-}
+};
 
-function splitMessageIntoChunks(message, chunkSize) {
+const splitMessageIntoChunks = (message, chunkSize) => {
   const chunks = [];
   for (let i = 0; i < message.length; i += chunkSize) {
     chunks.push(message.slice(i, i + chunkSize));
   }
   return chunks;
-}
+};
+
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+};

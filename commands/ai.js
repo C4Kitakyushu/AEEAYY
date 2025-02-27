@@ -6,8 +6,8 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'ai',
-  description: 'interact with hershey ai',
-  usage: 'ai <your message>',
+  description: 'Interact with GPT-4o AI',
+  usage: 'gpt4o <your message>',
   author: 'developer',
 
   async execute(senderId, args) {
@@ -27,18 +27,15 @@ module.exports = {
 };
 
 const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const systemRole = 'You are Hershy AI, an AI assistant designed to help users with various queries.';
-  const prompt = `${systemRole}\n${input}`;
-  const apiUrl = `https://echoai.zetsu.xyz/ask?q=${encodeURIComponent(prompt)}`;
+  const apiUrl = `https://markdevs-last-api-p2y6.onrender.com/api/gpt4o?prompt=${encodeURIComponent(input)}&uid=${senderId}`;
 
   try {
-    
     const { data } = await axios.get(apiUrl);
-    const responseText = data || 'No response from the AI.';
+    const responseText = data.response || 'No response from the AI.';
 
     await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
   } catch (error) {
-    console.error('Error in Ai command:', error);
+    console.error('Error in GPT-4o command:', error);
     await sendError(senderId, '❌ Error: Something went wrong.', pageAccessToken);
   }
 };

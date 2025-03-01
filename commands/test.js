@@ -39,7 +39,7 @@ async function handleVeniceRequest(apiUrl, query, userId) {
   const { data } = await axios.get(apiUrl, {
     params: {
       ask: query || "",
-      uid: userId || "kupal"
+      uid: userId || "1"
     }
   });
 

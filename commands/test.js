@@ -3,7 +3,7 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "interact with gpt-4",
+  description: "Interact with Venice AI",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken) {
@@ -12,41 +12,37 @@ module.exports = {
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: "❌ please provide a prompt for gpt-4 to respond." },
+        { text: `❌ Please provide a prompt for Venice AI to respond to.` },
         pageAccessToken
       );
     }
 
-    sendMessage(
-      senderId,
-      { text: "⌛ processing your request, please wait..." },
-      pageAccessToken
-    );
-
     try {
-      const apiUrl = "https://markdevs-last-api.onrender.com/gpt4";
-      const response = await handleGPT4Request(apiUrl, userPrompt, senderId);
-      const result = response.response || "no response from the ai.";
-      
+      const apiUrl = "https://kaiz-apis.gleeze.com/api/venice-ai";
+      const response = await handleVeniceRequest(apiUrl, userPrompt, senderId);
+
+      const result = response.response;
+
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
     } catch (error) {
-      console.error("error in gpt-4 command:", error);
+      console.error("Error in Venice command:", error);
       sendMessage(
         senderId,
-        { text: `❌ error: ${error.message || "something went wrong."}` },
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
         pageAccessToken
       );
     }
   }
 };
 
-async function handleGPT4Request(apiUrl, query, uid) {
+async function handleVeniceRequest(apiUrl, query, userId) {
   const { data } = await axios.get(apiUrl, {
     params: {
-      prompt: query,
-      uid: uid
+      ask: query || "",
+      uid: userId || "kupal"
     }
   });
+
   return data;
 }
 
@@ -55,6 +51,7 @@ async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
 
   if (text.length > maxMessageLength) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
+
     for (const message of messages) {
       await new Promise(resolve => setTimeout(resolve, 500));
       await sendMessage(senderId, { text: message }, pageAccessToken);

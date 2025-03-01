@@ -1,42 +1,76 @@
-const axios = require('axios');
+const axios = require("axios");
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: 'test',
-  description: 'ask to claude sonnet 3.5',
-  author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    const message = args.join(' ').trim();
+  name: "test",
+  description: "Interact with Claude AI for text-based responses",
+  author: "developer",
 
-    if (!message) {
-      return sendMessage(senderId, { text: '𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝗮 𝘃𝗮𝗹𝗶𝗱 𝗾𝘂𝗲𝘀𝘁𝗶𝗼𝗻.' }, pageAccessToken);
+  async execute(senderId, args, pageAccessToken) {
+    const userPrompt = args.join(" ").trim();
+
+    if (!userPrompt) {
+      return sendMessage(
+        senderId,
+        { text: "❌ Please provide a message for Claude AI to respond to." },
+        pageAccessToken
+      );
     }
 
-    sendMessage(senderId, { text: '🕧 | 𝗦𝗲𝗮𝗿𝗰𝗵𝗶𝗻𝗴 𝗳𝗼𝗿 𝗮𝗻 𝗮𝗻𝘀𝘄𝗲𝗿, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
-
-    // Delay for 2 seconds
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const apiUrl = `http://sgp1.hmvhostings.com:25743/claude?message=${encodeURIComponent(message)}`;
+    sendMessage(
+      senderId,
+      { text: "⌛ Processing your request, please wait..." },
+      pageAccessToken
+    );
 
     try {
-      const response = await axios.get(apiUrl);
+      const apiUrl = "http://sgp1.hmvhostings.com:25743/claude";
+      const response = await handleClaudeRequest(apiUrl, userPrompt, senderId);
 
-      if (response.data && response.data.response) {
-        const answer = response.data.response;
-        const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+      const result = response.response;
 
-        const message = `✨ 𝗠𝗘𝗧𝗔𝗟𝗟𝗜𝗖 𝗖𝗛𝗥𝗢𝗠𝗘 𝗔𝗜 🤖\n━━━━━━━━━━━━━━━━━━\n${answer}\n━━━━━━━━━━━━━━━━━━\n⏰ 𝗥𝗲𝘀𝗽𝗼𝗻𝗱 𝗧𝗶𝗺𝗲: ${responseTime}`;
-
-        sendMessage(senderId, { text: message }, pageAccessToken);
-      } else {
-        console.error('API response did not contain expected data:', response.data);
-        sendMessage(senderId, { text: '❌ | An error occurred while generating the text response. Please try again later.' }, pageAccessToken);
-      }
+      await sendConcatenatedMessage(senderId, result, pageAccessToken);
     } catch (error) {
-      console.error('Error calling Claude Sonnet API:', error.message || error);
-      sendMessage(senderId, { 
-        text: `❌ | An error occurred while processing your request. Please try again later. Error details: ${error.message}` 
-      }, pageAccessToken);
+      console.error("Error in Claude command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
     }
   }
 };
+
+async function handleClaudeRequest(apiUrl, query, uid) {
+  const { data } = await axios.get(apiUrl, {
+    params: {
+      message: query || "",
+      uid: uid,
+    }
+  });
+
+  return data;
+}
+
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+  const maxMessageLength = 2000;
+
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+
+    for (const message of messages) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
+  }
+}
+
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+}

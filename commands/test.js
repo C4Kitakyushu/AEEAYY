@@ -3,7 +3,7 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Interact with MetaV2 AI",
+  description: "Interact with GPT-4o AI",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken) {
@@ -12,20 +12,20 @@ module.exports = {
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: `❌ Please provide a prompt for MetaV2 AI to respond to.` },
+        { text: `❌ Please provide a prompt for GPT-4o AI to respond to.` },
         pageAccessToken
       );
     }
 
     try {
-      const apiUrl = "https://markdevs-last-api-p2y6.onrender.com/metav2";
-      const response = await handleMetaV2Request(apiUrl, userPrompt, senderId);
+      const apiUrl = "https://api.zetsu.xyz/api/gpt-4o";
+      const response = await handleGPT4oRequest(apiUrl, userPrompt, senderId);
 
       const result = response.response;
 
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
     } catch (error) {
-      console.error("Error in MetaV2 command:", error);
+      console.error("Error in GPT-4o command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },
@@ -35,10 +35,10 @@ module.exports = {
   }
 };
 
-async function handleMetaV2Request(apiUrl, query, userId) {
+async function handleGPT4oRequest(apiUrl, query, userId) {
   const { data } = await axios.get(apiUrl, {
     params: {
-      prompt: query || "",
+      q: query || "",
       uid: userId || "1"
     }
   });

@@ -1,52 +1,46 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: "test",
-  description: "Interact with GPT-4o AI",
-  author: "developer",
+  name: 'test',
+  description: 'Interact with Venice AI',
+  usage: 'venice <your message>',
+  author: 'developer',
 
-  async execute(senderId, args, pageAccessToken) {
-    const userPrompt = args.join(" ").trim();
+  async execute(senderId, args) {
+    const pageAccessToken = token;
+    const userPrompt = (args.join(' ') || 'Hello').trim();
 
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: `❌ Please provide a prompt for GPT-4o AI to respond to.` },
+        { text: '❌ Please provide a question or prompt for Venice AI to respond.' },
         pageAccessToken
       );
     }
 
-    try {
-      const apiUrl = "https://api.zetsu.xyz/api/gpt-4o";
-      const response = await handleGPT4oRequest(apiUrl, userPrompt, senderId);
+    await handleVeniceResponse(senderId, userPrompt, pageAccessToken);
+  },
+};
 
-      const result = response.response;
+const handleVeniceResponse = async (senderId, input, pageAccessToken) => {
+  const apiUrl = `https://kaiz-apis.gleeze.com/api/venice-ai?ask=${encodeURIComponent(input)}&uid=${senderId}`;
 
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
-    } catch (error) {
-      console.error("Error in GPT-4o command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
-    }
+  try {
+    const { data } = await axios.get(apiUrl);
+    const responseText = data.response || 'No response from Venice AI.';
+
+    await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
+  } catch (error) {
+    console.error('Error in Venice AI command:', error);
+    await sendError(senderId, '❌ Error: Something went wrong.', pageAccessToken);
   }
 };
 
-async function handleGPT4oRequest(apiUrl, query, userId) {
-  const { data } = await axios.get(apiUrl, {
-    params: {
-      q: query || "",
-      uid: userId || "1"
-    }
-  });
-
-  return data;
-}
-
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
   const maxMessageLength = 2000;
 
   if (text.length > maxMessageLength) {
@@ -59,12 +53,16 @@ async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   } else {
     await sendMessage(senderId, { text }, pageAccessToken);
   }
-}
+};
 
-function splitMessageIntoChunks(message, chunkSize) {
+const splitMessageIntoChunks = (message, chunkSize) => {
   const chunks = [];
   for (let i = 0; i < message.length; i += chunkSize) {
     chunks.push(message.slice(i, i + chunkSize));
   }
   return chunks;
-}
+};
+
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+};

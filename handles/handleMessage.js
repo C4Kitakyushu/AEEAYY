@@ -53,89 +53,7 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-  // Handling "deepseek" command
-if (messageText.startsWith('deepseek')) {
-  const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
-  const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
-
-  try {
-    // Execute the "deepseek" command
-    await commands.get('deepseek').execute(senderId, args, pageAccessToken, event, lastImage);
-
-    // Clear the stored image after processing
-    lastImageByUser.delete(senderId);
-  } catch (error) {
-    console.error('Error while processing the AI3 command:', error);
-    // Send error feedback to the user
-    await sendMessage(
-      senderId, 
-      { text: '❌ An error occurred while processing your AI3 request. Please try again later.' }, 
-      pageAccessToken
-    );
-  }
-  return;
-}
-
-if (messageText === 'imgbb') {
-  const lastImage = lastImageByUser.get(senderId);
-  const lastVideo = lastVideoByUser.get(senderId);
-  const mediaToUpload = lastImage || lastVideo;
-
-  if (mediaToUpload) {
-    try {
-      await commands.get('imgbb').execute(senderId, [], pageAccessToken, mediaToUpload);
-      lastImageByUser.delete(senderId);
-      lastVideoByUser.delete(senderId);
-    } catch (error) {
-      await sendMessage(senderId, { text: '❌ An error occurred while processing your request. Please try again later.' }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, {
-      text: '❌ Please send an image or video first, then type "imgbb" to upload and get the link.',
-    }, pageAccessToken);
-  }
-  return;
-}
-
-    // Handling "upscale" command
-if (messageText === 'upscale') {
-  const lastImage = lastImageByUser.get(senderId);
-  if (lastImage) {
-    try {
-      await commands.get('upscale').execute(senderId, [], pageAccessToken, lastImage);
-      lastImageByUser.delete(senderId); // Remove the image from memory after processing
-    } catch (error) {
-      await sendMessage(senderId, { text: '❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗽𝗿𝗼𝗰𝗲𝘀𝘀𝗶𝗻𝗴 𝘁𝗵𝗲 𝗶𝗺𝗮𝗴𝗲.' }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗿𝗲𝗺𝗶𝗻𝗶" 𝘁𝗼 𝗲𝗻𝗵𝗮𝗻𝗰𝗲 𝗶𝘁.' }, pageAccessToken);
-  }
-  return;
-}
-
-    // Handling "geminiv2" command
-if (messageText.startsWith('geminiv2')) {
-  const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
-  const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
-
-  try {
-    // Execute the "geminiv2" command
-    await commands.get('geminiv2').execute(senderId, args, pageAccessToken, event, lastImage);
-    
-    // Clear the stored image after processing
-    lastImageByUser.delete(senderId);
-  } catch (error) {
-    console.error('Error while processing the Gemini command:', error);
-    // Send error feedback to the user
-    await sendMessage(
-      senderId, 
-      { text: '❌ An error occurred while processing your Gemini request. Please try again later.' }, 
-      pageAccessToken
-    );
-  }
-  return;
-}
-
+  
     // Handling "gemini" command
 if (messageText.startsWith('gemini')) {
   const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
@@ -178,43 +96,7 @@ if (messageText === 'imgur') {
       }
       return;
     }
-// Handling "remini" command
-if (messageText === 'remini') {
-  const lastImage = lastImageByUser.get(senderId);
-  if (lastImage) {
-    try {
-      await commands.get('remini').execute(senderId, [], pageAccessToken, lastImage);
-      lastImageByUser.delete(senderId); // Remove the image from memory after processing
-    } catch (error) {
-      await sendMessage(senderId, { text: '❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗽𝗿𝗼𝗰𝗲𝘀𝘀𝗶𝗻𝗴 𝘁𝗵𝗲 𝗶𝗺𝗮𝗴𝗲.' }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗿𝗲𝗺𝗶𝗻𝗶" 𝘁𝗼 𝗲𝗻𝗵𝗮𝗻𝗰𝗲 𝗶𝘁.' }, pageAccessToken);
-  }
-  return;
-}
 
-if (messageText.startsWith('tint')) {
-  const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
-  const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
-
-  try {
-    // Execute the "" command
-    await commands.get('tint').execute(senderId, args, pageAccessToken, event, lastImage);
-
-    // Clear the stored image after processing
-    lastImageByUser.delete(senderId);
-  } catch (error) {
-    console.error('Error while processing the AI3 command:', error);
-    // Send error feedback to the user
-    await sendMessage(
-      senderId, 
-      { text: '❌ An error occurred while processing your AI3 request. Please try again later.' }, 
-      pageAccessToken
-    );
-  }
-  return;
-}
 
     // Other command processing logic....    let commandName, args;
     if (messageText.startsWith(prefix)) {

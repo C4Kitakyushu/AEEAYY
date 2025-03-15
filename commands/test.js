@@ -2,44 +2,37 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'test',
-  description: 'Enhance image quality using the Upscale API.',
+  name: 'gdrive',
+  description: 'Upload media to Google Drive link.',
   author: 'Jonell Magallanes',
 
-  async execute(senderId, args, pageAccessToken, imageUrl) {
-    if (!imageUrl) {
+  async execute(senderId, args, pageAccessToken, attachmentUrl) {
+    if (!attachmentUrl) {
       return sendMessage(senderId, {
-        text: `𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝘂𝗽𝘀𝗰𝗮𝗹𝗲" 𝘁𝗼 𝗶𝗺𝗽𝗿𝗼𝘃𝗲 𝗶𝘁𝘀 𝗾𝘂𝗮𝗹𝗶𝘁𝘆.`
+        text: '❌ No attachment detected. Please send an image or video first.'
       }, pageAccessToken);
     }
 
-    await sendMessage(senderId, { text: '⌛ 𝗘𝗻𝗵𝗮𝗻𝗰𝗶𝗻𝗴 𝗶𝗺𝗮𝗴𝗲 𝗾𝘂𝗮𝗹𝗶𝘁𝘆, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
+    await sendMessage(senderId, { 
+      text: '⌛ Uploading the attachment to Google Drive... Please wait.' 
+    }, pageAccessToken);
 
     try {
-      const apiUrl = `https://hiroshi-api.onrender.com/image/upscale?url=${encodeURIComponent(imageUrl)}`;
+      const apiUrl = `https://ccprojectapis.ddns.net/api/gdrive?url=${encodeURIComponent(attachmentUrl)}`;
       const response = await axios.get(apiUrl);
+      const gdriveLink = response?.data;
 
-      if (response.data) {
-        const processedImageURL = response.data;
-
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: {
-              url: processedImageURL
-            }
-          }
-        }, pageAccessToken);
-      } else {
-        await sendMessage(senderId, {
-          text: '❎ | Failed to enhance the image. Please try again later.'
-        }, pageAccessToken);
+      if (!gdriveLink) {
+        throw new Error('❌ Google Drive link not found in the response');
       }
 
-    } catch (error) {
-      console.error('Error enhancing image:', error);
       await sendMessage(senderId, {
-        text: '❎ | An error occurred while processing the image. Please try again later.'
+        text: `☁️ 𝗚𝗼𝗼𝗴𝗹𝗲 𝗗𝗿𝗶𝘃𝗲 𝗨𝗽𝗹𝗼𝗮𝗱 𝗖𝗼𝗺𝗽𝗹𝗲𝘁𝗲𝗱:\n\n🔗 ${gdriveLink}`
+      }, pageAccessToken);
+    } catch (error) {
+      console.error('❌ Error uploading to Google Drive:', error.response?.data || error.message);
+      await sendMessage(senderId, {
+        text: '❌ An error occurred while uploading to Google Drive. Please try again later.'
       }, pageAccessToken);
     }
   }

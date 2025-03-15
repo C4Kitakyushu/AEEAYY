@@ -1,6 +1,5 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs-extra');
 
 module.exports = {
   name: 'test',

@@ -20,11 +20,14 @@ module.exports = {
     const apiUrl = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(imageUrl)}`;
 
     try {
+      const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
+      const imageBase64 = `data:image/jpeg;base64,${Buffer.from(response.data).toString('base64')}`;
+
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: apiUrl
+            url: imageBase64
           }
         }
       }, pageAccessToken);

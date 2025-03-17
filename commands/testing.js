@@ -1,45 +1,47 @@
 const axios = require('axios');
 
-const EMAIL_API_URL = "https://markdevs-last-api-p2y6.onrender.com/api/gen";
-const INBOX_API_URL = "https://aryanchauhanapi.onrender.com/inbox?email=";
+const EMAIL_API_URL = "https://kaiz-apis.gleeze.com/api/tempmail-create";
+const INBOX_API_URL = "https://kaiz-apis.gleeze.com/api/tempmail-inbox?token=";
 
 module.exports = {
   name: 'testing',
-  description: 'generate temporary email or check inbox',
-  author: 'developer',
+  description: 'Generate temporary email or check inbox',
+  author: 'Kaizenji',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     try {
       if (args.length === 0) {
-        return sendMessage(senderId, { text: "tempmail create and tempmail inbox <email>" }, pageAccessToken);
+        return sendMessage(senderId, { text: "Use 'tempmail create' to generate an email or 'tempmail inbox <token>' to check inbox." }, pageAccessToken);
       }
 
       const command = args[0].toLowerCase();
 
       if (command === 'create') {
-        let email;
+        let email, token;
         try {
-          // Generate a random temporary email
-          const response = await axios.get(EMAIL_API_URL);
-          email = response.data.email;
+          const response = await axios.post(EMAIL_API_URL, {
+            author: "Kaizenji",
+            note: "To check inbox, use the token with the endpoint."
+          });
 
-          if (!email) {
-            throw new Error("Failed to generate email");
+          email = response.data.address;
+          token = response.data.token;
+
+          if (!email || !token) {
+            throw new Error("Failed to generate email or retrieve token.");
           }
         } catch (error) {
           console.error("❌ | Failed to generate email", error.message);
           return sendMessage(senderId, { text: `❌ | Failed to generate email. Error: ${error.message}` }, pageAccessToken);
         }
-        return sendMessage(senderId, { text: `generated email ✉️: ${email}` }, pageAccessToken);
+
+        return sendMessage(senderId, { text: `Generated email ✉️: ${email}\n🔑 Token: ${token}` }, pageAccessToken);
+
       } else if (command === 'inbox' && args.length === 2) {
-        const email = args[1];
-        if (!email) {
-          return sendMessage(senderId, { text: "❌ | Please provide an email address to check the inbox." }, pageAccessToken);
-        }
+        const token = args[1];
 
         let inboxMessages;
         try {
-          // Retrieve messages from the specified email
-          const inboxResponse = await axios.get(`${INBOX_API_URL}${email}`);
+          const inboxResponse = await axios.get(`${INBOX_API_URL}${token}`);
           inboxMessages = inboxResponse.data;
 
           if (!Array.isArray(inboxMessages)) {
@@ -61,9 +63,10 @@ module.exports = {
         const subject = latestMessage.subject || "No subject";
 
         const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;
-        return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
+        return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages:\n${formattedMessage}` }, pageAccessToken);
+
       } else {
-        return sendMessage(senderId, { text: `❌ | Invalid command. Use 'tempmail create (generate email)\ntempmail inbox <email>. (to inbox code)` }, pageAccessToken);
+        return sendMessage(senderId, { text: `❌ | Invalid command. Use 'tempmail create' to generate an email or 'tempmail inbox <token>' to check inbox.` }, pageAccessToken);
       }
     } catch (error) {
       console.error("Unexpected error:", error.message);

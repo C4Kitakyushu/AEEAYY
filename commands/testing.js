@@ -1,67 +1,24 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
-const fs = require("fs");
-
-const token = fs.readFileSync("token.txt", "utf8");
+const axios = require('axios');
 
 module.exports = {
-  name: "testing",
-  description: "Interact with GPT-4 via CCProject API",
-  author: "developer",
+  name: 'testing',
+  description: 'fetch a random bible verse!',
+  author: 'CH4IRMANNN',
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲..." }, pageAccessToken);
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
-    const userPrompt = (args.join(" ") || "Hello").trim();
+    try {
+      const response = await axios.get('https://elevnnnx-rest-api.onrender.com/api/bibleverse');
+      const { verse } = response.data;
 
-    if (!userPrompt) {
-      return sendMessage(
-        senderId,
-        { text: "❌ Please provide a message for GPT-4 to respond to." },
-        pageAccessToken
-      );
+      if (!verse) {
+        return sendMessage(senderId, { text: "🥺 𝗦𝗼𝗿𝗿𝘆, 𝗜 𝗰𝗼𝘂𝗹𝗱𝗻'𝘁 𝗳𝗶𝗻𝗱 𝗮 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲." }, pageAccessToken);
+      }
+
+      sendMessage(senderId, { text: `📖 𝗛𝗲𝗿𝗲 𝗶𝘀 𝘁𝗵𝗲 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲:\n\n${verse}` }, pageAccessToken);
+    } catch (error) {
+      console.error(error);
+      sendMessage(senderId, { text: `❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱: ${error.message}` }, pageAccessToken);
     }
-
-    await handleChatResponse(senderId, userPrompt, pageAccessToken);
-  },
-};
-
-const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = `https://ccprojectapis.ddns.net/api/gpt4?ask=${encodeURIComponent(input)}&id=${encodeURIComponent(senderId)}`;
-
-  try {
-    const { data } = await axios.get(apiUrl);
-    const responseText = data || "No response from the AI.";
-
-    await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
-  } catch (error) {
-    console.error("Error in GPT-4 CCProject command:", error);
-    await sendError(senderId, "❌ Error: Something went wrong.", pageAccessToken);
   }
-};
-
-const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-};
-
-const splitMessageIntoChunks = (message, chunkSize) => {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-};
-
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
 };

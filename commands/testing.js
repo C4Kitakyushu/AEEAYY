@@ -2,13 +2,19 @@ const axios = require('axios');
 
 module.exports = {
   name: 'testing',
-  description: 'fetch a random bible verse!',
+  description: 'Fetch a random Bible verse!',
   author: 'CH4IRMANNN',
   async execute(senderId, args, pageAccessToken, sendMessage) {
     sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲..." }, pageAccessToken);
 
+    const params = {
+      book: args[0] || '',       // Specify book if provided (e.g., "Proverbs")
+      chapter: args[1] || '',    // Specify chapter if provided
+      verse: args[2] || ''       // Specify verse if provided
+    };
+
     try {
-      const response = await axios.get('https://elevnnnx-rest-api.onrender.com/api/bibleverse');
+      const response = await axios.get('https://elevnnnx-rest-api.onrender.com/api/bibleverse', { params });
       const { verse } = response.data;
 
       if (!verse) {

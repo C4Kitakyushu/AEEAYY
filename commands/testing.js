@@ -1,31 +1,73 @@
 const axios = require('axios');
 
+const EMAIL_API_URL = "https://markdevs-last-api-p2y6.onrender.com/api/gen";
+const INBOX_API_URL = "https://aryanchauhanapi.onrender.com/inbox?email=";
+
 module.exports = {
   name: 'testing',
-  description: 'Fetch a Bible verse!',
-  author: 'Dale Mekumi',
+  description: 'generate temporary email or check inbox',
+  author: 'developer',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    sendMessage(senderId, { text: "📖 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲..." }, pageAccessToken);
-
     try {
-      const response = await axios.get('https://elevnnnx-rest-api.onrender.com/api/bibleverse', {
-        params: {
-          text: "Many are the plans in a person’s heart, but it is the Lord’s purpose that prevails. - Proverbs 19:21 (NIV)\n"
-        }
-      });
-
-      const verse = response.data.verse || response.data;  // Handle different possible data structures
-
-      if (!verse) {
-        return sendMessage(senderId, { text: "🥺 𝗦𝗼𝗿𝗿𝘆, 𝗜 𝗰𝗼𝘂𝗹𝗱𝗻'𝘁 𝗳𝗶𝗻𝗱 𝗮 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲." }, pageAccessToken);
+      if (args.length === 0) {
+        return sendMessage(senderId, { text: "tempmail create and tempmail inbox <email>" }, pageAccessToken);
       }
 
-      sendMessage(senderId, { 
-        text: `📜 𝗕𝗶𝗯𝗹𝗲 𝗩𝗲𝗿𝘀𝗲\n\n"${verse}"`
-      }, pageAccessToken);
+      const command = args[0].toLowerCase();
+
+      if (command === 'create') {
+        let email;
+        try {
+          // Generate a random temporary email
+          const response = await axios.get(EMAIL_API_URL);
+          email = response.data.email;
+
+          if (!email) {
+            throw new Error("Failed to generate email");
+          }
+        } catch (error) {
+          console.error("❌ | Failed to generate email", error.message);
+          return sendMessage(senderId, { text: `❌ | Failed to generate email. Error: ${error.message}` }, pageAccessToken);
+        }
+        return sendMessage(senderId, { text: `generated email ✉️: ${email}` }, pageAccessToken);
+      } else if (command === 'inbox' && args.length === 2) {
+        const email = args[1];
+        if (!email) {
+          return sendMessage(senderId, { text: "❌ | Please provide an email address to check the inbox." }, pageAccessToken);
+        }
+
+        let inboxMessages;
+        try {
+          // Retrieve messages from the specified email
+          const inboxResponse = await axios.get(`${INBOX_API_URL}${email}`);
+          inboxMessages = inboxResponse.data;
+
+          if (!Array.isArray(inboxMessages)) {
+            throw new Error("Unexpected response format");
+          }
+        } catch (error) {
+          console.error(`❌ | Failed to retrieve inbox messages`, error.message);
+          return sendMessage(senderId, { text: `❌ | Failed to retrieve inbox messages. Error: ${error.message}` }, pageAccessToken);
+        }
+
+        if (inboxMessages.length === 0) {
+          return sendMessage(senderId, { text: "❌ | No messages found in the inbox." }, pageAccessToken);
+        }
+
+        // Get the most recent message
+        const latestMessage = inboxMessages[0];
+        const from = latestMessage.from || "Unknown sender";
+        const date = latestMessage.date || "Unknown date";
+        const subject = latestMessage.subject || "No subject";
+
+        const formattedMessage = `📧 From: ${from}\n📩 Subject: ${subject}\n📅 Date: ${date}\n━━━━━━━━━━━━━━━━`;
+        return sendMessage(senderId, { text: `━━━━━━━━━━━━━━━━\n📬 Inbox messages for ${email}:\n${formattedMessage}` }, pageAccessToken);
+      } else {
+        return sendMessage(senderId, { text: `❌ | Invalid command. Use 'tempmail create (generate email)\ntempmail inbox <email>. (to inbox code)` }, pageAccessToken);
+      }
     } catch (error) {
-      console.error(error);
-      sendMessage(senderId, { text: `❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱: ${error.message}` }, pageAccessToken);
+      console.error("Unexpected error:", error.message);
+      return sendMessage(senderId, { text: `❌ | An unexpected error occurred: ${error.message}` }, pageAccessToken);
     }
   }
 };

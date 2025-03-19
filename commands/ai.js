@@ -6,36 +6,69 @@ const token = fs.readFileSync("token.txt", "utf8");
 
 module.exports = {
   name: "ai",
-  description: "Interact with GPT-4 via CCProject API",
+  description: "Interact with Gemini Vision",
   author: "developer",
 
-  async execute(senderId, args) {
+  async execute(senderId, args, event, imageUrl) {
     const pageAccessToken = token;
     const userPrompt = (args.join(" ") || "Hello").trim();
+    const repliedMessage = event.message.reply_to?.message || "";
+    const finalPrompt = repliedMessage ? `${repliedMessage} ${userPrompt}`.trim() : userPrompt;
 
-    if (!userPrompt) {
+    if (!finalPrompt) {
       return sendMessage(
         senderId,
-        { text: "❌ Please provide a message for GPT-4 to respond to." },
+        { text: "Kindly provide your specific questions." },
         pageAccessToken
       );
     }
 
-    await handleChatResponse(senderId, userPrompt, pageAccessToken);
+    try {
+      if (!imageUrl) {
+        if (event.message.reply_to && event.message.reply_to.mid) {
+          imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
+        } else if (event.message?.attachments && event.message.attachments[0]?.type === "image") {
+          imageUrl = event.message.attachments[0].payload.url;
+        }
+      }
+
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/gemini-vision`;
+      const response = await handleImageRecognition(apiUrl, finalPrompt, imageUrl, senderId);
+      const result = response.response;
+      const visionResponse = `${result}`;
+
+      await sendConcatenatedMessage(senderId, visionResponse, pageAccessToken);
+
+    } catch (error) {
+      console.error("Error in AI command:", error);
+      await sendError(senderId, "❌ Error: Something went wrong.", pageAccessToken);
+    }
   },
 };
 
-const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = `https://ccprojectapis.ddns.net/api/gpt4?ask=${encodeURIComponent(input)}&id=${encodeURIComponent(senderId)}`;
-
+const handleImageRecognition = async (apiUrl, prompt, imageUrl, senderId) => {
   try {
-    const { data } = await axios.get(apiUrl);
-    const responseText = data || "No response from the AI.";
-
-    await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
+    const { data } = await axios.get(apiUrl, {
+      params: {
+        q: prompt,
+        uid: senderId,
+        imageUrl: imageUrl || ""
+      }
+    });
+    return data;
   } catch (error) {
-    console.error("Error in GPT-4 CCProject command:", error);
-    await sendError(senderId, "❌ Error: Something went wrong.", pageAccessToken);
+    throw new Error("Failed to connect to the Gemini Vision API.");
+  }
+};
+
+const getRepliedImage = async (mid, pageAccessToken) => {
+  try {
+    const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
+      params: { access_token: pageAccessToken }
+    });
+    return data?.data[0]?.image_data?.url || "";
+  } catch (error) {
+    throw new Error("Failed to retrieve replied image.");
   }
 };
 

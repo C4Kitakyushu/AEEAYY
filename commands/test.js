@@ -69,7 +69,10 @@ module.exports = {
           sendMessage(
             senderId,
             {
-              text: `📥 •=====[Inbox]=====•\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n📅 Date: ${inboxDate}\n\n💌 Message:\n${inboxBody}`
+              text: `🛡️ | TOKEN VERIFIED ✅\n\n\EMAIL INBOX
+━━━━━━━━━━━━━━━━
+👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}
+━━━━━━━━━━━━━━━━`
             },
             pageAccessToken
           );

@@ -27,8 +27,8 @@ module.exports = {
           );
         }
 
+        const email = data.email; // Email directly from the API response
         const token = data.token;
-        const email = data.email; // Use the email directly from the API response
 
         sendMessage(
           senderId,

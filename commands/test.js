@@ -33,7 +33,7 @@ module.exports = {
         sendMessage(
           senderId,
           {
-            text: `📧 | **Temporary Email:** ${email}\n\n🔑 | **Token:**\n${token}\n\nUse this token to check the inbox.`
+            text: `📧 | Generated Email: ${email}\n\n🔑 | TOKEN\n${token}\n\nUse this token to check the inbox\ntempmail inbox <token>.`
           },
           pageAccessToken
         );

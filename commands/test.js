@@ -19,7 +19,7 @@ module.exports = {
         const response = await axios.get("https://kaiz-apis.gleeze.com/api/tempmail-create");
         const data = response.data;
 
-        if (!data || !data.email || !data.token) {
+        if (!data || !data.token) {
           return sendMessage(
             senderId,
             { text: "⚠️ Failed to generate email. Please try again later." },
@@ -27,11 +27,16 @@ module.exports = {
           );
         }
 
-        const { email, token } = data;
+        const token = data.token;
+        const emailPrefix = token.slice(0, 12); // Create email format by combining token
+        const emailDomain = "ktxri.terriblecoffee.org"; // Custom domain for display
+        const email = `${emailPrefix}@${emailDomain}`;
 
         sendMessage(
           senderId,
-          { text: `✅ Here is your generated email:\n\n✉️ Email: ${email}\n🔑 Token: ${token}\n\nUse \`tempmailv2 inbox ${token}\` to check your inbox.` },
+          {
+            text: `📧 | **Temporary Email:** ${email}\n\n🔑 | **Token:**\n${token}\n\nUse this token to check the inbox.`
+          },
           pageAccessToken
         );
       } catch (error) {

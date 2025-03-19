@@ -1,13 +1,14 @@
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios'); // Added axios for HTTP requests
+const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 
 const commands = new Map();
-const lastImageByUser = new Map(); // Store the last image sent by each user
-const lastVideoByUser = new Map(); // Store the last video sent by each user
+const lastImageByUser = new Map();
+const lastVideoByUser = new Map();
 const prefix = '-';
 
+// Load commands dynamically
 const commandFiles = fs.readdirSync(path.join(__dirname, '../commands')).filter(file => file.endsWith('.js'));
 for (const file of commandFiles) {
   const command = require(`../commands/${file}`);
@@ -37,6 +38,25 @@ async function handleMessage(event, pageAccessToken) {
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
 
+    // Handling "gemini" command
+    if (messageText.startsWith('ai')) {
+      const lastImage = lastImageByUser.get(senderId);
+      const args = messageText.split(/\s+/).slice(1);
+
+      try {
+        await commands.get('ai').execute(senderId, args, pageAccessToken, event, lastImage);
+        lastImageByUser.delete(senderId);
+      } catch (error) {
+        console.error('Error while processing the Gemini command:', error);
+        await sendMessage(
+          senderId,
+          { text: '❌ An error occurred while processing your Gemini request. Please try again later.' },
+          pageAccessToken
+        );
+      }
+      return;
+    }
+
     // Handling "removebg" command
     if (messageText === 'removebg') {
       const lastImage = lastImageByUser.get(senderId);
@@ -45,59 +65,17 @@ async function handleMessage(event, pageAccessToken) {
           await commands.get('removebg').execute(senderId, [], pageAccessToken, lastImage);
           lastImageByUser.delete(senderId);
         } catch (error) {
-          await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
+          await sendMessage(senderId, { text: '❌ An error occurred while processing the image.' }, pageAccessToken);
         }
       } else {
-        await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗿𝗲𝗺𝗼𝘃𝗲𝗯𝗴" 𝘁𝗼 𝗿𝗲𝗺𝗼𝘃𝗲 𝗶𝘁𝘀 𝗯𝗮𝗰𝗸𝗴𝗿𝗼𝘂𝗻𝗱.' }, pageAccessToken);
+        await sendMessage(senderId, { text: '❌ Please send an image first, then type "removebg" to remove its background.' }, pageAccessToken);
       }
       return;
     }
 
-    // Handling "removebg" command
-    if (messageText === 'test') {
-      const lastImage = lastImageByUser.get(senderId);
-      if (lastImage) {
-        try {
-          await commands.get('test').execute(senderId, [], pageAccessToken, lastImage);
-          lastImageByUser.delete(senderId);
-        } catch (error) {
-          await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗿𝗲𝗺𝗼𝘃𝗲𝗯𝗴" 𝘁𝗼 𝗿𝗲𝗺𝗼𝘃𝗲 𝗶𝘁𝘀 𝗯𝗮𝗰𝗸𝗴𝗿𝗼𝘂𝗻𝗱.' }, pageAccessToken);
-      }
-      return;
-    }
-
-
-    // Handling "gemini" command
-if (messageText.startsWith('gemini')) {
-  const lastImage = lastImageByUser.get(senderId); // Retrieve the last image sent by the user
-  const args = messageText.split(/\s+/).slice(1); // Extract arguments from the command
-
-  try {
-    // Execute the "gemini" command
-    await commands.get('gemini').execute(senderId, args, pageAccessToken, event, lastImage);
-
-    // Clear the stored image after processing
-    lastImageByUser.delete(senderId);
-  } catch (error) {
-    console.error('Error while processing the Gemini command:', error);
-    // Send error feedback to the user
-    await sendMessage(
-      senderId, 
-      { text: '❌ An error occurred while processing your Gemini request. Please try again later.' }, 
-      pageAccessToken
-    );
-  }
-  return;
-}
-
-
-if (messageText === 'imgur') {
-      const lastImage = lastImageByUser.get(senderId);
-      const lastVideo = lastVideoByUser.get(senderId);
-      const mediaToUpload = lastImage || lastVideo;
+    // Handling "imgur" command
+    if (messageText === 'imgur') {
+      const mediaToUpload = lastImageByUser.get(senderId) || lastVideoByUser.get(senderId);
 
       if (mediaToUpload) {
         try {
@@ -108,15 +86,14 @@ if (messageText === 'imgur') {
           await sendMessage(senderId, { text: '🫵😼' }, pageAccessToken);
         }
       } else {
-        await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗼𝗿 𝘃𝗶𝗱𝗲𝗼 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗶𝗺𝗴𝘂𝗿" 𝘁𝗼 𝘂𝗽𝗹𝗼𝗮𝗱 𝗰𝗼𝗻𝘃𝗲𝗿𝘁 𝗹𝗶𝗻𝗸' }, pageAccessToken);
+        await sendMessage(senderId, { text: '❌ Please send an image or video first, then type "imgur" to upload.' }, pageAccessToken);
       }
       return;
     }
 
-if (messageText === 'gdrive') {
-      const lastImage = lastImageByUser.get(senderId);
-      const lastVideo = lastVideoByUser.get(senderId);
-      const mediaToUpload = lastImage || lastVideo;
+    // Handling "gdrive" command
+    if (messageText === 'gdrive') {
+      const mediaToUpload = lastImageByUser.get(senderId) || lastVideoByUser.get(senderId);
 
       if (mediaToUpload) {
         try {
@@ -127,12 +104,13 @@ if (messageText === 'gdrive') {
           await sendMessage(senderId, { text: '🫵😼' }, pageAccessToken);
         }
       } else {
-        await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗼𝗿 𝘃𝗶𝗱𝗲𝗼 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗶𝗺𝗴𝘂𝗿" 𝘁𝗼 𝘂𝗽𝗹𝗼𝗮𝗱 𝗰𝗼𝗻𝘃𝗲𝗿𝘁 𝗹𝗶𝗻𝗸' }, pageAccessToken);
+        await sendMessage(senderId, { text: '❌ Please send an image or video first, then type "gdrive" to upload.' }, pageAccessToken);
       }
       return;
     }
 
-    // Other command processing logic....    let commandName, args;
+    // Generic Command Handling (Prefix & Non-Prefix)
+    let commandName, args;
     if (messageText.startsWith(prefix)) {
       const argsArray = messageText.slice(prefix.length).split(' ');
       commandName = argsArray.shift().toLowerCase();
@@ -149,18 +127,19 @@ if (messageText === 'gdrive') {
         await command.execute(senderId, args, pageAccessToken, sendMessage);
       } catch (error) {
         console.error(`Error executing command ${commandName}:`, error);
-        sendMessage(senderId, { text: `There was an error executing the command "${commandName}". Please try again later.` }, pageAccessToken);
+        await sendMessage(senderId, { text: `❌ Error executing command "${commandName}". Please try again later.` }, pageAccessToken);
       }
       return;
     }
 
+    // Default to AI Command if no other command matches
     const aiCommand = commands.get('ai');
     if (aiCommand) {
       try {
         await aiCommand.execute(senderId, [messageText], pageAccessToken);
       } catch (error) {
-        console.error('Error executing Ai command:', error);
-        sendMessage(senderId, { text: 'There was an error processing your request.' }, pageAccessToken);
+        console.error('Error executing AI command:', error);
+        await sendMessage(senderId, { text: '❌ There was an error processing your request.' }, pageAccessToken);
       }
     }
   } else if (event.message) {
@@ -171,6 +150,3 @@ if (messageText === 'gdrive') {
 }
 
 module.exports = { handleMessage };
-
-
-    

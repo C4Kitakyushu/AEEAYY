@@ -19,7 +19,7 @@ module.exports = {
         const response = await axios.get("https://kaiz-apis.gleeze.com/api/tempmail-create");
         const data = response.data;
 
-        if (!data || !data.token || !data.domain) {
+        if (!data || !data.token || !data.email) {
           return sendMessage(
             senderId,
             { text: "⚠️ Failed to generate email. Please try again later." },
@@ -27,10 +27,8 @@ module.exports = {
           );
         }
 
+        const email = data.email;
         const token = data.token;
-        const domain = data.domain || "unknown.domain";
-        const emailPrefix = token.slice(0, 12); // Create email prefix based on token
-        const email = `${emailPrefix}@${domain}`;
 
         sendMessage(
           senderId,
@@ -71,7 +69,7 @@ module.exports = {
           sendMessage(
             senderId,
             {
-              text: `📥 •=====[Inbox]=====•\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n📅 Date: ${inboxDate}\n\n💌 Message:\n${inboxBody}`
+              text: `📥 •=====[Inbox]=====•\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}`
             },
             pageAccessToken
           );

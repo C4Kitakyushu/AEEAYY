@@ -1,42 +1,82 @@
-const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
+const axios = require("axios");
 
 module.exports = {
-  name: 'test',
-  description: 'Upscale an image to higher resolution using version 2 of the API',
-  author: 'Rized',
+  name: "tempmail",
+  description: "Generate a temporary email and fetch inbox messages",
+  author: "developer",
+  async execute(senderId, args, pageAccessToken, sendMessage) {
 
-  async execute(senderId, args, pageAccessToken, imageUrl) {
-    if (!imageUrl) {
-      return sendMessage(senderId, {
-        text: '❌ Please reply to an image to upscale it!'
-      }, pageAccessToken);
+    if (!args[0]) {
+      return sendMessage(
+        senderId,
+        { text: "❗ Please provide a valid command: `gen` or `inbox {token}`." },
+        pageAccessToken
+      );
     }
 
-    await sendMessage(senderId, {
-      text: '🔼 Upscaling the image (v2), please wait...'
-    }, pageAccessToken);
+    if (args[0].toLowerCase() === "gen") {
+      try {
+        const response = await axios.get("https://kaiz-apis.gleeze.com/api/tempmail-create");
+        const { email, token } = response.data;
 
-    const apiUrl = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(imageUrl)}`;
+        sendMessage(
+          senderId,
+          { text: `✅ Here is your generated email:\n\n✉️ Email: ${email}\n🔑 Token: ${token}\n\nUse \`tempmailv2 inbox ${token}\` to check your inbox.` },
+          pageAccessToken
+        );
+      } catch (error) {
+        console.error("Error generating email:", error);
+        sendMessage(
+          senderId,
+          { text: "⚠️ An error occurred while generating the email." },
+          pageAccessToken
+        );
+      }
+    } 
+    
+    else if (args[0].toLowerCase() === "inbox" && args.length === 2) {
+      const token = args[1];
+      try {
+        const response = await axios.get(`https://kaiz-apis.gleeze.com/api/tempmail-inbox?token=${token}`);
+        const inbox = response.data.inbox;
 
-    try {
-      const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
-      const imageBase64 = `data:image/jpeg;base64,${Buffer.from(response.data).toString('base64')}`;
+        if (!inbox || inbox.length === 0) {
+          sendMessage(
+            senderId,
+            { text: "📭 No messages found in your inbox." },
+            pageAccessToken
+          );
+        } else {
+          const firstMail = inbox[0];
+          const inboxFrom = firstMail.from;
+          const inboxSubject = firstMail.subject;
+          const inboxBody = firstMail.body || "No content available.";
+          const inboxDate = firstMail.date;
 
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'image',
-          payload: {
-            url: imageBase64
-          }
+          sendMessage(
+            senderId,
+            {
+              text: `📥 •=====[Inbox]=====•\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n📅 Date: ${inboxDate}\n\n💌 Message: ${inboxBody}`
+            },
+            pageAccessToken
+          );
         }
-      }, pageAccessToken);
-
-    } catch (error) {
-      console.error('Error during upscaling (v2):', error);
-      await sendMessage(senderId, {
-        text: '❌ An error occurred while processing your request. Please try again later.'
-      }, pageAccessToken);
+      } catch (error) {
+        console.error("Error fetching inbox:", error);
+        sendMessage(
+          senderId,
+          { text: "⚠️ An error occurred while fetching the inbox." },
+          pageAccessToken
+        );
+      }
+    } 
+    
+    else {
+      sendMessage(
+        senderId,
+        { text: "❗ Please provide a valid command: `gen` or `inbox {token}`." },
+        pageAccessToken
+      );
     }
   }
 };

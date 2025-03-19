@@ -17,7 +17,17 @@ module.exports = {
     if (args[0].toLowerCase() === "gen") {
       try {
         const response = await axios.get("https://kaiz-apis.gleeze.com/api/tempmail-create");
-        const { email, token } = response.data;
+        const data = response.data;
+
+        if (!data || !data.email || !data.token) {
+          return sendMessage(
+            senderId,
+            { text: "⚠️ Failed to generate email. Please try again later." },
+            pageAccessToken
+          );
+        }
+
+        const { email, token } = data;
 
         sendMessage(
           senderId,
@@ -48,10 +58,10 @@ module.exports = {
           );
         } else {
           const firstMail = inbox[0];
-          const inboxFrom = firstMail.from;
-          const inboxSubject = firstMail.subject;
+          const inboxFrom = firstMail.from || "Unknown Sender";
+          const inboxSubject = firstMail.subject || "No Subject";
           const inboxBody = firstMail.body || "No content available.";
-          const inboxDate = firstMail.date;
+          const inboxDate = firstMail.date || "Unknown Date";
 
           sendMessage(
             senderId,

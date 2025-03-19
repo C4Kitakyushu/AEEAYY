@@ -60,7 +60,7 @@ module.exports = {
       const token = args[1];
       try {
         const response = await axios.get(`https://kaiz-apis.gleeze.com/api/tempmail-inbox?token=${token}`);
-        const inbox = response.data.inbox;
+        const inbox = response.data.emails;
 
         if (!inbox || inbox.length === 0) {
           sendMessage(
@@ -78,7 +78,7 @@ module.exports = {
           sendMessage(
             senderId,
             {
-              text: `📥 •=====[Inbox]=====•\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n📅 Date: ${inboxDate}\n\n💌 Message: ${inboxBody}`
+              text: `📥 •=====[Inbox]=====•\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n📅 Date: ${inboxDate}\n\n💌 Message:\n${inboxBody}`
             },
             pageAccessToken
           );

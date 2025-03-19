@@ -6,13 +6,6 @@ module.exports = {
   author: "developer",
   async execute(senderId, args, pageAccessToken, sendMessage) {
 
-    // Custom domain list for randomization
-    const customDomains = [
-      "aow3.awesome47.com",
-      "4ip9.expiredtoaster.org",
-      "tdc1.awesome47.com"
-    ];
-
     if (!args[0]) {
       return sendMessage(
         senderId,
@@ -26,7 +19,7 @@ module.exports = {
         const response = await axios.get("https://kaiz-apis.gleeze.com/api/tempmail-create");
         const data = response.data;
 
-        if (!data || !data.token) {
+        if (!data || !data.token || !data.domain) {
           return sendMessage(
             senderId,
             { text: "⚠️ Failed to generate email. Please try again later." },
@@ -35,9 +28,9 @@ module.exports = {
         }
 
         const token = data.token;
-        const emailPrefix = token.slice(0, 12); // Extract part of the token for the email prefix
-        const randomDomain = customDomains[Math.floor(Math.random() * customDomains.length)];
-        const email = `${emailPrefix}@${randomDomain}`;
+        const domain = data.domain || "unknown.domain";
+        const emailPrefix = token.slice(0, 12); // Create email prefix based on token
+        const email = `${emailPrefix}@${domain}`;
 
         sendMessage(
           senderId,

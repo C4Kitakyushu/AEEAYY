@@ -2,59 +2,103 @@ const axios = require("axios");
 
 module.exports = {
   name: "tempmail",
-  description: "Generate random email and fetch inbox",
+  description: "Generate a temporary email and fetch inbox messages",
   author: "developer",
   async execute(senderId, args, pageAccessToken, sendMessage) {
 
+    // Custom domain list for randomization
+    const customDomains = [
+      "aow3.awesome47.com",
+      "4ip9.expiredtoaster.org",
+      "tdc1.awesome47.com"
+    ];
+
     if (!args[0]) {
-      return sendMessage(senderId, { 
-        text: "Please provide a valid command: 'gen' or 'inbox {token}'." 
-      }, pageAccessToken);
+      return sendMessage(
+        senderId,
+        { text: "❗ Please provide a valid command: `gen` or `inbox {token}`." },
+        pageAccessToken
+      );
     }
 
-    if (args[0] === "gen") {
+    if (args[0].toLowerCase() === "gen") {
       try {
-        const apiUrl = "https://kaiz-apis.gleeze.com/api/tempmail-create";
-        const response = await axios.get(apiUrl);
+        const response = await axios.get("https://kaiz-apis.gleeze.com/api/tempmail-create");
+        const data = response.data;
 
-        const email = response.data.email;
-        const token = response.data.token;
+        if (!data || !data.token) {
+          return sendMessage(
+            senderId,
+            { text: "⚠️ Failed to generate email. Please try again later." },
+            pageAccessToken
+          );
+        }
 
-        sendMessage(senderId, {
-          text: `📧 | Temporary Email: ${email}\n\n🔑 | Token: ${token}\n\nUse this token to check the inbox.`
-        }, pageAccessToken);
+        const token = data.token;
+        const emailPrefix = token.slice(0, 12); // Extract part of the token for the email prefix
+        const randomDomain = customDomains[Math.floor(Math.random() * customDomains.length)];
+        const email = `${emailPrefix}@${randomDomain}`;
 
+        sendMessage(
+          senderId,
+          {
+            text: `📧 | **Temporary Email:** ${email}\n\n🔑 | **Token:**\n${token}\n\nUse this token to check the inbox.`
+          },
+          pageAccessToken
+        );
       } catch (error) {
         console.error("Error generating email:", error);
-        sendMessage(senderId, { text: "An error occurred while generating the email." }, pageAccessToken);
+        sendMessage(
+          senderId,
+          { text: "⚠️ An error occurred while generating the email." },
+          pageAccessToken
+        );
       }
-    } else if (args[0].toLowerCase() === "inbox" && args.length === 2) {
+    } 
+    
+    else if (args[0].toLowerCase() === "inbox" && args.length === 2) {
       const token = args[1];
       try {
-        const apiUrl = `https://kaiz-apis.gleeze.com/api/tempmail-inbox?token=${token}`;
-        const response = await axios.get(apiUrl);
-        const messages = response.data.emails;
+        const response = await axios.get(`https://kaiz-apis.gleeze.com/api/tempmail-inbox?token=${token}`);
+        const inbox = response.data.inbox;
 
-        if (messages && messages.length > 0) {
-          const inboxFrom = messages[0].from;
-          const inboxSubject = messages[0].subject;
-          const inboxBody = messages[0].body;
-          const inboxDate = messages[0].date;
-
+        if (!inbox || inbox.length === 0) {
           sendMessage(
             senderId,
-            { text: `•=====[Inbox]=====•\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n📅 Date: ${inboxDate}\n\n💌 Message: ${inboxBody}` },
+            { text: "📭 No messages found in your inbox." },
             pageAccessToken
           );
         } else {
-          sendMessage(senderId, { text: "🔴 No messages found in the inbox for this token." }, pageAccessToken);
+          const firstMail = inbox[0];
+          const inboxFrom = firstMail.from || "Unknown Sender";
+          const inboxSubject = firstMail.subject || "No Subject";
+          const inboxBody = firstMail.body || "No content available.";
+          const inboxDate = firstMail.date || "Unknown Date";
+
+          sendMessage(
+            senderId,
+            {
+              text: `📥 •=====[Inbox]=====•\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n📅 Date: ${inboxDate}\n\n💌 Message: ${inboxBody}`
+            },
+            pageAccessToken
+          );
         }
       } catch (error) {
         console.error("Error fetching inbox:", error);
-        sendMessage(senderId, { text: "An error occurred while fetching the inbox." }, pageAccessToken);
+        sendMessage(
+          senderId,
+          { text: "⚠️ An error occurred while fetching the inbox." },
+          pageAccessToken
+        );
       }
-    } else {
-      sendMessage(senderId, { text: "Please provide a valid command: 'gen' or 'inbox {token}'." }, pageAccessToken);
+    } 
+    
+    else {
+      sendMessage(
+        senderId,
+        { text: "❗ Please provide a valid command: `gen` or `inbox {token}`." },
+        pageAccessToken
+      );
     }
   }
 };

@@ -6,7 +6,7 @@ const token = fs.readFileSync("token.txt", "utf8");
 
 module.exports = {
   name: "ai",
-  description: "Interact with Gemini Vision",
+  description: "Interact with Gemini Vision via Kaiz API",
   author: "developer",
 
   async execute(senderId, args, event, imageUrl) {
@@ -18,35 +18,23 @@ module.exports = {
     if (!finalPrompt) {
       return sendMessage(
         senderId,
-        { text: "Kindly provide your specific questions." },
+        { text: "❌ Kindly provide your specific questions." },
         pageAccessToken
       );
     }
 
-    try {
-      if (!imageUrl) {
-        if (event.message.reply_to && event.message.reply_to.mid) {
-          imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
-        } else if (event.message?.attachments && event.message.attachments[0]?.type === "image") {
-          imageUrl = event.message.attachments[0].payload.url;
-        }
-      }
-
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/gemini-vision`;
-      const response = await handleImageRecognition(apiUrl, finalPrompt, imageUrl, senderId);
-      const result = response.response;
-      const visionResponse = `${result}`;
-
-      await sendConcatenatedMessage(senderId, visionResponse, pageAccessToken);
-
-    } catch (error) {
-      console.error("Error in AI command:", error);
-      await sendError(senderId, "❌ Error: Something went wrong.", pageAccessToken);
+    // Handle image retrieval if imageUrl is missing
+    if (!imageUrl) {
+      imageUrl = await getImageFromEvent(event, pageAccessToken);
     }
+
+    await handleGeminiResponse(senderId, finalPrompt, imageUrl, pageAccessToken);
   },
 };
 
-const handleImageRecognition = async (apiUrl, prompt, imageUrl, senderId) => {
+const handleGeminiResponse = async (senderId, prompt, imageUrl, pageAccessToken) => {
+  const apiUrl = `https://kaiz-apis.gleeze.com/api/gemini-vision`;
+
   try {
     const { data } = await axios.get(apiUrl, {
       params: {
@@ -55,20 +43,29 @@ const handleImageRecognition = async (apiUrl, prompt, imageUrl, senderId) => {
         imageUrl: imageUrl || ""
       }
     });
-    return data;
+
+    const responseText = data?.response || "No response from the AI.";
+    await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
   } catch (error) {
-    throw new Error("Failed to connect to the Gemini Vision API.");
+    console.error("Error in Gemini Vision command:", error);
+    await sendError(senderId, "❌ Error: Something went wrong.", pageAccessToken);
   }
 };
 
-const getRepliedImage = async (mid, pageAccessToken) => {
+const getImageFromEvent = async (event, pageAccessToken) => {
   try {
-    const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
-      params: { access_token: pageAccessToken }
-    });
-    return data?.data[0]?.image_data?.url || "";
+    if (event.message.reply_to && event.message.reply_to.mid) {
+      const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
+        params: { access_token: pageAccessToken }
+      });
+      return data?.data[0]?.image_data?.url || "";
+    } else if (event.message?.attachments && event.message.attachments[0]?.type === 'image') {
+      return event.message.attachments[0].payload.url;
+    }
+    return "";
   } catch (error) {
-    throw new Error("Failed to retrieve replied image.");
+    console.error("Failed to retrieve replied image:", error);
+    return "";
   }
 };
 

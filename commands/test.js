@@ -19,7 +19,7 @@ module.exports = {
         const response = await axios.get("https://kaiz-apis.gleeze.com/api/tempmail-create");
         const data = response.data;
 
-        if (!data || !data.token || !data.email) {
+        if (!data || !data.token || !data.address) {
           return sendMessage(
             senderId,
             { text: "⚠️ Failed to generate email. Please try again later." },
@@ -27,8 +27,8 @@ module.exports = {
           );
         }
 
-        const email = data.email; // Email directly from the API response
         const token = data.token;
+        const email = data.address;
 
         sendMessage(
           senderId,

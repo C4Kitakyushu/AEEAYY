@@ -10,13 +10,11 @@ module.exports = {
     "Interact with GPT‑4 for text responses and Gemini Vision for image recognition",
   author: "developer",
 
-  // The execute function now accepts an optional event parameter.
   async execute(senderId, args, event) {
     const pageAccessToken = token;
-    // Use provided text or default to "Hello"
     const userPrompt = (args.join(" ") || "Hello").trim();
+
     let finalPrompt = userPrompt;
-    // If the message is a reply, prepend the replied-to message text
     if (
       event &&
       event.message &&
@@ -34,19 +32,20 @@ module.exports = {
       );
     }
 
-    // Attempt to extract an image URL from the event, if available.
+    // Keywords for Gemini Vision trigger
+    const geminiKeywords = ["sagutan", "answer this", "analyze", "recognize"];
+    const useGemini = geminiKeywords.some((keyword) =>
+      finalPrompt.toLowerCase().includes(keyword)
+    );
+
     let imageUrl = null;
     if (event && event.message) {
-      // Check if the current message contains an image attachment.
       if (
         event.message.attachments &&
-        event.message.attachments.length > 0 &&
-        event.message.attachments[0].type === "image"
+        event.message.attachments[0]?.type === "image"
       ) {
         imageUrl = event.message.attachments[0].payload.url;
-      }
-      // Otherwise, if this is a reply, try fetching the image from the replied message.
-      else if (event.message.reply_to && event.message.reply_to.mid) {
+      } else if (event.message.reply_to && event.message.reply_to.mid) {
         try {
           imageUrl = await getRepliedImage(
             event.message.reply_to.mid,
@@ -58,8 +57,7 @@ module.exports = {
       }
     }
 
-    // If an image is detected, use the Gemini Vision API.
-    if (imageUrl) {
+    if (useGemini || imageUrl) {
       try {
         const apiUrl = "https://kaiz-apis.gleeze.com/api/gemini-vision";
         const response = await handleImageRecognition(
@@ -69,8 +67,7 @@ module.exports = {
           senderId
         );
         const result = response.response;
-        const visionResponse = `${result}`;
-        await sendConcatenatedMessage(senderId, visionResponse, pageAccessToken);
+        await sendConcatenatedMessage(senderId, result, pageAccessToken);
       } catch (error) {
         console.error("Error in Gemini Vision command:", error);
         return sendMessage(
@@ -80,7 +77,6 @@ module.exports = {
         );
       }
     } else {
-      // Otherwise, use the GPT‑4 API for a text response.
       try {
         const apiUrl = `https://ccprojectapis.ddns.net/api/gpt4?ask=${encodeURIComponent(
           finalPrompt
@@ -100,7 +96,6 @@ module.exports = {
   },
 };
 
-// Calls Gemini Vision API with the given prompt and image URL.
 async function handleImageRecognition(apiUrl, prompt, imageUrl, senderId) {
   try {
     const { data } = await axios.get(apiUrl, {
@@ -116,7 +111,6 @@ async function handleImageRecognition(apiUrl, prompt, imageUrl, senderId) {
   }
 }
 
-// Retrieves the image URL from a replied-to message (using its mid) via Facebook Graph API.
 async function getRepliedImage(mid, pageAccessToken) {
   try {
     const { data } = await axios.get(
@@ -129,7 +123,6 @@ async function getRepliedImage(mid, pageAccessToken) {
   }
 }
 
-// Splits a long message into chunks and sends them sequentially.
 async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   const maxMessageLength = 2000;
   if (text.length > maxMessageLength) {
@@ -143,7 +136,6 @@ async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   }
 }
 
-// Helper: splits a message string into smaller chunks.
 function splitMessageIntoChunks(message, chunkSize) {
   const chunks = [];
   for (let i = 0; i < message.length; i += chunkSize) {

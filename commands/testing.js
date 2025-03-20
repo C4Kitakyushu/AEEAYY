@@ -2,7 +2,7 @@ const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: "test",
+  name: "gpt",
   description: "Interact with GPT AI",
   author: "developer",
 
@@ -35,10 +35,7 @@ module.exports = {
 };
 
 async function handleGPTRequest(apiUrl, query) {
-  const { data } = await axios.get(apiUrl, {
-    params: { q: query || "" }
-  });
-
+  const { data } = await axios.get(`${apiUrl}?q=${encodeURIComponent(query)}`);
   return data;
 }
 

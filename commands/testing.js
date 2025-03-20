@@ -2,29 +2,40 @@ const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: "gpt",
-  description: "Interact with GPT AI",
+  name: "spamsms",
+  description: "Spam OTP to a phone number",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken) {
-    const userPrompt = args.join(" ").trim();
+    const [phone, count, interval] = args;
 
-    if (!userPrompt) {
+    if (!phone || !count || !interval) {
       return sendMessage(
         senderId,
-        { text: `❌ Please provide a prompt for GPT AI to respond to.` },
+        { text: `❌ Please provide a phone number, count, and interval.\n\nUsage: spamsms <phone> <count> <interval>` },
         pageAccessToken
       );
     }
 
     try {
-      const apiUrl = "https://elevnnnx-rest-api.onrender.com/api/gpt";
-      const response = await handleGPTRequest(apiUrl, userPrompt);
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/spamsms`;
+      const response = await axios.get(apiUrl, {
+        params: {
+          phone: phone.trim(),
+          count: parseInt(count),
+          interval: parseInt(interval)
+        }
+      });
 
-      const result = response.response || response.error || "No response from the AI.";
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
+      const result = response.data;
+      const successMessage = result.success
+        ? `✅ Successfully sent ${result.count} messages to ${result.target_number} with an interval of ${result.interval} seconds.`
+        : `❌ Failed to send messages.`;
+
+      await sendMessage(senderId, { text: successMessage }, pageAccessToken);
+
     } catch (error) {
-      console.error("Error in GPT command:", error);
+      console.error("Error in Spamsms command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },
@@ -33,29 +44,3 @@ module.exports = {
     }
   }
 };
-
-async function handleGPTRequest(apiUrl, query) {
-  const { data } = await axios.get(`${apiUrl}?q=${encodeURIComponent(query)}`);
-  return data;
-}
-
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
-  const maxMessageLength = 2000;
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-}
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}

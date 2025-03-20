@@ -1,63 +1,124 @@
-const axios = require('axios');
+const axios = require("axios");
 
 module.exports = {
-  name: 'test',
-  description: 'Get weather information for a specified location.',
-  author: 'developer',
-
+  name: "test",
+  description: "Generate a temporary email and fetch inbox messages",
+  author: "developer",
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    const query = args.join(' ').trim();
-
-    if (!query) {
-      return sendMessage(senderId, { text: '❌ Please provide a location.\n\nUsage: weather <location>' }, pageAccessToken);
+    if (!args[0]) {
+      return sendMessage(
+        senderId,
+        { text: "❗ Please provide a valid command: `gen` or `inbox {email}` or `read {email} {id}`." },
+        pageAccessToken
+      );
     }
 
-    try {
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/weather?q=${encodeURIComponent(query)}`;
-      const response = await axios.get(apiUrl);
+    if (args[0].toLowerCase() === "gen") {
+      try {
+        const response = await axios.get("https://elevnnnx-rest-api.onrender.com/api/yopmail?q=create");
+        const data = response.data;
 
-      // Corrected data structure based on the API response
-      const data = response.data.op;
-
-      if (data && data.location) {
-        const location = data.location.name;
-        const currentWeather = data.current;
-        const forecast = data.forecast;
-
-        let weatherMessage = `🌍 *Weather Report for ${location}*\n\n`;
-        weatherMessage += `🌡️ Temperature: ${currentWeather.temperature}°C\n`;
-        weatherMessage += `💨 Wind: ${currentWeather.wind}\n`;
-        weatherMessage += `🌫️ Humidity: ${currentWeather.humidity}%\n`;
-        weatherMessage += `📅 Observation Time: ${currentWeather.observationtime}\n\n`;
-
-        // Forecast Summary
-        weatherMessage += `📋 *3-Day Forecast*\n`;
-        forecast.slice(0, 3).forEach(day => {
-          weatherMessage += `📆 ${day.shortday} - ${day.skytextday}, ${day.high}°C / ${day.low}°C\n`;
-        });
-
-        // Send main weather info
-        await sendMessage(senderId, { text: weatherMessage }, pageAccessToken);
-
-        // Send weather image if available
-        if (currentWeather.imageUrl) {
-          await sendMessage(senderId, {
-            attachment: {
-              type: 'image',
-              payload: {
-                url: currentWeather.imageUrl,
-                is_reusable: true
-              }
-            }
-          }, pageAccessToken);
+        if (!data || !data.email) {
+          return sendMessage(
+            senderId,
+            { text: "⚠️ Failed to generate email. Please try again later." },
+            pageAccessToken
+          );
         }
-      } else {
-        sendMessage(senderId, { text: '❌ No weather data found for the specified location.' }, pageAccessToken);
-      }
 
-    } catch (error) {
-      console.error('❗ Error calling Weather API:', error?.response?.data || error);
-      sendMessage(senderId, { text: '❌ Error processing your request. Please try again later.' }, pageAccessToken);
+        const email = data.email;
+
+        sendMessage(
+          senderId,
+          {
+            text: `📧 | Generated Email: ${email}\n\nUse this email to check the inbox with:\n\`tempmail inbox ${email}\``
+          },
+          pageAccessToken
+        );
+      } catch (error) {
+        console.error("Error generating email:", error);
+        sendMessage(
+          senderId,
+          { text: "⚠️ An error occurred while generating the email." },
+          pageAccessToken
+        );
+      }
+    } 
+
+    else if (args[0].toLowerCase() === "inbox" && args.length === 2) {
+      const email = args[1];
+      try {
+        const response = await axios.get(`https://elevnnnx-rest-api.onrender.com/api/yopmail?q=inbox&email=${email}`);
+        const inbox = response.data.emails;
+
+        if (!inbox || inbox.length === 0) {
+          sendMessage(
+            senderId,
+            { text: "📭 No messages found in your inbox." },
+            pageAccessToken
+          );
+        } else {
+          const firstMail = inbox[0];
+          const inboxFrom = firstMail.from || "Unknown Sender";
+          const inboxSubject = firstMail.subject || "No Subject";
+          const inboxId = firstMail.id || "Unknown ID";
+
+          sendMessage(
+            senderId,
+            {
+              text: `🛡️ | EMAIL INBOX\n━━━━━━━━━━━━━━━━\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n🆔 Message ID: ${inboxId}\n━━━━━━━━━━━━━━━━\n\nTo read the message, use:\n\`tempmail read ${email} ${inboxId}\``
+            },
+            pageAccessToken
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching inbox:", error);
+        sendMessage(
+          senderId,
+          { text: "⚠️ An error occurred while fetching the inbox." },
+          pageAccessToken
+        );
+      }
+    }
+
+    else if (args[0].toLowerCase() === "read" && args.length === 3) {
+      const email = args[1];
+      const id = args[2];
+      try {
+        const response = await axios.get(`https://elevnnnx-rest-api.onrender.com/api/yopmail?q=read&email=${email}&id=${id}`);
+        const mailContent = response.data;
+
+        if (!mailContent || !mailContent.body) {
+          sendMessage(
+            senderId,
+            { text: "📭 Message content not found." },
+            pageAccessToken
+          );
+        } else {
+          sendMessage(
+            senderId,
+            {
+              text: `📩 | MESSAGE CONTENT\n━━━━━━━━━━━━━━━━\n📝 ${mailContent.body}\n━━━━━━━━━━━━━━━━`
+            },
+            pageAccessToken
+          );
+        }
+      } catch (error) {
+        console.error("Error reading message:", error);
+        sendMessage(
+          senderId,
+          { text: "⚠️ An error occurred while reading the message." },
+          pageAccessToken
+        );
+      }
+    }
+
+    else {
+      sendMessage(
+        senderId,
+        { text: "❗ Please provide a valid command: `gen`, `inbox {email}`, or `read {email} {id}`." },
+        pageAccessToken
+      );
     }
   }
 };

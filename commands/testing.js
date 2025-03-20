@@ -1,32 +1,64 @@
-const axios = require('axios');
+const axios = require("axios");
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: 'te',
-  description: 'Fetch an anime quote!',
-  author: 'Dale Mekumi',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    sendMessage(senderId, { text: "🎬 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮𝗻 𝗮𝗻𝗶𝗺𝗲 𝗾𝘂𝗼𝘁𝗲..." }, pageAccessToken);
+  name: "test",
+  description: "Interact with GPT AI",
+  author: "developer",
+
+  async execute(senderId, args, pageAccessToken) {
+    const userPrompt = args.join(" ").trim();
+
+    if (!userPrompt) {
+      return sendMessage(
+        senderId,
+        { text: `❌ Please provide a prompt for GPT AI to respond to.` },
+        pageAccessToken
+      );
+    }
 
     try {
-      const response = await axios.get('https://elevnnnx-rest-api.onrender.com/api/animequotes', {
-        params: {
-          character: "Mikasa Ackerman",
-          quote: "If we’re going to die anyway, then let’s die fighting!"
-        }
-      });
+      const apiUrl = "https://elevnnnx-rest-api.onrender.com/api/gpt";
+      const response = await handleGPTRequest(apiUrl, userPrompt);
 
-      const { character, quote } = response.data;
-
-      if (!character || !quote) {
-        return sendMessage(senderId, { text: "🥺 𝗦𝗼𝗿𝗿𝘆, 𝗜 𝗰𝗼𝘂𝗹𝗱𝗻'𝘁 𝗳𝗶𝗻𝗱 𝗮𝗻 𝗮𝗻𝗶𝗺𝗲 𝗾𝘂𝗼𝘁𝗲." }, pageAccessToken);
-      }
-
-      sendMessage(senderId, {
-        text: `🗡️ 𝗔𝗻𝗶𝗺𝗲 𝗤𝘂𝗼𝘁𝗲\n\n🗨️ "${quote}"\n👤 - ${character}`
-      }, pageAccessToken);
+      const result = response.response || response.error || "No response from the AI.";
+      await sendConcatenatedMessage(senderId, result, pageAccessToken);
     } catch (error) {
-      console.error(error);
-      sendMessage(senderId, { text: `❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱: ${error.message}` }, pageAccessToken);
+      console.error("Error in GPT command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
     }
   }
 };
+
+async function handleGPTRequest(apiUrl, query) {
+  const { data } = await axios.get(apiUrl, {
+    params: { q: query || "" }
+  });
+
+  return data;
+}
+
+async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+  const maxMessageLength = 2000;
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await sendMessage(senderId, { text: message }, pageAccessToken);
+    }
+  } else {
+    await sendMessage(senderId, { text }, pageAccessToken);
+  }
+}
+
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+}

@@ -3,48 +3,69 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Get weather information for a specific city",
+  description: "Get song lyrics with thumbnail",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken) {
-    const city = args.join(" ").trim();
+    const songTitle = args.join(" ").trim();
 
-    if (!city) {
+    if (!songTitle) {
       return sendMessage(
         senderId,
-        { text: `❌ Please provide a city name.\n\nUsage: weather <city>` },
+        { text: `❌ Please provide a song title.\n\nUsage: lyrics <title>` },
         pageAccessToken
       );
     }
 
     try {
-      const apiUrl = `https://jerome-web.gleeze.com/service?city=${encodeURIComponent(city)}`;
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/lyrics?title=${encodeURIComponent(songTitle)}`;
       const response = await axios.get(apiUrl);
 
       const data = response.data;
 
-      if (data.cod !== 200) {
+      if (!data || !data.lyrics) {
         return sendMessage(
           senderId,
-          { text: `❌ Error: ${data.message || "City not found."}` },
+          { text: `❌ No lyrics found for "${songTitle}".` },
           pageAccessToken
         );
       }
 
-      const weatherInfo = `
-🌤️ Weather in ${data.name}, ${data.sys.country}
-- 🌡️ Temperature: ${data.main.temp}°C (Feels like: ${data.main.feels_like}°C)
-- ☁️ Condition: ${data.weather[0].description}
-- 💧 Humidity: ${data.main.humidity}%
-- 🌬️ Wind Speed: ${data.wind.speed} m/s
-- 🌅 Sunrise: ${new Date(data.sys.sunrise * 1000).toLocaleTimeString()}
-- 🌇 Sunset: ${new Date(data.sys.sunset * 1000).toLocaleTimeString()}
-      `.trim();
+      const lyricsPayload = {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "generic",
+            elements: [
+              {
+                title: data.title,
+                image_url: data.thumbnail || "https://example.com/default-image.jpg",
+                subtitle: `Lyrics by ${data.author}`,
+                buttons: [
+                  {
+                    type: "postback",
+                    title: "View Lyrics",
+                    payload: `VIEW_LYRICS_${data.title}`,
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      };
 
-      await sendMessage(senderId, { text: weatherInfo }, pageAccessToken);
+      await sendMessage(senderId, lyricsPayload, pageAccessToken);
+
+      // Send lyrics separately if they're too long for the template
+      if (data.lyrics.length > 600) {
+        const trimmedLyrics = data.lyrics.substring(0, 600) + "...";
+        await sendMessage(senderId, { text: trimmedLyrics }, pageAccessToken);
+      } else {
+        await sendMessage(senderId, { text: data.lyrics }, pageAccessToken);
+      }
 
     } catch (error) {
-      console.error("Error in weather command:", error);
+      console.error("Error in lyrics command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },

@@ -8,7 +8,7 @@ module.exports = {
     if (!args[0]) {
       return sendMessage(
         senderId,
-        { text: "❗ Please provide a valid command: `gen` or `inbox {email}` or `read {email} {id}`." },
+        { text: "❗ Please provide a valid command: `gen`, `inbox {email}`, or `read {email} {id}`." },
         pageAccessToken
       );
     }
@@ -49,7 +49,7 @@ module.exports = {
       const email = args[1];
       try {
         const response = await axios.get(`https://elevnnnx-rest-api.onrender.com/api/yopmail?q=inbox&email=${email}`);
-        const inbox = response.data.emails;
+        const inbox = response.data.messages;
 
         if (!inbox || inbox.length === 0) {
           sendMessage(
@@ -59,7 +59,7 @@ module.exports = {
           );
         } else {
           const firstMail = inbox[0];
-          const inboxFrom = firstMail.from || "Unknown Sender";
+          const inboxFrom = firstMail.sender || "Unknown Sender";
           const inboxSubject = firstMail.subject || "No Subject";
           const inboxId = firstMail.id || "Unknown ID";
 
@@ -88,7 +88,7 @@ module.exports = {
         const response = await axios.get(`https://elevnnnx-rest-api.onrender.com/api/yopmail?q=read&email=${email}&id=${id}`);
         const mailContent = response.data;
 
-        if (!mailContent || !mailContent.body) {
+        if (!mailContent || !mailContent.content) {
           sendMessage(
             senderId,
             { text: "📭 Message content not found." },
@@ -98,7 +98,7 @@ module.exports = {
           sendMessage(
             senderId,
             {
-              text: `📩 | MESSAGE CONTENT\n━━━━━━━━━━━━━━━━\n📝 ${mailContent.body}\n━━━━━━━━━━━━━━━━`
+              text: `📩 | MESSAGE CONTENT\n━━━━━━━━━━━━━━━━\n📝 ${mailContent.content}\n━━━━━━━━━━━━━━━━`
             },
             pageAccessToken
           );

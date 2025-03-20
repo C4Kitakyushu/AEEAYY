@@ -15,7 +15,9 @@ module.exports = {
     try {
       const apiUrl = `https://kaiz-apis.gleeze.com/api/weather?q=${encodeURIComponent(query)}`;
       const response = await axios.get(apiUrl);
-      const data = response.data;
+
+      // Corrected data structure based on the API response
+      const data = response.data.op;
 
       if (data && data.location) {
         const location = data.location.name;
@@ -54,7 +56,7 @@ module.exports = {
       }
 
     } catch (error) {
-      console.error('Error calling Weather API:', error);
+      console.error('❗ Error calling Weather API:', error?.response?.data || error);
       sendMessage(senderId, { text: '❌ Error processing your request. Please try again later.' }, pageAccessToken);
     }
   }

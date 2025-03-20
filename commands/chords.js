@@ -41,7 +41,7 @@ module.exports = {
 };
 
 function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
+  const chunks = 600;
   for (let i = 0; i < message.length; i += chunkSize) {
     chunks.push(message.slice(i, i + chunkSize));
   }

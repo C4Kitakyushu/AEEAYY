@@ -43,7 +43,7 @@ module.exports = {
         return;
       }
 
-      const apiUrl = `https://ajiro-rest-api.gleeze.com/api/downloader?url=${encodeURIComponent(url)}`;
+      const apiUrl = `elevnnnx-rest-api.onrender.com/api/downloader?url=${encodeURIComponent(url)}`;
       const response = await axios.get(apiUrl);
 
       if (response.data && response.data.content && response.data.content.status === true) {

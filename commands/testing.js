@@ -2,40 +2,49 @@ const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: "spamsms",
-  description: "Spam OTP to a phone number",
+  name: "test",
+  description: "Get weather information for a specific city",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken) {
-    const [phone, count, interval] = args;
+    const city = args.join(" ").trim();
 
-    if (!phone || !count || !interval) {
+    if (!city) {
       return sendMessage(
         senderId,
-        { text: `❌ Please provide a phone number, count, and interval.\n\nUsage: spamsms <phone> <count> <interval>` },
+        { text: `❌ Please provide a city name.\n\nUsage: weather <city>` },
         pageAccessToken
       );
     }
 
     try {
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/spamsms`;
-      const response = await axios.get(apiUrl, {
-        params: {
-          phone: phone.trim(),
-          count: parseInt(count),
-          interval: parseInt(interval)
-        }
-      });
+      const apiUrl = `https://jerome-web.gleeze.com/service?city=${encodeURIComponent(city)}`;
+      const response = await axios.get(apiUrl);
 
-      const result = response.data;
-      const successMessage = result.success
-        ? `✅ Successfully sent ${result.count} messages to ${result.target_number} with an interval of ${result.interval} seconds.`
-        : `❌ Failed to send messages.`;
+      const data = response.data;
 
-      await sendMessage(senderId, { text: successMessage }, pageAccessToken);
+      if (data.cod !== 200) {
+        return sendMessage(
+          senderId,
+          { text: `❌ Error: ${data.message || "City not found."}` },
+          pageAccessToken
+        );
+      }
+
+      const weatherInfo = `
+🌤️ Weather in ${data.name}, ${data.sys.country}
+- 🌡️ Temperature: ${data.main.temp}°C (Feels like: ${data.main.feels_like}°C)
+- ☁️ Condition: ${data.weather[0].description}
+- 💧 Humidity: ${data.main.humidity}%
+- 🌬️ Wind Speed: ${data.wind.speed} m/s
+- 🌅 Sunrise: ${new Date(data.sys.sunrise * 1000).toLocaleTimeString()}
+- 🌇 Sunset: ${new Date(data.sys.sunset * 1000).toLocaleTimeString()}
+      `.trim();
+
+      await sendMessage(senderId, { text: weatherInfo }, pageAccessToken);
 
     } catch (error) {
-      console.error("Error in Spamsms command:", error);
+      console.error("Error in weather command:", error);
       sendMessage(
         senderId,
         { text: `❌ Error: ${error.message || "Something went wrong."}` },

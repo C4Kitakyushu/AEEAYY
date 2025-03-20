@@ -113,24 +113,6 @@ if (messageText === 'imgur') {
       return;
     }
 
-if (messageText === 'gdrive') {
-      const lastImage = lastImageByUser.get(senderId);
-      const lastVideo = lastVideoByUser.get(senderId);
-      const mediaToUpload = lastImage || lastVideo;
-
-      if (mediaToUpload) {
-        try {
-          await commands.get('gdrive').execute(senderId, [], pageAccessToken, mediaToUpload);
-          lastImageByUser.delete(senderId);
-          lastVideoByUser.delete(senderId);
-        } catch (error) {
-          await sendMessage(senderId, { text: '🫵😼' }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗼𝗿 𝘃𝗶𝗱𝗲𝗼 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗶𝗺𝗴𝘂𝗿" 𝘁𝗼 𝘂𝗽𝗹𝗼𝗮𝗱 𝗰𝗼𝗻𝘃𝗲𝗿𝘁 𝗹𝗶𝗻𝗸' }, pageAccessToken);
-      }
-      return;
-    }
 
     // Other command processing logic....    let commandName, args;
     if (messageText.startsWith(prefix)) {

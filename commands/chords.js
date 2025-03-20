@@ -16,7 +16,7 @@ module.exports = {
         const chordsMessage = `Title: ${result.title}\nArtist: ${result.artist}\nKey: ${result.key}\n\n${result.chords}`;
 
         // Split the response into chunks if it exceeds 2000 characters
-        const maxMessageLength = 600;
+        const maxMessageLength = 2000;
         if (chordsMessage.length > maxMessageLength) {
           const messages = splitMessageIntoChunks(chordsMessage, maxMessageLength);
           for (const message of messages) {

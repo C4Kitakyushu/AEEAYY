@@ -1,124 +1,93 @@
+const { sendMessage } = require("../handles/sendMessage");
 const axios = require("axios");
 
 module.exports = {
   name: "test",
-  description: "Generate a temporary email and fetch inbox messages",
-  author: "developer",
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    if (!args[0]) {
-      return sendMessage(
-        senderId,
-        { text: "❗ Please provide a valid command: `gen`, `inbox {email}`, or `read {email} {id}`." },
-        pageAccessToken
-      );
+  description: "Generate YOPMail email, check inbox, and read messages.",
+  usage: "yopmail <generate|inbox|read> [options]",
+  category: "Tools ⚒️",
+
+  async execute(senderId, args, pageAccessToken) {
+    if (args.length === 0) {
+      const errorMessage = "❗ Please specify an action. Usage: `yopmail generate`, `yopmail inbox <email>`, `yopmail read <email> <messageId>`.";
+      await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+      return;
     }
 
-    if (args[0].toLowerCase() === "gen") {
+    const action = args[0].toLowerCase();
+
+    // Generate Email
+    if (action === "generate") {
       try {
         const response = await axios.get("https://elevnnnx-rest-api.onrender.com/api/yopmail?q=create");
-        const data = response.data;
+        const email = response.data.email;
 
-        if (!data || !data.email) {
-          return sendMessage(
-            senderId,
-            { text: "⚠️ Failed to generate email. Please try again later." },
-            pageAccessToken
-          );
-        }
-
-        const email = data.email;
-
-        sendMessage(
-          senderId,
-          {
-            text: `📧 | Generated Email: ${email}\n\nUse this email to check the inbox with:\n\`tempmail inbox ${email}\``
-          },
-          pageAccessToken
-        );
+        const message = `✅ Your YOPMail email address has been created: ${email}\nYou can now check your inbox using the 'inbox' command.`;
+        await sendMessage(senderId, { text: message }, pageAccessToken);
       } catch (error) {
-        console.error("Error generating email:", error);
-        sendMessage(
-          senderId,
-          { text: "⚠️ An error occurred while generating the email." },
-          pageAccessToken
-        );
+        console.error("Error generating YOPMail email:", error);
+        const errorMessage = "⚠️ Oops! Something went wrong while generating the email. Please try again later.";
+        await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
       }
-    } 
+    }
 
-    else if (args[0].toLowerCase() === "inbox" && args.length === 2) {
+    // Inbox Check
+    else if (action === "inbox") {
+      if (args.length < 2) {
+        const errorMessage = "❗ You need to provide an email. Usage: `yopmail inbox <email>`.";
+        await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+        return;
+      }
+
       const email = args[1];
+
       try {
         const response = await axios.get(`https://elevnnnx-rest-api.onrender.com/api/yopmail?q=inbox&email=${email}`);
         const inbox = response.data.messages;
 
         if (!inbox || inbox.length === 0) {
-          sendMessage(
-            senderId,
-            { text: "📭 No messages found in your inbox." },
-            pageAccessToken
-          );
+          const noMailMessage = "📭 Your inbox is empty.";
+          await sendMessage(senderId, { text: noMailMessage }, pageAccessToken);
         } else {
-          const firstMail = inbox[0];
-          const inboxFrom = firstMail.sender || "Unknown Sender";
-          const inboxSubject = firstMail.subject || "No Subject";
-          const inboxId = firstMail.id || "Unknown ID";
+          const mailSummary = inbox.map((mail) => {
+            return `📧 ID: ${mail.id}\n👤 From: ${mail.sender}\n📌 Subject: ${mail.subject}`;
+          }).join("\n\n");
 
-          sendMessage(
-            senderId,
-            {
-              text: `🛡️ | EMAIL INBOX\n━━━━━━━━━━━━━━━━\n👤 From: ${inboxFrom}\n🔖 Subject: ${inboxSubject}\n🆔 Message ID: ${inboxId}\n━━━━━━━━━━━━━━━━\n\nTo read the message, use:\n\`tempmail read ${email} ${inboxId}\``
-            },
-            pageAccessToken
-          );
+          const message = `✅ You have ${inbox.length} email(s) in your inbox:\n\n${mailSummary}\n\nUse \`yopmail read <email> <messageId>\` to read an email.`;
+          await sendMessage(senderId, { text: message }, pageAccessToken);
         }
       } catch (error) {
-        console.error("Error fetching inbox:", error);
-        sendMessage(
-          senderId,
-          { text: "⚠️ An error occurred while fetching the inbox." },
-          pageAccessToken
-        );
+        console.error("Error fetching YOPMail inbox:", error);
+        const errorMessage = "⚠️ Oops! Something went wrong while fetching your inbox. Please try again later.";
+        await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
       }
     }
 
-    else if (args[0].toLowerCase() === "read" && args.length === 3) {
+    // Read Email Content
+    else if (action === "read") {
+      if (args.length < 3) {
+        const errorMessage = "❗ Please provide the email and message ID. Usage: `yopmail read <email> <messageId>`.";
+        await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+        return;
+      }
+
       const email = args[1];
-      const id = args[2];
+      const messageId = args[2];
+
       try {
-        const response = await axios.get(`https://elevnnnx-rest-api.onrender.com/api/yopmail?q=read&email=${email}&id=${id}`);
-        const mailContent = response.data;
+        const response = await axios.get(`https://elevnnnx-rest-api.onrender.com/api/yopmail?q=read&email=${email}&id=${messageId}`);
+        const emailContent = response.data;
 
-        if (!mailContent || !mailContent.content) {
-          sendMessage(
-            senderId,
-            { text: "📭 Message content not found." },
-            pageAccessToken
-          );
-        } else {
-          sendMessage(
-            senderId,
-            {
-              text: `📩 | MESSAGE CONTENT\n━━━━━━━━━━━━━━━━\n📝 ${mailContent.content}\n━━━━━━━━━━━━━━━━`
-            },
-            pageAccessToken
-          );
-        }
+        const message = `✅ Here's the email content:\n\n📝 ${emailContent.content}`;
+        await sendMessage(senderId, { text: message }, pageAccessToken);
       } catch (error) {
-        console.error("Error reading message:", error);
-        sendMessage(
-          senderId,
-          { text: "⚠️ An error occurred while reading the message." },
-          pageAccessToken
-        );
+        console.error("Error reading YOPMail message:", error);
+        const errorMessage = "⚠️ Oops! Something went wrong while reading the email. Please try again later.";
+        await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
       }
-    }
-
-    else {
-      sendMessage(
-        senderId,
-        { text: "❗ Please provide a valid command: `gen`, `inbox {email}`, or `read {email} {id}`." },
-        pageAccessToken
-      );
+    } else {
+      const errorMessage = "❗ Invalid command. Usage: `yopmail generate`, `yopmail inbox <email>`, `yopmail read <email> <messageId>`.";
+      await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
     }
   }
 };

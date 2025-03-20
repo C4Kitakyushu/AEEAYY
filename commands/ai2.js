@@ -20,7 +20,7 @@ module.exports = {
     try {
      
 
-      const API_KEY = "AIzaSyCRgVWxdX2sY9b4NdnXGn5P91vDwSWdpQM"; // Replace with your actual API key
+      const API_KEY = "AIzaSyD-msS_FTZLH1yGO-iOzzzgQmg2fZS25hU"; // Replace with your actual API key
       const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${API_KEY}`;
 
       // Send request to the API

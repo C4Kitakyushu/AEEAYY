@@ -1,50 +1,57 @@
-const axios = require('axios');
+const axios = require("axios");
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: 'lyrics',
-  description: 'fetches lyrics for a given song.',
-  author: 'developer',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    const songName = args.join(" ").trim();
+  name: "lyrics",
+  description: "Get song lyrics",
+  author: "developer",
 
-    if (!songName) {
-      return sendMessage(senderId, { text: "Please provide a song name!" }, pageAccessToken);
+  async execute(senderId, args, pageAccessToken) {
+    const songTitle = args.join(" ").trim();
+
+    if (!songTitle) {
+      return sendMessage(
+        senderId,
+        { text: `❌ Please provide a song title.\n\nUsage: lyrics <title>` },
+        pageAccessToken
+      );
     }
 
     try {
-      await fetchLyrics(sendMessage, senderId, pageAccessToken, songName);
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/lyrics?title=${encodeURIComponent(songTitle)}`;
+      const response = await axios.get(apiUrl);
+
+      const data = response.data;
+
+      if (!data || !data.lyrics) {
+        return sendMessage(
+          senderId,
+          { text: `❌ No lyrics found for "${songTitle}".` },
+          pageAccessToken
+        );
+      }
+
+      // Send the thumbnail if available
+      if (data.thumbnail) {
+        await sendMessage(senderId, { attachment: { type: "image", payload: { url: data.thumbnail } } }, pageAccessToken);
+      }
+
+      // Display the title first
+      await sendMessage(senderId, { text: `🎵 *${data.title}* 🎵\n` }, pageAccessToken);
+
+      // Chunk the lyrics to prevent message overflow
+      const chunkSize = 600;
+      for (let i = 0; i < data.lyrics.length; i += chunkSize) {
+        await sendMessage(senderId, { text: data.lyrics.substring(i, i + chunkSize) }, pageAccessToken);
+      }
+
     } catch (error) {
-      console.error(`Error fetching lyrics for "${songName}":`, error);
-      sendMessage(senderId, { text: `Sorry, there was an error getting the lyrics for "${songName}"!` }, pageAccessToken);
+      console.error("Error in lyrics command:", error);
+      sendMessage(
+        senderId,
+        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        pageAccessToken
+      );
     }
-  },
-};
-
-async function fetchLyrics(sendMessage, senderId, pageAccessToken, songName) {
-  const apiUrl = `https://api.popcat.xyz/lyrics?song=${encodeURIComponent(songName)}`;
-
-  try {
-    const response = await axios.get(apiUrl);
-    const { lyrics, title, artist, image } = response.data;
-
-    if (!lyrics) {
-      throw new Error("Lyrics not found");
-    }
-
-    const messageData = {
-      text: `🎧 | Title: ${title}\n🎤 | Artist: ${artist}\n━━━━━━━━━━━━━━━━\n${lyrics}\n━━━━━━━━━━━━━━━━`
-    };
-
-    // Add image if available
-    if (image) {
-      const imgResponse = await axios.get(image, { responseType: 'arraybuffer' });
-      messageData.attachment = Buffer.from(imgResponse.data, 'binary');
-    }
-
-    sendMessage(senderId, messageData, pageAccessToken);
-
-  } catch (error) {
-    console.error(`Error fetching lyrics from Popcat API for "${songName}":`, error.message || error);
-    sendMessage(senderId, { text: `Sorry, lyrics for "${songName}" were not found!` }, pageAccessToken);
   }
-}
+};

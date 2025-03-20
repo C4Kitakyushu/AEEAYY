@@ -1,26 +1,28 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'aniquotes',
-  description: 'fetch a random anime quote!',
-  author: 'Dale Mekumi', 
+  name: 'aniquote',
+  description: 'Fetch an anime quote!',
+  author: 'Dale Mekumi',
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗮𝗻𝗶𝗺𝗲 𝗾𝘂𝗼𝘁𝗲..." }, pageAccessToken);
+    sendMessage(senderId, { text: "🎬 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮𝗻 𝗮𝗻𝗶𝗺𝗲 𝗾𝘂𝗼𝘁𝗲..." }, pageAccessToken);
 
     try {
-      const response = await axios.get('https://h-anime-quote-api.vercel.app/anime-quote');
-      const quoteData = response.data.data;
+      const response = await axios.get('https://elevnnnx-rest-api.onrender.com/api/animequotes', {
+        params: {
+          character: "Mikasa Ackerman",
+          quote: "If we’re going to die anyway, then let’s die fighting!"
+        }
+      });
 
-      const anime = quoteData.anime.name;
-      const character = quoteData.character.name;
-      const quote = quoteData.content;
+      const { character, quote } = response.data;
 
-      if (!quote || !anime || !character) {
+      if (!character || !quote) {
         return sendMessage(senderId, { text: "🥺 𝗦𝗼𝗿𝗿𝘆, 𝗜 𝗰𝗼𝘂𝗹𝗱𝗻'𝘁 𝗳𝗶𝗻𝗱 𝗮𝗻 𝗮𝗻𝗶𝗺𝗲 𝗾𝘂𝗼𝘁𝗲." }, pageAccessToken);
       }
 
-      sendMessage(senderId, { 
-        text: `📝: 𝗔𝗻𝗶𝗺𝗲 𝗤𝘂𝗼𝘁𝗲\n\n 🖋️: "${quote}"\n\n👤: ${character} (${anime})` 
+      sendMessage(senderId, {
+        text: `🗡️ 𝗔𝗻𝗶𝗺𝗲 𝗤𝘂𝗼𝘁𝗲\n\n🗨️ "${quote}"\n👤 - ${character}`
       }, pageAccessToken);
     } catch (error) {
       console.error(error);

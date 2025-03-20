@@ -37,10 +37,10 @@ module.exports = {
       }
 
       // Display the title first
-      await sendMessage(senderId, { text: `👤: {data.title}\n` }, pageAccessToken);
+      await sendMessage(senderId, { text: `👤: ${data.title}\n` }, pageAccessToken);
 
       // Chunk the lyrics to prevent message overflow
-      const chunkSize = 800;
+      const chunkSize = 600;
       for (let i = 0; i < data.lyrics.length; i += chunkSize) {
         await sendMessage(senderId, { text: data.lyrics.substring(i, i + chunkSize) }, pageAccessToken);
       }

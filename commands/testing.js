@@ -1,57 +1,61 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
 
 module.exports = {
-  name: "test",
-  description: "Get song lyrics",
-  author: "developer",
+  name: 'test',
+  description: 'Get weather information for a specified location.',
+  author: 'developer',
 
-  async execute(senderId, args, pageAccessToken) {
-    const songTitle = args.join(" ").trim();
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    const query = args.join(' ').trim();
 
-    if (!songTitle) {
-      return sendMessage(
-        senderId,
-        { text: `❌ Please provide a song title.\n\nUsage: lyrics <title>` },
-        pageAccessToken
-      );
+    if (!query) {
+      return sendMessage(senderId, { text: '❌ Please provide a location.\n\nUsage: weather <location>' }, pageAccessToken);
     }
 
     try {
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/lyrics?title=${encodeURIComponent(songTitle)}`;
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/weather?q=${encodeURIComponent(query)}`;
       const response = await axios.get(apiUrl);
-
       const data = response.data;
 
-      if (!data || !data.lyrics) {
-        return sendMessage(
-          senderId,
-          { text: `❌ No lyrics found for "${songTitle}".` },
-          pageAccessToken
-        );
-      }
+      if (data && data.location) {
+        const location = data.location.name;
+        const currentWeather = data.current;
+        const forecast = data.forecast;
 
-      // Send the thumbnail if available
-      if (data.thumbnail) {
-        await sendMessage(senderId, { attachment: { type: "image", payload: { url: data.thumbnail } } }, pageAccessToken);
-      }
+        let weatherMessage = `🌍 *Weather Report for ${location}*\n\n`;
+        weatherMessage += `🌡️ Temperature: ${currentWeather.temperature}°C\n`;
+        weatherMessage += `💨 Wind: ${currentWeather.wind}\n`;
+        weatherMessage += `🌫️ Humidity: ${currentWeather.humidity}%\n`;
+        weatherMessage += `📅 Observation Time: ${currentWeather.observationtime}\n\n`;
 
-      // Display the title first
-      await sendMessage(senderId, { text: `🎵 *${data.title}* 🎵\n` }, pageAccessToken);
+        // Forecast Summary
+        weatherMessage += `📋 *3-Day Forecast*\n`;
+        forecast.slice(0, 3).forEach(day => {
+          weatherMessage += `📆 ${day.shortday} - ${day.skytextday}, ${day.high}°C / ${day.low}°C\n`;
+        });
 
-      // Chunk the lyrics to prevent message overflow
-      const chunkSize = 600;
-      for (let i = 0; i < data.lyrics.length; i += chunkSize) {
-        await sendMessage(senderId, { text: data.lyrics.substring(i, i + chunkSize) }, pageAccessToken);
+        // Send main weather info
+        await sendMessage(senderId, { text: weatherMessage }, pageAccessToken);
+
+        // Send weather image if available
+        if (currentWeather.imageUrl) {
+          await sendMessage(senderId, {
+            attachment: {
+              type: 'image',
+              payload: {
+                url: currentWeather.imageUrl,
+                is_reusable: true
+              }
+            }
+          }, pageAccessToken);
+        }
+      } else {
+        sendMessage(senderId, { text: '❌ No weather data found for the specified location.' }, pageAccessToken);
       }
 
     } catch (error) {
-      console.error("Error in lyrics command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
+      console.error('Error calling Weather API:', error);
+      sendMessage(senderId, { text: '❌ Error processing your request. Please try again later.' }, pageAccessToken);
     }
   }
 };

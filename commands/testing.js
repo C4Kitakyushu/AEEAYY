@@ -3,7 +3,7 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Get song lyrics with thumbnail",
+  description: "Get song lyrics",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken) {
@@ -31,37 +31,18 @@ module.exports = {
         );
       }
 
-      const lyricsPayload = {
-        attachment: {
-          type: "template",
-          payload: {
-            template_type: "generic",
-            elements: [
-              {
-                title: data.title,
-                image_url: data.thumbnail || "https://example.com/default-image.jpg",
-                subtitle: `Lyrics by ${data.author}`,
-                buttons: [
-                  {
-                    type: "postback",
-                    title: "View Lyrics",
-                    payload: `VIEW_LYRICS_${data.title}`,
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      };
+      // Send the thumbnail if available
+      if (data.thumbnail) {
+        await sendMessage(senderId, { attachment: { type: "image", payload: { url: data.thumbnail } } }, pageAccessToken);
+      }
 
-      await sendMessage(senderId, lyricsPayload, pageAccessToken);
+      // Display the title first
+      await sendMessage(senderId, { text: `🎵 *${data.title}* 🎵\n` }, pageAccessToken);
 
-      // Send lyrics separately if they're too long for the template
-      if (data.lyrics.length > 600) {
-        const trimmedLyrics = data.lyrics.substring(0, 600) + "...";
-        await sendMessage(senderId, { text: trimmedLyrics }, pageAccessToken);
-      } else {
-        await sendMessage(senderId, { text: data.lyrics }, pageAccessToken);
+      // Chunk the lyrics to prevent message overflow
+      const chunkSize = 600;
+      for (let i = 0; i < data.lyrics.length; i += chunkSize) {
+        await sendMessage(senderId, { text: data.lyrics.substring(i, i + chunkSize) }, pageAccessToken);
       }
 
     } catch (error) {

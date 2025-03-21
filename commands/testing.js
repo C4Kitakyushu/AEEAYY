@@ -28,17 +28,11 @@ module.exports = {
             payload: { url: imageUrl }
           }
         }, pageAccessToken);
-
-        // Optional: Send a confirmation message
-        await sendMessage(senderId, {
-          text: `✅ Image generated successfully!\n\n📋 Prompt: ${prompt}`
-        }, pageAccessToken);
       } else {
-        await sendMessage(senderId, { text: '❌ Failed to generate image. Please try again later.' }, pageAccessToken);
+        console.error('Error: Invalid API response or image not found.');
       }
     } catch (error) {
       console.error('Error:', error);
-      await sendMessage(senderId, { text: '❌ An error occurred while processing your request.' }, pageAccessToken);
     }
   }
 };

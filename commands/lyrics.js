@@ -1,65 +1,29 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'lyrics',
-  description: 'Fetch song lyrics with accurate title and thumbnail',
-  author: 'developer',
+  description: 'fetch song lyrics',
+  usage: 'lyrics [song name]',
+  author: 'dev',
 
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    const query = args.join(' ').trim();
-
-    if (!query) {
-      return sendMessage(senderId, { text: '❌ Please provide a song title.\n\nUsage: lyrics <title>' }, pageAccessToken);
-    }
-
+  async execute(senderId, args, pageAccessToken) {
     try {
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/lyrics?title=${encodeURIComponent(query)}`;
-      const response = await axios.get(apiUrl);
-      const result = response.data;
-
-      if (result && result.title && result.lyrics) {
-        const titleInfo = `🎵 *${result.title}*\n\n`;
-        const lyricsMessage = `${result.lyrics}`;
-
-        // Display title first
-        await sendMessage(senderId, { text: titleInfo }, pageAccessToken);
-
-        // Send thumbnail as image payload (if available)
-        if (result.thumbnail) {
-          await sendMessage(senderId, {
-            attachment: {
-              type: 'image',
-              payload: {
-                url: result.thumbnail,
-                is_reusable: true
-              }
-            }
-          }, pageAccessToken);
-        }
-
-        // Chunk the lyrics if needed
-        const chunkSize = 600;
-        const lyricChunks = splitMessageIntoChunks(lyricsMessage, chunkSize);
-
-        for (const chunk of lyricChunks) {
-          await sendMessage(senderId, { text: chunk }, pageAccessToken);
-        }
+      const { data } = await axios.get(`https://api.popcat.xyz/lyrics?song=${encodeURIComponent(args.join(' '))}`);
+      if (data?.lyrics) {
+        const messages = splitMessage(data.title, data.artist, data.lyrics, 2000);
+        messages.forEach(message => sendMessage(senderId, { text: message }, pageAccessToken));
+        if (data.image) sendMessage(senderId, { attachment: { type: 'image', payload: { url: data.image, is_reusable: true } } }, pageAccessToken);
       } else {
-        sendMessage(senderId, { text: '❌ No lyrics found for your query.' }, pageAccessToken);
+        sendMessage(senderId, { text: 'Sorry, no lyrics were found for your query.' }, pageAccessToken);
       }
-
-    } catch (error) {
-      console.error('Error calling Lyrics API:', error);
-      sendMessage(senderId, { text: '❌ Error processing your request. Please try again later.' }, pageAccessToken);
+    } catch {
+      sendMessage(senderId, { text: 'Sorry, there was an error processing your request.' }, pageAccessToken);
     }
   }
 };
 
-// Utility function to split text into manageable chunks
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}
+const splitMessage = (title, artist, lyrics, chunkSize) => {
+  const message = `Title: ${title}\nArtist: ${artist}\n\n${lyrics}`;
+  return Array.from({ length: Math.ceil(message.length / chunkSize) }, (_, i) => message.slice(i * chunkSize, (i + 1) * chunkSize));
+};

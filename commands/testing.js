@@ -1,19 +1,18 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Generate an image using Flux Pro Replicate.',
+  description: 'Generates an image based on a prompt using Flux Pro Replicate.',
   author: 'developer',
 
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    const prompt = args.join(' ');
-
-    // Validate input
-    if (!prompt) {
-      return sendMessage(senderId, {
-        text: '❌ *Please provide a valid prompt!*\n\nUsage: `flux <PROMPT>`'
-      }, pageAccessToken);
+  async execute(senderId, args, pageAccessToken) {
+    if (!args || !Array.isArray(args) || args.length === 0) {
+      await sendMessage(senderId, { text: '❌ Please provide a prompt for image generation.' }, pageAccessToken);
+      return;
     }
+
+    const prompt = args.join(' ');
 
     try {
       const apiUrl = `https://betadash-api-swordslush-production.up.railway.app/flux?prompt=${encodeURIComponent(prompt)}`;
@@ -23,26 +22,23 @@ module.exports = {
         const imageUrl = response.data.data.imageUrl;
 
         // Send the generated image
-        sendMessage(senderId, {
+        await sendMessage(senderId, {
           attachment: {
             type: 'image',
-            payload: {
-              url: imageUrl,
-              is_reusable: true
-            }
+            payload: { url: imageUrl }
           }
         }, pageAccessToken);
 
-        // Send additional confirmation
-        sendMessage(senderId, {
-          text: `✅ *Image generated successfully!*\n\n📋 *Prompt:* ${prompt}\n📤 *Image URL:* ${imageUrl}`
+        // Optional: Send a confirmation message
+        await sendMessage(senderId, {
+          text: `✅ Image generated successfully!\n\n📋 Prompt: ${prompt}`
         }, pageAccessToken);
       } else {
-        sendMessage(senderId, { text: '❌ *Failed to generate image. Please try again later.*' }, pageAccessToken);
+        await sendMessage(senderId, { text: '❌ Failed to generate image. Please try again later.' }, pageAccessToken);
       }
     } catch (error) {
-      console.error('❗ Error calling Flux API:', error?.response?.data || error);
-      sendMessage(senderId, { text: '❌ An error occurred while processing your request.' }, pageAccessToken);
+      console.error('Error:', error);
+      await sendMessage(senderId, { text: '❌ An error occurred while processing your request.' }, pageAccessToken);
     }
   }
 };

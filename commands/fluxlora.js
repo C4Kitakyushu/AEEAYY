@@ -8,7 +8,7 @@ module.exports = {
 
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length < 2) {
-      await sendMessage(senderId, { text: '❌ Please provide both a prompt and a model number (1-7). Example: flux-lora dog 2' }, pageAccessToken);
+      await sendMessage(senderId, { text: '❌ Please provide both a prompt and a model number (1-7).\n Example:\n flux-lora dog 2' }, pageAccessToken);
       return;
     }
 

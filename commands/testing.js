@@ -20,6 +20,9 @@ module.exports = {
       if (response.data && response.data.ok && response.data.data && response.data.data.imageUrl) {
         const resultUrl = response.data.data.imageUrl;
 
+        // Send the response with prompt and result
+        const message = `🎨 **Flux Image Generation**\n\n📌 **Prompt**: ${prompt}\n\n🌐 **Result**: ${resultUrl}`;
+        sendMessage(senderId, { text: message }, pageAccessToken);
 
         // Send the generated image
         sendMessage(

@@ -1,67 +1,39 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
-const fs = require("fs");
-
-const token = fs.readFileSync("token.txt", "utf8");
+const axios = require('axios');
 
 module.exports = {
-  name: "ai",
-  description: "intereact with gpt4",
-  author: "developer",
+  name: 'ai',
+  description: 'Generate responses using GPT-4o Pro with optional image support.',
+  author: 'developer',
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
-    const userPrompt = (args.join(" ") || "Hello").trim();
-
-    if (!userPrompt) {
-      return sendMessage(
-        senderId,
-        { text: "❌ Please provide a message." },
-        pageAccessToken
-      );
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    if (!args || args.length < 2) {
+      sendMessage(senderId, { text: '❌ Please provide a query and a user ID (UID). Example: gpt-4o-pro What is AI? 4' }, pageAccessToken);
+      return;
     }
 
-    await handleChatResponse(senderId, userPrompt, pageAccessToken);
-  },
-};
+    const uid = args.pop(); // Extract UID
+    const ask = args.join(' ');
 
-const handleChatResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = `https://ccprojectapis.ddns.net/api/gpt4?ask=${encodeURIComponent(input)}&id=${encodeURIComponent(senderId)}`;
-
-  try {
-    const { data } = await axios.get(apiUrl);
-    const responseText = data || "No response from the AI.";
-
-    await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
-  } catch (error) {
-    console.error("Error in GPT-4 CCProject command:", error);
-    await sendError(senderId, "❌ Error: Something went wrong.", pageAccessToken);
-  }
-};
-
-const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
+    // Validate UID
+    if (isNaN(uid)) {
+      sendMessage(senderId, { text: '❌ Invalid UID. Please provide a numeric UID.' }, pageAccessToken);
+      return;
     }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-};
 
-const splitMessageIntoChunks = (message, chunkSize) => {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-};
+    try {
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/gpt-4o-pro?ask=${encodeURIComponent(ask)}&uid=${encodeURIComponent(uid)}`;
+      const response = await axios.get(apiUrl);
 
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+      if (response.data && response.data.reply) {
+        // Send GPT-4 reply
+        sendMessage(senderId, { text: `🤖 **GPT-4 Response:**\n${response.data.reply}` }, pageAccessToken);
+      } else {
+        console.error('Error: No reply found in API response.');
+        sendMessage(senderId, { text: '❌ Sorry, no response was generated. Please try again later.' }, pageAccessToken);
+      }
+    } catch (error) {
+      console.error('Error calling GPT-4o Pro API:', error);
+      sendMessage(senderId, { text: '❌ An error occurred while processing your request. Please try again later.' }, pageAccessToken);
+    }
+  }
 };

@@ -4,8 +4,7 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   name: 'removebg',
   description: 'Remove the background from an image.',
-  author: 'dev',
-
+  author: 'Developer',
   async execute(senderId, args, pageAccessToken, imageUrl) {
     if (!imageUrl) {
       return sendMessage(senderId, {
@@ -13,24 +12,26 @@ module.exports = {
       }, pageAccessToken);
     }
 
-    await sendMessage(senderId, { text: '⌛ 𝗥𝗲𝗺𝗼𝘃𝗶𝗻𝗴 𝗯𝗮𝗰𝗸𝗴𝗿𝗼𝘂𝗻𝗱 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
+    await sendMessage(senderId, {
+      text: '⌛ 𝗥𝗲𝗺𝗼𝘃𝗶𝗻𝗴 𝗯𝗮𝗰𝗸𝗴𝗿𝗼𝘂𝗻𝗱 𝗳𝗿𝗼𝗺 𝘁𝗵𝗲 𝗶𝗺𝗮𝗴𝗲. 𝗣𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...'
+    }, pageAccessToken);
 
     try {
-      const removeBgUrl = `https://jerome-web.gleeze.com/service/api/removebg?url=${encodeURIComponent(imageUrl)}`;
+      const apiUrl = `https://markdevs-last-api-p2y6.onrender.com/api/removebg?imageUrl=${encodeURIComponent(imageUrl)}`;
 
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: removeBgUrl
-          }
-        }
+            url: apiUrl,
+          },
+        },
       }, pageAccessToken);
 
     } catch (error) {
       console.error('Error removing background:', error);
       await sendMessage(senderId, {
-        text: 'An error occurred while processing the image. Please try again later.'
+        text: '𝗘𝗿𝗿𝗼𝗿: 𝗨𝗻𝗮𝗯𝗹𝗲 𝘁𝗼 𝗽𝗿𝗼𝗰𝗲𝘀𝘀 𝘁𝗵𝗲 𝗶𝗺𝗮𝗴𝗲. 𝗣𝗹𝗲𝗮𝘀𝗲 𝘁𝗿𝘆 𝗮𝗴𝗮𝗶𝗻 𝗹𝗮𝘁𝗲𝗿.'
       }, pageAccessToken);
     }
   }

@@ -1,53 +1,45 @@
 const axios = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
+const fs = require("fs");
+
+const token = fs.readFileSync("token.txt", "utf8");
 
 module.exports = {
   name: "ai",
-  description: "Interact with GPT-4o for AI-powered responses",
+  description: "Interact with ZeroGPT AI",
   author: "developer",
 
-  async execute(senderId, args, pageAccessToken) {
-    const userPrompt = args.join(" ").trim();
+  async execute(senderId, args) {
+    const pageAccessToken = token;
+    const userPrompt = (args.join(" ") || "Hello").trim();
 
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: "❌ Please provide a question for GPT-4o to answer." },
+        { text: "Please provide a question." },
         pageAccessToken
       );
     }
 
-    try {
-      const apiUrl = "https://kaiz-apis.gleeze.com/api/gpt-4o";
-      const response = await handleGPT4oRequest(apiUrl, userPrompt);
+    await handleZeroGPTResponse(senderId, userPrompt, pageAccessToken);
+  },
+};
 
-      const result = response.reply; // Assume 'reply' contains the response
+const handleZeroGPTResponse = async (senderId, input, pageAccessToken) => {
+  const apiUrl = `https://kaiz-apis.gleeze.com/api/zerogpt-ai?ask=${encodeURIComponent(input)}&uid=4`;
 
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
-    } catch (error) {
-      console.error("Error in gpt4o command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
-        pageAccessToken
-      );
-    }
+  try {
+    const { data } = await axios.get(apiUrl);
+    const responseText = data.reply || "No response from the AI.";
+
+    await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
+  } catch (error) {
+    console.error("Error in ZeroGPT command:", error);
+    await sendError(senderId, "❌ Error: Something went wrong.", pageAccessToken);
   }
 };
 
-async function handleGPT4oRequest(apiUrl, query) {
-  const { data } = await axios.get(apiUrl, {
-    params: {
-      ask: query || "",
-      uid: "4",
-      webSearch: "off"
-    }
-  });
-
-  return data;
-}
-
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
+const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
   const maxMessageLength = 2000;
 
   if (text.length > maxMessageLength) {
@@ -60,12 +52,16 @@ async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   } else {
     await sendMessage(senderId, { text }, pageAccessToken);
   }
-}
+};
 
-function splitMessageIntoChunks(message, chunkSize) {
+const splitMessageIntoChunks = (message, chunkSize) => {
   const chunks = [];
   for (let i = 0; i < message.length; i += chunkSize) {
     chunks.push(message.slice(i, i + chunkSize));
   }
   return chunks;
-}
+};
+
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+};

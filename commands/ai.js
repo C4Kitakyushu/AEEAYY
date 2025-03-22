@@ -21,25 +21,17 @@ module.exports = {
       );
     }
 
-    await handleGPT4oResponse(senderId, userPrompt, pageAccessToken);
+    await handleChatResponse(senderId, userPrompt, pageAccessToken);
   },
 };
 
-const handleGPT4oResponse = async (senderId, input, pageAccessToken) => {
-  const apiUrl = "https://kaiz-apis.gleeze.com/api/gpt-4o";
+const handleChatResponse = async (senderId, input, pageAccessToken) => {
+  const apiUrl = `https://kaiz-apis.gleeze.com/api/gpt-4o?ask=${encodeURIComponent(input)}&uid=4&webSearch=off`;
 
   try {
-    const { data } = await axios.get(apiUrl, {
-      params: {
-        ask: input,
-        uid: "4",
-        webSearch: "off",
-      },
-    });
+    const { data } = await axios.get(apiUrl);
+    const responseText = data.reply || "No valid response from the AI.";
 
-    console.log("API Response:", data); // Log the API response for debugging
-
-    const responseText = data.reply || "❌ No valid response received from GPT-4o.";
     await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
   } catch (error) {
     console.error("Error in gpt4o command:", error);
@@ -49,10 +41,6 @@ const handleGPT4oResponse = async (senderId, input, pageAccessToken) => {
 
 const sendConcatenatedMessage = async (senderId, text, pageAccessToken) => {
   const maxMessageLength = 2000;
-
-  if (!text || typeof text !== "string") {
-    text = "❌ Response is empty or invalid.";
-  }
 
   if (text.length > maxMessageLength) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);

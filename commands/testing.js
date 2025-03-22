@@ -3,46 +3,54 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Search and retrieve audio from SoundCloud.',
-  author: 'developer',
+  description: 'Fetch a Facebook profile picture using UID.',
+  author: 'Developer',
+
   async execute(senderId, args, pageAccessToken) {
-    // Validate if a search query is provided
+    // Check if UID is provided
     if (!args || args.length === 0) {
-      console.log('No search query provided.');
-      await sendMessage(senderId, { text: 'Please provide a search term for SoundCloud.' }, pageAccessToken);
-      return;
+      return sendMessage(
+        senderId,
+        {
+          text: '𝗣𝗹𝗲𝗮𝘀𝗲 𝗽𝗿𝗼𝘃𝗶𝗱𝗲 𝗮 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸 𝗨𝗜𝗗 𝘁𝗼 𝗴𝗲𝘁 𝗮 𝗽𝗿𝗼𝗳𝗶𝗹𝗲 𝗽𝗶𝗰𝘁𝘂𝗿𝗲.',
+        },
+        pageAccessToken
+      );
     }
 
-    const searchQuery = args.join(' ');
-    const apiUrl = `https://betadash-api-swordslush-production.up.railway.app/sc?search=${encodeURIComponent(searchQuery)}`;
+    const uid = args[0];
 
-    console.log(`Generated API URL: ${apiUrl}`); // Debugging log
+    await sendMessage(
+      senderId,
+      { text: '⌛ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸 𝗽𝗿𝗼𝗳𝗶𝗹𝗲 𝗽𝗶𝗰𝘁𝘂𝗿𝗲, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' },
+      pageAccessToken
+    );
 
     try {
-      // Send request to the API
-      const response = await axios.get(apiUrl);
-      console.log('API Response:', response.data); // Debug log for response
-
-      // Check if the API returned valid audio data
-      if (response.data && response.data.url) {
-        const audioUrl = response.data.url; // Assuming the API provides an audio URL
-
-        console.log('Sending audio URL:', audioUrl); // Debugging log
-        // Send the audio player link to the user
-        await sendMessage(
-          senderId,
-          {
-            text: `Here is your SoundCloud audio for "${searchQuery}":\n\n${audioUrl}`,
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/facebookpfp?uid=${encodeURIComponent(uid)}`;
+      
+      // Send profile picture as an image attachment
+      await sendMessage(
+        senderId,
+        {
+          attachment: {
+            type: 'image',
+            payload: {
+              url: apiUrl,
+            },
           },
-          pageAccessToken
-        );
-      } else {
-        console.log('Invalid API response structure:', response.data);
-        await sendMessage(senderId, { text: 'Failed to fetch SoundCloud audio. Please try again.' }, pageAccessToken);
-      }
+        },
+        pageAccessToken
+      );
     } catch (error) {
-      console.error('Error fetching SoundCloud audio:', error.message); // Log the error for debugging
-      await sendMessage(senderId, { text: 'An error occurred while retrieving the audio. Please try again later.' }, pageAccessToken);
+      console.error('Error fetching Facebook profile picture:', error);
+      await sendMessage(
+        senderId,
+        {
+          text: '𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗳𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝘁𝗵𝗲 𝗽𝗿𝗼𝗳𝗶𝗹𝗲 𝗽𝗶𝗰𝘁𝘂𝗿𝗲. 𝗣𝗹𝗲𝗮𝘀𝗲 𝘁𝗿𝘆 𝗮𝗴𝗮𝗶𝗻 𝗹𝗮𝘁𝗲𝗿.',
+        },
+        pageAccessToken
+      );
     }
   },
 };

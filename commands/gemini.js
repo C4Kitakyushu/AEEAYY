@@ -3,22 +3,19 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "gemini",
-  description: "interact with gemini vision",
+  description: "interact to gemini 1.5 flash vision",
   author: "developer",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
     const userPrompt = args.join(" ");
-    const repliedMessage = event.message.reply_to?.message || "";
-    const finalPrompt = repliedMessage ? `${repliedMessage} ${userPrompt}`.trim() : userPrompt;
 
-    if (!finalPrompt) {
+    if (!userPrompt && !imageUrl) {
       return sendMessage(senderId, { 
-        text: "Kindly provide your specific questions." 
+        text: `Provide your question.` 
       }, pageAccessToken);
     }
 
     try {
-      // If imageUrl isn't provided, try to extract it from the event
       if (!imageUrl) {
         if (event.message.reply_to && event.message.reply_to.mid) {
           imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
@@ -27,49 +24,54 @@ module.exports = {
         }
       }
 
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/gemini-vision`;
-      const response = await handleImageRecognition(apiUrl, finalPrompt, imageUrl, senderId);
-      const result = response.response;
-      const visionResponse = `${result}`;
-      await sendConcatenatedMessage(senderId, visionResponse, pageAccessToken);
+      const apiUrl = `https://api.zetsu.xyz/gemini`;
+      const response = await handleImageRecognition(apiUrl, userPrompt, imageUrl);
+      const result = response.gemini;
+
+      // Get the current response time in Manila timezone
+      const responseTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour12: true });
+
+      // Format the response message
+      const message = `${result}`;
+
+      await sendConcatenatedMessage(senderId, message, pageAccessToken);
 
     } catch (error) {
-      console.error("Error in AI command:", error);
+      console.error("Error in Gemini command:", error);
       sendMessage(senderId, { text: `Error: ${error.message || "Something went wrong."}` }, pageAccessToken);
     }
   }
 };
 
-async function handleImageRecognition(apiUrl, prompt, imageUrl, senderId) {
-  try {
-    const { data } = await axios.get(apiUrl, {
-      params: {
-        q: prompt,
-        uid: senderId,
-        imageUrl: imageUrl || ""
-      }
-    });
-    return data;
-  } catch (error) {
-    throw new Error("Failed to connect to the Gemini Vision API.");
-  }
+async function handleImageRecognition(apiUrl, prompt, imageUrl) {
+  const { data } = await axios.get(apiUrl, {
+    params: {
+      prompt,
+      url: imageUrl || ""
+    }
+  });
+
+  return data;
 }
 
 async function getRepliedImage(mid, pageAccessToken) {
-  try {
-    const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
-      params: { access_token: pageAccessToken }
-    });
-    return data?.data[0]?.image_data?.url || "";
-  } catch (error) {
-    throw new Error("Failed to retrieve replied image.");
+  const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
+    params: { access_token: pageAccessToken }
+  });
+
+  if (data && data.data.length > 0 && data.data[0].image_data) {
+    return data.data[0].image_data.url;
+  } else {
+    return "";
   }
 }
 
 async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
   const maxMessageLength = 2000;
+
   if (text.length > maxMessageLength) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
+
     for (const message of messages) {
       await new Promise(resolve => setTimeout(resolve, 500));
       await sendMessage(senderId, { text: message }, pageAccessToken);

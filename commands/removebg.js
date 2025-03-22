@@ -4,8 +4,10 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   name: 'removebg',
   description: 'Remove the background from an image.',
-  author: 'Developer',
+  author: 'Strawhat Luffy & kshitiz',
   async execute(senderId, args, pageAccessToken, imageUrl) {
+    const apiKey = 'cdgvJYo22Tu3tSJqXhBLbWwk';
+
     if (!imageUrl) {
       return sendMessage(senderId, {
         text: `𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗿𝗲𝗺𝗼𝘃𝗲𝗯𝗴" 𝘁𝗼 𝗿𝗲𝗺𝗼𝘃𝗲 𝗶𝘁𝘀 𝗯𝗮𝗰𝗸𝗴𝗿𝗼𝘂𝗻𝗱.`
@@ -17,13 +19,29 @@ module.exports = {
     }, pageAccessToken);
 
     try {
-      const apiUrl = `https://markdevs-last-api-p2y6.onrender.com/api/removebg?imageUrl=${encodeURIComponent(imageUrl)}`;
+      const response = await axios.post(
+        'https://api.remove.bg/v1.0/removebg',
+        {
+          image_url: imageUrl,
+          size: 'auto',
+        },
+        {
+          headers: {
+            'X-Api-Key': apiKey,
+            'Content-Type': 'application/json',
+          },
+          responseType: 'arraybuffer',
+        }
+      );
+
+      const imageBuffer = Buffer.from(response.data, 'binary');
 
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: apiUrl,
+            is_reusable: true,
+            url: `data:image/png;base64,${imageBuffer.toString('base64')}`,
           },
         },
       }, pageAccessToken);

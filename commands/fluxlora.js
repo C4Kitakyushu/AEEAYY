@@ -17,7 +17,7 @@ module.exports = {
 
     // Validate model range
     if (isNaN(model) || model < 1 || model > 7) {
-      await sendMessage(senderId, { text: '❌ Invalid model number. Please choose a model between 1 and 7.\n\n 🖼️: AVAILABLE MODEL \n
+      await sendMessage(senderId, { text: '❌ Invalid model number. Please choose a model between 1 and 7\n 🖼️: AVAILABLE MODEL\n
 Default 
 Cyberpunk
 Anime 

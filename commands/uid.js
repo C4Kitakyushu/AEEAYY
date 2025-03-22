@@ -7,41 +7,41 @@ const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'uid',
-  description: 'fb uid retriever',
+  description: 'Fetch Facebook UID from a given profile link.',
   role: 1,
-  author: 'develoepr',
+  author: 'developer',
 
   async execute(senderId, args) {
     const pageAccessToken = token;
 
     if (!Array.isArray(args) || args.length === 0) {
-      return await sendError(senderId, 'Usage: retrieve [Facebook profile URL]', pageAccessToken);
+      return await sendError(senderId, 'Usage: fbuid [Facebook profile URL]', pageAccessToken);
     }
 
     const profileUrl = args.join(' ').trim();
-    await handleFindFacebookId(senderId, profileUrl, pageAccessToken);
+    await handleFetchFacebookUid(senderId, profileUrl, pageAccessToken);
   },
 };
 
-// Function to retrieve Facebook ID from profile URL
-const handleFindFacebookId = async (senderId, profileUrl, pageAccessToken) => {
+// Function to retrieve Facebook UID from profile URL
+const handleFetchFacebookUid = async (senderId, profileUrl, pageAccessToken) => {
   try {
-    const res = await axios.get('https://api.zetsu.xyz/api/findid', {
+    const res = await axios.get('https://kaiz-apis.gleeze.com/api/fbuid', {
       params: { url: profileUrl },
     });
 
-    const { status, result } = res.data;
+    const { UID } = res.data;
 
-    if (status && result) {
+    if (UID) {
       await sendMessage(senderId, {
-        text: `Facebook ID: ${result}`,
+        text: `✔ Facebook UID for the given profile:\n\nUID: ${UID}`,
       }, pageAccessToken);
     } else {
-      throw new Error('Unable to retrieve Facebook ID');
+      throw new Error('Unable to retrieve Facebook UID');
     }
   } catch (error) {
-    console.error('Error retrieving Facebook ID:', error);
-    await sendError(senderId, 'Error retrieving Facebook ID. Please try again or check your input.', pageAccessToken);
+    console.error('Error retrieving Facebook UID:', error);
+    await sendError(senderId, 'Error retrieving Facebook UID. Please try again or check your input.', pageAccessToken);
   }
 };
 

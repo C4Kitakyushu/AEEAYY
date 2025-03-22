@@ -1,74 +1,64 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+// Read token from file
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: "ai",
-  description: "interact with gemini ai for text-based conversations.",
-  author: "developer",
+  name: 'ai',
+  description: 'Ask GPT-4o a question and get AI-powered responses',
+  usage: 'gpt4o [question]',
+  author: 'developer',
 
-  async execute(senderId, args, pageAccessToken) {
-    const userMessage = args.join(" ").trim();
+  execute: async (senderId, args) => {
+    const pageAccessToken = token;
 
-    if (!userMessage) {
-      return sendMessage(
+    // Validate input: Ensure the user provides a question
+    if (!args.length) {
+      return sendError(
         senderId,
-        { text: "❌ Please provide a question for Gemini AI." },
+        '🤖 Invalid format! Use the command like this:\n\ngpt4o [question]\nExample: gpt4o What is the capital of France?',
         pageAccessToken
       );
     }
+
+    // Combine arguments into a single question
+    const question = args.join(' ').trim();
+    const apiUrl = `https://kaiz-apis.gleeze.com/api/gpt-4o?ask=${encodeURIComponent(
+      question
+    )}&uid=4&webSearch=off`;
 
     try {
+      // Fetch data from the API
+      const { data } = await axios.get(apiUrl);
 
-
-      const API_KEY = "AIzaSyD-msS_FTZLH1yGO-iOzzzgQmg2fZS25hU"; // Replace with your actual API key
-      const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${API_KEY}`;
-
-      // Send request to the API
-      const response = await axios.post(API_URL, {
-        contents: [{ role: "user", parts: [{ text: userMessage }] }]
-      });
-
-      const data = response.data;
-      if (!response.data || !data.candidates || !data.candidates[0].content.parts[0].text) {
-        throw new Error("No response from Gemini AI.");
+      // Check if API response contains valid data
+      if (data && data.reply) {
+        await sendMessage(
+          senderId,
+          { text: `🤖 GPT-4o says:\n\n${data.reply}` },
+          pageAccessToken
+        );
+      } else {
+        await sendError(
+          senderId,
+          `❌ No valid response received for your query.`,
+          pageAccessToken
+        );
       }
-
-      // Extract response and format text
-      let aiResponse = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1");
-
-      // Send AI-generated response
-      await sendConcatenatedMessage(senderId, aiResponse, pageAccessToken);
     } catch (error) {
-      console.error("❌ Error in Gemini command:", error);
-      sendMessage(
+      console.error('Error fetching response from GPT-4o:', error);
+      await sendError(
         senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        '❌ An error occurred while communicating with GPT-4o. Please try again later.',
         pageAccessToken
       );
     }
-  }
+  },
 };
 
-// Helper function to send long messages in chunks
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-}
-
-// Helper function to split long messages
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}
+// Centralized error handler for sending error messages
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+};

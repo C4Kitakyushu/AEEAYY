@@ -17,7 +17,14 @@ module.exports = {
 
     // Validate model range
     if (isNaN(model) || model < 1 || model > 7) {
-      await sendMessage(senderId, { text: '❌ Invalid model number. Please choose a model between 1 and 7.' }, pageAccessToken);
+      await sendMessage(senderId, { text: '❌ Invalid model number. Please choose a model between 1 and 7.\n\n 🖼️: AVAILABLE MODEL \n
+Default 
+Cyberpunk
+Anime 
+Chibi
+Pixel Art
+Oil Painting 
+3D' }, pageAccessToken);
       return;
     }
 
@@ -38,7 +45,7 @@ module.exports = {
         }, pageAccessToken);
 
         // Optionally send model info
-        await sendMessage(senderId, { text: `📌 Selected Model: ${selectedModel}` }, pageAccessToken);
+        await sendMessage(senderId, { text: `🖼️•Selected Model: ${selectedModel}` }, pageAccessToken);
       } else {
         console.error('Error: No valid result returned from API.');
         await sendMessage(senderId, { text: '❌ Could not generate the image. Please check your input.' }, pageAccessToken);

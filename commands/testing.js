@@ -1,51 +1,65 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-// Read the token once at the top level
-const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: 'test',
-  description: 'Fetch Facebook UID from a given profile link.',
-  role: 1,
-  author: 'developer',
+  name: "test",
+  description: "Search for images on Pinterest",
+  author: "developer",
 
-  async execute(senderId, args) {
-    const pageAccessToken = token;
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    try {
+      // Validate input: must include a dash separator between search term and number.
+      if (args.length === 0) {
+        return sendMessage(senderId, {
+          text: "🖼️ Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest cats - 5"
+        }, pageAccessToken);
+      }
 
-    if (!Array.isArray(args) || args.length === 0) {
-      return await sendError(senderId, 'Usage: fbuid [Facebook profile URL]', pageAccessToken);
+      // Combine the args into one string and split by " - "
+      const [searchTerm, count] = args.join(" ").split(" - ");
+
+      if (!searchTerm || !count) {
+        return sendMessage(senderId, {
+          text: "🖼️ Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest cats - 5"
+        }, pageAccessToken);
+      }
+
+      // Parse the number of images and check that it’s within a valid range (1-10)
+      const numOfImages = parseInt(count) || 5;
+      if (isNaN(numOfImages) || numOfImages < 1 || numOfImages > 10) {
+        return sendMessage(senderId, {
+          text: "🖼️ Invalid number! Please enter a number of images between 1 and 10."
+        }, pageAccessToken);
+      }
+
+      // Call the Pinterest API
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/pinterest?search=${encodeURIComponent(searchTerm)}`;
+      console.log(`Fetching data from API: ${apiUrl}`);
+      const response = await axios.get(apiUrl);
+
+      const data = response.data.data;
+      if (!data || data.length === 0) {
+        return sendMessage(senderId, { text: `No results found for "${searchTerm}".` }, pageAccessToken);
+      }
+
+      // Use the first numOfImages URLs provided by the API
+      const imageUrls = data.slice(0, numOfImages);
+      if (imageUrls.length === 0) {
+        return sendMessage(senderId, { text: `No available images for "${searchTerm}".` }, pageAccessToken);
+      }
+
+      // Send each image URL as an attachment
+      for (const url of imageUrls) {
+        await sendMessage(senderId, {
+          attachment: {
+            type: "image",
+            payload: { url }
+          }
+        }, pageAccessToken);
+      }
+
+    } catch (error) {
+      console.error("Failed to retrieve images from Pinterest:", error);
+      sendMessage(senderId, { text: `❌ Failed to retrieve images from Pinterest. Error: ${error.message || error}` }, pageAccessToken);
     }
-
-    const profileUrl = args.join(' ').trim();
-    await handleFetchFacebookUid(senderId, profileUrl, pageAccessToken);
-  },
-};
-
-// Function to retrieve Facebook UID from profile URL
-const handleFetchFacebookUid = async (senderId, profileUrl, pageAccessToken) => {
-  try {
-    const res = await axios.get('https://kaiz-apis.gleeze.com/api/fbuid', {
-      params: { url: profileUrl },
-    });
-
-    const { UID } = res.data;
-
-    if (UID) {
-      await sendMessage(senderId, {
-        text: `✔ Facebook UID for the given profile:\n\nUID: ${UID}`,
-      }, pageAccessToken);
-    } else {
-      throw new Error('Unable to retrieve Facebook UID');
-    }
-  } catch (error) {
-    console.error('Error retrieving Facebook UID:', error);
-    await sendError(senderId, 'Error retrieving Facebook UID. Please try again or check your input.', pageAccessToken);
   }
-};
-
-// Centralized error handler for sending error messages
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
 };

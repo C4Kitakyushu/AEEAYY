@@ -47,12 +47,14 @@ module.exports = {
       const data = response.data;
 
       if (data && data.status) {
-        const sharedPosts = data.postIds.join("\n");
+        const sharedPosts = data.postIds
+          .map((postId, index) => `🔹 ${index + 1}: ${postId}`)
+          .join("\n");
 
         sendMessage(
           senderId,
           {
-            text: `✔️ Successfully shared the post ${shareAmount} times.\n\n📄 Post IDs:\n${sharedPosts}`,
+            text: `✔️ ${data.message}\n\n📄 Shared Post IDs:\n${sharedPosts}`,
           },
           pageAccessToken
         );

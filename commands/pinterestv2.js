@@ -19,7 +19,7 @@ module.exports = {
 
       if (!searchTerm || !count) {
         return sendMessage(senderId, {
-          text: "🖼️•Invalid format! Use the command like this:\n\npinterest [search term] - [number of images]\nExample: pinterest Llama - 10"
+          text: "Usage: pinterest [search term] - [number of images]\nexample: pinterest dog - 10"
         }, pageAccessToken);
       }
 
@@ -27,7 +27,7 @@ module.exports = {
       const numOfImages = parseInt(count) || 5;
       if (isNaN(numOfImages) || numOfImages < 1 || numOfImages > 10) {
         return sendMessage(senderId, {
-          text: "🖼️•Invalid number! Please enter a number of images between 1 and 10."
+          text: "Usage: pinterest [search term] - [number of images]\nexample: pinterest dog - 10"
         }, pageAccessToken);
       }
 

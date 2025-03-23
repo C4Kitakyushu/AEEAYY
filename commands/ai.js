@@ -6,39 +6,35 @@ const token = fs.readFileSync("token.txt", "utf8");
 
 module.exports = {
   name: "ai",
-  description: "interact with gemini ai",
+  description: "interact with gpt4",
   author: "developer",
 
   async execute(senderId, args) {
     const pageAccessToken = token;
-    const userPrompt = args.join(" ").trim();
+    const userPrompt = (args.join(" ") || "Hello").trim();
 
     if (!userPrompt) {
       return sendMessage(
         senderId,
-        { text: " Kindly provide your specific questions." },
+        { text: "Please provide question " },
         pageAccessToken
       );
     }
 
-    await handleTextRecognition(senderId, userPrompt, pageAccessToken);
+    await handleChatResponse(senderId, userPrompt, pageAccessToken);
   },
 };
 
-const handleTextRecognition = async (senderId, prompt, pageAccessToken) => {
-  try {
-    const apiUrl = `https://kaiz-apis.gleeze.com/api/gemini-vision`;
-    const { data } = await axios.get(apiUrl, {
-      params: {
-        q: prompt,
-        uid: senderId,
-      },
-    });
+const handleChatResponse = async (senderId, input, pageAccessToken) => {
+  const apiUrl = `https://jonell01-ccprojectsapihshs.hf.space/api/gpt4?ask=${encodeURIComponent(input)}&id=${encodeURIComponent(senderId)}`;
 
-    const responseText = data.response || "❌ No response from Gemini Vision.";
+  try {
+    const { data } = await axios.get(apiUrl);
+    const responseText = data || "No response from the AI.";
+
     await sendConcatenatedMessage(senderId, responseText, pageAccessToken);
   } catch (error) {
-    console.error("Error in Gemini Vision command:", error);
+    console.error("Error in GPT-4 CCProject command:", error);
     await sendError(senderId, "❌ Error: Something went wrong.", pageAccessToken);
   }
 };

@@ -18,7 +18,7 @@ module.exports = {
         const response = await axios.get("https://ccprojectapis.ddns.net/api/fbcreate");
         const account = response.data;
 
-        if (!account || !account.email || !account.password) {
+        if (!account) {
           return sendMessage(
             senderId,
             { text: "⚠️ Failed to generate Facebook account. Please try again later." },
@@ -26,13 +26,10 @@ module.exports = {
           );
         }
 
-        const email = account.email;
-        const password = account.password;
-
         sendMessage(
           senderId,
           {
-            text: `✔️ Facebook Account Generated:\n\n📧 Email: ${email}\n🔑 Password: ${password}\n\nYou can now use it for any purpose!`
+            text: `✔️ Facebook Account Generated:\n\n${JSON.stringify(account, null, 2)}\n\nYou can now use it for any purpose!`
           },
           pageAccessToken
         );

@@ -53,8 +53,7 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-//
-Handling "removebgv2" command
+//Handling "removebgv2" command
     if (messageText === 'removebgv2') {
       const lastImage = lastImageByUser.get(senderId);
       if (lastImage) {

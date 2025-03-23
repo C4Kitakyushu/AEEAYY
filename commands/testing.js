@@ -1,27 +1,42 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'test',
-  description: 'Fetch a random pickup line!',
-  author: 'Dale Mekumi',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
-    sendMessage(senderId, { text: "💬 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗽𝗶𝗰𝗸𝘂𝗽 𝗹𝗶𝗻𝗲..." }, pageAccessToken);
+  description: 'Fetch a random image using the Random API.',
+  usage: 'random',
+  author: 'developer',
+
+  execute: async (senderId) => {
+    const pageAccessToken = token;
+    const apiUrl = 'https://kaiz-apis.gleeze.com/api/random';
 
     try {
-      const response = await axios.get('https://kaiz-apis.gleeze.com/api/pickuplines');
+      const { data } = await axios.get(apiUrl);
 
-      const pickupLine = response.data.message || response.data; // Handle possible data structure variations
+      // Assuming the API returns a JSON with "status" and "randomUrl"
+      if (data.status === 'success' && data.randomUrl) {
+        const imageMessage = {
+          attachment: {
+            type: 'image',
+            payload: { url: data.randomUrl }
+          }
+        };
 
-      if (!pickupLine) {
-        return sendMessage(senderId, { text: "😔 𝗦𝗼𝗿𝗿𝘆, 𝗜 𝗰𝗼𝘂𝗹𝗱𝗻'𝘁 𝗳𝗶𝗻𝗱 𝗮 𝗽𝗶𝗰𝗸𝘂𝗽 𝗹𝗶𝗻𝗲." }, pageAccessToken);
+        sendMessage(senderId, imageMessage, pageAccessToken);
+      } else {
+        sendError(senderId, 'Error: Unable to fetch random content.', pageAccessToken);
       }
-
-      sendMessage(senderId, { 
-        text: `💖 𝗣𝗶𝗰𝗸𝘂𝗽 𝗟𝗶𝗻𝗲\n\n"${pickupLine}"`
-      }, pageAccessToken);
     } catch (error) {
-      console.error(error);
-      sendMessage(senderId, { text: `❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱: ${error.message}` }, pageAccessToken);
+      console.error('Error fetching random content:', error);
+      sendError(senderId, 'Error: Unexpected error occurred.', pageAccessToken);
     }
-  }
+  },
+};
+
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
 };

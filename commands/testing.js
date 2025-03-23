@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 module.exports = {
-  name: 'pickuplines',
+  name: 'test',
   description: 'Fetch a random pickup line!',
   author: 'Dale Mekumi',
   async execute(senderId, args, pageAccessToken, sendMessage) {

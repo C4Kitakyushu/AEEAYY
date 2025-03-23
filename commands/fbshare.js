@@ -2,55 +2,66 @@ const axios = require("axios");
 
 module.exports = {
   name: "fbshare",
-  description: "Shares a Facebook post using user-defined parameters.",
-  author: "YourName",
+  description: "Share a Facebook post multiple times using a cookie or token.",
+  author: "developer",
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    // Validate input parameters
     if (args.length < 5) {
       return sendMessage(
         senderId,
-        { text: "❗ Usage: `fbshare <postUrl> | <cookieOrToken> | <amount> | <privacy> | <interval>`" },
+        {
+          text: "❗ Usage: `fbshare <postUrl> | <cookieOrToken> | <shareAmount> | <privacy> | <intervalSeconds>`\n\nExample:\nfbshare https://facebook.com/post | token_here | 50 | EVERYONE | 1",
+        },
         pageAccessToken
       );
     }
 
-    // Parse user input
     const [postUrl, cookieOrToken, shareAmount, privacy, intervalSeconds] = args.join(" ").split(" | ");
 
     if (!postUrl || !cookieOrToken || !shareAmount || !privacy || !intervalSeconds) {
       return sendMessage(
         senderId,
-        { text: "⚠️ All parameters are required: postUrl, cookieOrToken, amount, privacy, intervalSeconds." },
+        {
+          text: "⚠️ All parameters are required: postUrl, cookieOrToken, shareAmount, privacy, and intervalSeconds.",
+        },
         pageAccessToken
       );
     }
 
+    await sendMessage(
+      senderId,
+      {
+        text: `⌛ Sharing the post... \n\n🔗 Post URL: ${postUrl} \n🔒 Privacy: ${privacy} \n🔁 Shares: ${shareAmount} \n⏱ Interval: ${intervalSeconds} seconds`,
+      },
+      pageAccessToken
+    );
+
     try {
-      // Call the API
-      const response = await axios.get("https://haji-mix.up.railway.app/api/fbshare", {
-        params: {
-          postUrl: encodeURIComponent(postUrl),
-          cookieOrToken,
-          shareAmount,
-          privacy,
-          intervalSeconds,
-        },
-      });
+      const response = await axios.get(
+        `https://haji-mix.up.railway.app/api/fbshare?postUrl=${encodeURIComponent(
+          postUrl
+        )}&cookieOrToken=${encodeURIComponent(
+          cookieOrToken
+        )}&shareAmount=${shareAmount}&privacy=${privacy}&intervalSeconds=${intervalSeconds}`
+      );
 
       const data = response.data;
 
       if (data && data.status) {
+        const sharedPosts = data.postIds.join("\n");
+
         sendMessage(
           senderId,
           {
-            text: `✅ Successfully shared the post ${shareAmount} times.\n\nCreator: ${data.creator}\nPost IDs:\n${data.postIds.join("\n")}`,
+            text: `✔️ Successfully shared the post ${shareAmount} times.\n\n📄 Post IDs:\n${sharedPosts}`,
           },
           pageAccessToken
         );
       } else {
         sendMessage(
           senderId,
-          { text: "⚠️ Sharing the post failed. Please check your parameters and try again." },
+          {
+            text: "⚠️ Sharing failed. Please ensure your cookie/token and post URL are correct.",
+          },
           pageAccessToken
         );
       }
@@ -58,7 +69,9 @@ module.exports = {
       console.error("Error sharing post:", error);
       sendMessage(
         senderId,
-        { text: "⚠️ An error occurred while processing your request. Please try again later." },
+        {
+          text: "⚠️ An error occurred while sharing the post. Please try again later.",
+        },
         pageAccessToken
       );
     }

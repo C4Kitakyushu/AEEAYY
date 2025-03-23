@@ -69,6 +69,7 @@ Handling "removebgv2" command
       }
       return;
     }
+
     // Handling "remini" command
     if (messageText === 'remini') {
       const lastImage = lastImageByUser.get(senderId);

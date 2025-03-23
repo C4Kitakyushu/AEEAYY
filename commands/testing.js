@@ -12,8 +12,14 @@ module.exports = {
 
   execute: async (senderId, args) => {
     const pageAccessToken = token;
-    const searchQuery = args[0] || 'dog'; // Default search term is 'dog'
-    const limit = args[1] || 5; // Default limit is 5
+
+    // Validate user input
+    if (!args[0]) {
+      return sendError(senderId, 'Please provide a search term (e.g., Braveimage cat 5).', pageAccessToken);
+    }
+
+    const searchQuery = args[0];
+    const limit = args[1] || 5; // Default limit is 5 if not provided by the user
     const apiUrl = `https://kaiz-apis.gleeze.com/api/brave-image?search=${encodeURIComponent(searchQuery)}&limit=${limit}`;
 
     try {

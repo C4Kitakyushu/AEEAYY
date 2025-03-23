@@ -2,29 +2,35 @@ const axios = require("axios");
 
 module.exports = {
   name: "fbshare",
-  description: "share a facebook post multiple times using a cookie or token.",
+  description: "Share a Facebook post multiple times using a cookie or token.",
   author: "developer",
   async execute(senderId, args, pageAccessToken, sendMessage) {
-    if (!args[0] || !args[1]) {
+    if (args.length < 5) {
       return sendMessage(
         senderId,
         {
-          text: "❗ Usage: `fbshare fb url | token or cookie | amount | privacy | interval ",
+          text: "❗ Usage: `fbshare <postUrl> | <cookieOrToken> | <amount> | <privacy> | <interval>`\n\nExample:\nfbshare https://facebook.com/postURL | token_or_cookie | 100 | EVERYONE | 1",
         },
         pageAccessToken
       );
     }
 
-    const postUrl = args[0];
-    const cookieOrToken = args[1];
-    const shareAmount = args[2] || 1; // Optional default to 1 share
-    const privacy = args[3] || "EVERYONE"; // Optional privacy settings
-    const intervalSeconds = args[4] || 1; // Optional default interval to 1 second
+    const [postUrl, cookieOrToken, shareAmount, privacy, intervalSeconds] = args.join(" ").split(" | ");
+
+    if (!postUrl || !cookieOrToken || !shareAmount || !privacy || !intervalSeconds) {
+      return sendMessage(
+        senderId,
+        {
+          text: "❗ All parameters are required. Please provide:\n`<postUrl> | <cookieOrToken> | <amount> | <privacy> | <interval>`",
+        },
+        pageAccessToken
+      );
+    }
 
     await sendMessage(
       senderId,
       {
-        text: `⌛ Sharing the post... \n\n🔗 Post URL: ${postUrl} \n🔒 Privacy: ${privacy} \n🔁 Shares: ${shareAmount}`,
+        text: `⌛ Sharing the post...\n\n🔗 Post URL: ${postUrl} \n🔑 Token/Cookie: Provided \n🔁 Shares: ${shareAmount} \n🔒 Privacy: ${privacy} \n⏱️ Interval: ${intervalSeconds} seconds`,
       },
       pageAccessToken
     );

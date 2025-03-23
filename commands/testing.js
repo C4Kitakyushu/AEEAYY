@@ -3,33 +3,30 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Upload an image to Google Drive and return the file link.',
+  description: 'Automatically create a Facebook account.',
   author: 'developer',
 
-  async execute(senderId, args, pageAccessToken, imageUrl) {
-    if (!imageUrl) {
-      return sendMessage(senderId, {
-        text: '❌ No image detected. Please send an image first and then type "gdrive".'
-      }, pageAccessToken);
-    }
-
-    await sendMessage(senderId, { text: '⌛ Uploading your image to Google Drive, please wait...' }, pageAccessToken);
+  async execute(senderId, args, pageAccessToken) {
+    await sendMessage(senderId, { text: '⌛ Creating Facebook account, please wait...' }, pageAccessToken);
 
     try {
-      const response = await axios.get(`https://ccprojectapis.ddns.net/api/gdrive?url=${encodeURIComponent(imageUrl)}`);
-      const driveLink = response?.data?.link;
+      const response = await axios.get(`https://ccprojectapis.ddns.net/api/fbcreate`);
+      const accountDetails = response?.data;
 
-      if (!driveLink) {
+      if (!accountDetails || !accountDetails.email || !accountDetails.password) {
         return sendMessage(senderId, {
-          text: '❌ Unable to retrieve the Google Drive link. Please try again later.'
+          text: '❌ Unable to create a Facebook account at the moment. Please try again later.'
         }, pageAccessToken);
       }
 
+      const email = accountDetails.email;
+      const password = accountDetails.password;
+
       await sendMessage(senderId, {
-        text: `✔️ Your file has been successfully uploaded to Google Drive:\n\n🔗 ${driveLink}`
+        text: `✔️ Facebook account successfully created:\n\n📧 Email: ${email}\n🔑 Password: ${password}`
       }, pageAccessToken);
     } catch (error) {
-      console.error('❌ Error uploading image to Google Drive:', error);
+      console.error('❌ Error creating Facebook account:', error);
 
       let errorMessage = '❌ An unexpected error occurred. Please try again later.';
       if (error.response?.data?.message) {

@@ -12,7 +12,7 @@ module.exports = {
 
   execute: async (senderId) => {
     const pageAccessToken = token;
-    const apiUrl = 'https://kaiz-apis.gleeze.com/api/random';
+    const apiUrl = 'https://kaiz-apis.gleeze.com/api/random-jjk';
 
     try {
       const { data } = await axios.get(apiUrl);

@@ -1,51 +1,37 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
-
-const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'test',
-  description: 'Search for images using Brave search.',
-  usage: 'Braveimage <search-term> <limit>',
-  author: 'developer',
+  description: 'Swap faces between two images.',
+  author: 'dev',
 
-  execute: async (senderId, args) => {
-    const pageAccessToken = token;
-
-    // Validate user input
-    if (!args[0]) {
-      return sendError(senderId, 'Please provide a search term (e.g., Braveimage cat 5).', pageAccessToken);
+  async execute(senderId, args, pageAccessToken, swapUrl, baseUrl) {
+    if (!swapUrl || !baseUrl) {
+      return sendMessage(senderId, {
+        text: `❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝘁𝘄𝗼 𝗶𝗺𝗮𝗴𝗲 𝗨𝗥𝗟𝘀 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗳𝗮𝗰𝗲𝘀𝘄𝗮𝗽" 𝘄𝗶𝘁𝗵 𝗯𝗼𝘁𝗵 𝗨𝗥𝗟𝘀 𝗮𝘀 𝗽𝗮𝗿𝗮𝗺𝗲𝘁𝗲𝗿𝘀.`
+      }, pageAccessToken);
     }
 
-    const searchQuery = args[0];
-    const limit = args[1] || 5; // Default limit is 5 if not provided by the user
-    const apiUrl = `https://kaiz-apis.gleeze.com/api/brave-image?search=${encodeURIComponent(searchQuery)}&limit=${limit}`;
+    await sendMessage(senderId, { text: '⌛ 𝗦𝘄𝗮𝗽𝗽𝗶𝗻𝗴 𝗳𝗮𝗰𝗲𝘀, 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
 
     try {
-      const { data } = await axios.get(apiUrl);
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/faceswap?swapUrl=${encodeURIComponent(swapUrl)}&baseUrl=${encodeURIComponent(baseUrl)}`;
 
-      if (data.imageUrls && data.imageUrls.length > 0) {
-        const imageMessages = data.imageUrls.map((url) => ({
-          attachment: {
-            type: 'image',
-            payload: { url },
-          },
-        }));
-
-        for (const message of imageMessages) {
-          await sendMessage(senderId, message, pageAccessToken);
+      await sendMessage(senderId, {
+        attachment: {
+          type: 'image',
+          payload: {
+            url: apiUrl
+          }
         }
-      } else {
-        sendError(senderId, '❌ Error: No images found for your search.', pageAccessToken);
-      }
-    } catch (error) {
-      console.error('Error fetching Brave images:', error);
-      sendError(senderId, '❌ Error: Unexpected error occurred.', pageAccessToken);
-    }
-  },
-};
+      }, pageAccessToken);
 
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+    } catch (error) {
+      console.error('Error swapping faces:', error);
+      await sendMessage(senderId, {
+        text: '❌ 𝗔𝗻 𝗲𝗿𝗿𝗼𝗿 𝗼𝗰𝗰𝘂𝗿𝗿𝗲𝗱 𝘄𝗵𝗶𝗹𝗲 𝗽𝗿𝗼𝗰𝗲𝘀𝘀𝗶𝗻𝗴 𝘁𝗵𝗲 𝗳𝗮𝗰𝗲𝘀𝘄𝗮𝗽. 𝗣𝗹𝗲𝗮𝘀𝗲 𝘁𝗿𝘆 𝗮𝗴𝗮𝗶𝗻 𝗹𝗮𝘁𝗲𝗿.'
+      }, pageAccessToken);
+    }
+  }
 };

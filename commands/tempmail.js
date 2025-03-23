@@ -33,7 +33,7 @@ module.exports = {
         sendMessage(
           senderId,
           {
-            text: `📧 | Generated Email: ${email}\n\n🔑 | COPY YOUR TOKEN⬇️\n${token} \n\nUse this token to check the inbox\ntempmail inbox dywmalagdaimwd7jkwbwr8.`
+            text: `📧 | Generated Email: ${email}\n\n🔑 | COPY YOUR TOKEN⬇️\n${token} \n\n Check inbox using token example:\ntempmail inbox dywmalagdaimwd7jkwbwr8.`
           },
           pageAccessToken
         );

@@ -13,7 +13,7 @@ module.exports = {
       const joke = response.data.joke;
 
       if (joke) {
-        const message = `😁 𝗛𝗲𝗿𝗲 𝘆𝗼𝘂𝗿 𝗿𝗮𝗻𝗱𝗼𝗺 𝗰𝗼𝗿𝗻𝘆 𝗷𝗼𝗸𝗲𝘀: \n\n 😁 ${joke}\n\nhahaha kinginaka🫵😹`;
+        const message = ` 𝗛𝗲𝗿𝗲 𝘆𝗼𝘂𝗿 𝗿𝗮𝗻𝗱𝗼𝗺 𝗰𝗼𝗿𝗻𝘆 𝗷𝗼𝗸𝗲𝘀: \n\n${joke}`;
         sendMessage(senderId, { text: message }, pageAccessToken);
       } else {
         sendMessage(senderId, { text: "☹️ Sorry, I couldn't fetch a joke at the moment." }, pageAccessToken);

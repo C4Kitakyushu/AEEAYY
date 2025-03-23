@@ -18,7 +18,7 @@ module.exports = {
       const { data } = await axios.get(apiUrl);
 
       if (data.status === 'success' && data.shoti) {
-        const { videoUrl, username, nickname, duration, region } = data.shoti;
+        const { videoUrl } = data.shoti;
 
         const videoMessage = {
           attachment: {
@@ -29,8 +29,7 @@ module.exports = {
           },
         };
 
-        
-        await sendMessage(senderId, infoMessage, pageAccessToken);
+        await sendMessage(senderId, videoMessage, pageAccessToken);
       } else {
         sendError(senderId, '❌ Error: Unable to fetch Shoti video.', pageAccessToken);
       }

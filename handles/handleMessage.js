@@ -67,12 +67,12 @@ async function handleMessage(event, pageAccessToken) {
       }
       return;
     }
-
-   if (messageText === 'test') {
+//vampire 
+   if (messageText === 'vampire') {
       const lastImage = lastImageByUser.get(senderId);
       if (lastImage) {
         try {
-          await commands.get('test').execute(senderId, [], pageAccessToken, lastImage);
+          await commands.get('vampire').execute(senderId, [], pageAccessToken, lastImage);
           lastImageByUser.delete(senderId);
         } catch (error) {
           await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);

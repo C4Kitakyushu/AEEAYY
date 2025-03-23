@@ -2,64 +2,56 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const fs = require('fs');
 
-// Read token from file
 const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'test',
-  description: 'Search for a YouTube video and retrieve its download link',
-  usage: 'video [search term]',
+  description: 'Fetch a random TikTok Shoti video.',
+  usage: 'Shoti',
   author: 'developer',
 
-  execute: async (senderId, args) => {
+  execute: async (senderId) => {
     const pageAccessToken = token;
-
-    // Validate input: Ensure the user provides a query
-    if (!args.length) {
-      return sendError(
-        senderId,
-        '🎥 Invalid format! Use the command like this:\n\nvideo [search term]\nExample: video Tibok',
-        pageAccessToken
-      );
-    }
-
-    // Combine arguments into a single search query
-    const searchQuery = args.join(' ').trim();
-    const apiUrl = `https://kaiz-apis.gleeze.com/api/video?query=${encodeURIComponent(searchQuery)}`;
+    const apiUrl = 'https://kaiz-apis.gleeze.com/api/shoti';
 
     try {
-      // Fetch video data from the API
       const { data } = await axios.get(apiUrl);
 
-      // Check if API response contains valid data
-      if (data.download_url) {
+      if (data.status === 'success' && data.shoti) {
+        const { videoUrl, username, nickname, duration, region } = data.shoti;
+
         const videoMessage = {
           attachment: {
             type: 'video',
-            payload: { url: data.download_url },
+            payload: {
+              url: videoUrl,
+            },
           },
         };
 
         await sendMessage(senderId, videoMessage, pageAccessToken);
+
+        const infoMessage = {
+          text: `
+🎥 **TikTok Shoti Video Info**
+👤 **Username:** ${username}
+🌀 **Nickname:** ${nickname}
+⏱ **Duration:** ${duration} seconds
+📍 **Region:** ${region}
+          `.trim(),
+        };
+
+        await sendMessage(senderId, infoMessage, pageAccessToken);
       } else {
-        await sendError(
-          senderId,
-          `❌ No results found for "${searchQuery}".`,
-          pageAccessToken
-        );
+        sendError(senderId, '❌ Error: Unable to fetch Shoti video.', pageAccessToken);
       }
     } catch (error) {
-      console.error('Error fetching video:', error);
-      await sendError(
-        senderId,
-        '❌ An error occurred while fetching the video. Please try again later.',
-        pageAccessToken
-      );
+      console.error('Error fetching Shoti video:', error);
+      sendError(senderId, '❌ Error: Unexpected error occurred.', pageAccessToken);
     }
   },
 };
 
-// Centralized error handler for sending error messages
 const sendError = async (senderId, errorMessage, pageAccessToken) => {
   await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
 };

@@ -1,62 +1,53 @@
 const axios = require('axios');
-const { sendMessage, listenForReplies } = require('../handles/sendMessage');
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Fetch trivia quiz questions and allow the user to answer.',
+  description: 'Send a reaction using the API.',
   author: 'developer',
 
   async execute(senderId, args, pageAccessToken) {
-    const limit = args[0];
+    const token = args[0]; // The first argument is the token
+    const reactionType = args[1]?.toLowerCase(); // The second argument is the reaction type (e.g., like, love, etc.)
 
-    if (!limit || isNaN(limit) || limit <= 0 || limit > 10) {
+    if (!token) {
       return sendMessage(senderId, {
-        text: '❌ Invalid or missing limit parameter! Please provide a number between 1 and 10.'
+        text: '❌ Please provide a valid token. Example:\n\n**reaction <token> <reactionType>**'
       }, pageAccessToken);
     }
 
-    await sendMessage(senderId, { text: '⌛ Fetching trivia questions, please wait...' }, pageAccessToken);
+    if (!reactionType) {
+      return sendMessage(senderId, {
+        text: '❌ Please provide a reaction type. Example:\n\n**reaction <token> <reactionType>**'
+      }, pageAccessToken);
+    }
+
+    // Notify the user about the ongoing process
+    await sendMessage(senderId, {
+      text: `⌛ Sending your reaction **${reactionType}**, please wait...`
+    }, pageAccessToken);
 
     try {
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/quiz?limit=${limit}`;
+      // API request
+      const apiUrl = `https://fbapi-production.up.railway.app/reaction?token=${token}&reaction=${reactionType}`;
       const response = await axios.get(apiUrl);
-      const questions = response.data?.questions;
 
-      if (!questions || questions.length === 0) {
-        throw new Error('No questions found in the response.');
+      // Parse API response
+      const { status, message } = response.data;
+
+      if (status === true) {
+        await sendMessage(senderId, {
+          text: `✅ Reaction **${reactionType}** sent successfully!`
+        }, pageAccessToken);
+      } else {
+        await sendMessage(senderId, {
+          text: `❌ Failed to send reaction. Message: ${message || 'Unknown error'}.`
+        }, pageAccessToken);
       }
-
-      for (const question of questions) {
-        const { question: text, category, difficulty, choices, correct_answer } = question;
-        const formattedChoices = Object.entries(choices)
-          .map(([key, value]) => `${key}. ${value}`)
-          .join('\n');
-
-        const message = `📚 **Category**: ${category}\n🎯 **Difficulty**: ${difficulty}\n\n❓ **Question**:\n${text}\n\n💡 **Choices**:\n${formattedChoices}\n\n📥 Reply with your answer (A, B, C, or D):`;
-
-        await sendMessage(senderId, { text: message }, pageAccessToken);
-
-        // Listen for the user's answer
-        await listenForReplies(senderId, async (userReply) => {
-          const userAnswer = userReply.toUpperCase();
-
-          if (userAnswer === correct_answer) {
-            await sendMessage(senderId, {
-              text: `✅ Correct! Well done!`
-            }, pageAccessToken);
-          } else {
-            await sendMessage(senderId, {
-              text: `❌ Incorrect. The correct answer is **${correct_answer}. ${choices[correct_answer]}**.`
-            }, pageAccessToken);
-          }
-        });
-      }
-
-      await sendMessage(senderId, { text: '✅ All questions have been sent!' }, pageAccessToken);
     } catch (error) {
-      console.error('❌ Error fetching quiz questions:', error.response?.data || error.message);
+      console.error('❌ Error sending reaction:', error.response?.data || error.message);
       await sendMessage(senderId, {
-        text: '❌ An error occurred while fetching trivia questions. Please try again later.'
+        text: '❌ An error occurred while sending your reaction. Please try again later.'
       }, pageAccessToken);
     }
   }

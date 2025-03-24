@@ -3,72 +3,47 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Send a reaction on a Facebook post using the API.',
+  description: 'React to a post using the Facebook API.',
   author: 'developer',
 
   async execute(senderId, args, pageAccessToken) {
-    // Expect parameters: postUrl | token | reactionType
-    const input = args.join(' ').split(' | ');
-    const postUrl = input[0]?.trim();
-    const token = input[1]?.trim();
-    const reactionType = input[2]?.trim();
+    const input = args.join(' ').split('|');
+    const postId = input[0]?.trim();
+    const reactionType = input[1]?.trim();
 
-    if (!postUrl || !token || !reactionType) {
-      return sendMessage(
-        senderId,
-        {
-          text: '❗ Usage: `reaction <postUrl> | <token> | <reactionType>`\nExample:\nreaction https://facebook.com/post123 | abc123 | love',
-        },
-        pageAccessToken
-      );
+    if (!postId || !reactionType) {
+      return sendMessage(senderId, {
+        text: '❌ Please provide both the post ID and the reaction type in the format:\n\n**reaction <post_id> | <reaction_type>**'
+      }, pageAccessToken);
     }
 
-    if (!/^([A-Za-z0-9-_]{20,})$/.test(token)) {
-      return sendMessage(
-        senderId,
-        { text: '❗ Invalid token format. Please provide a valid access token.' },
-        pageAccessToken
-      );
-    }
-
-    await sendMessage(
-      senderId,
-      { text: `⌛ Sending your reaction "${reactionType}" for the post, please wait...` },
-      pageAccessToken
-    );
+    // Notify the user about the ongoing process
+    await sendMessage(senderId, {
+      text: '⌛ Processing your reaction, please wait...'
+    }, pageAccessToken);
 
     try {
-      const apiUrl = `https://fbapi-production.up.railway.app/reaction`;
-      const response = await axios.get(apiUrl, {
-        params: {
-          postUrl: postUrl,
-          token: token,
-          reaction: reactionType,
-        },
-      });
+      // API request
+      const apiUrl = `https://fbapi-production.up.railway.app/reaction?id=${encodeURIComponent(postId)}&reaction=${encodeURIComponent(reactionType)}`;
+      const response = await axios.get(apiUrl);
 
-      const data = response.data;
+      // Parse API response
+      const { status, message } = response.data;
 
-      if (data.status === true) {
-        await sendMessage(
-          senderId,
-          { text: `✅ Reaction "${reactionType}" was successfully sent for the post!` },
-          pageAccessToken
-        );
+      if (status === 'success') {
+        await sendMessage(senderId, {
+          text: `✅ Reaction **${reactionType}** added successfully to post **${postId}**!`
+        }, pageAccessToken);
       } else {
-        await sendMessage(
-          senderId,
-          { text: `❌ Failed to send reaction. Message: ${data.message || 'Unknown error'}.` },
-          pageAccessToken
-        );
+        await sendMessage(senderId, {
+          text: `❌ Failed to add reaction. Message: ${message || 'Unknown error'}.`
+        }, pageAccessToken);
       }
     } catch (error) {
-      console.error('❌ Error sending reaction:', error.response?.data || error.message);
-      await sendMessage(
-        senderId,
-        { text: '❌ An error occurred while sending your reaction. Please try again later.' },
-        pageAccessToken
-      );
+      console.error('❌ Error adding reaction:', error.response?.data || error.message);
+      await sendMessage(senderId, {
+        text: '❌ An error occurred while processing your reaction. Please try again later.'
+      }, pageAccessToken);
     }
-  },
+  }
 };

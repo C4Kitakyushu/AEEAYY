@@ -36,7 +36,7 @@ module.exports = {
         }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
-          text: `✅SMS sent successfully to ${phoneNumber}`
+          text: `✅ SMS sent successfully to ${phoneNumber}`
         }, pageAccessToken);
       }
     } catch (error) {

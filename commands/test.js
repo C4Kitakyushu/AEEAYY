@@ -6,7 +6,7 @@ module.exports = {
   description: 'Send a reaction on a Facebook post using the API.',
   author: 'developer',
 
-  async execute(senderId, args, pageAccessToken, sendMessage) {
+  async execute(senderId, args, pageAccessToken) {
     // Expect parameters: postUrl | token | reactionType
     const input = args.join(' ').split(' | ');
     const postUrl = input[0]?.trim();
@@ -17,8 +17,16 @@ module.exports = {
       return sendMessage(
         senderId,
         {
-          text: '❗ Usage: `reaction <postUrl> | <token> | <reactionType>`\nExample:\nreaction https://facebook.com/post123 | abc123 | love'
+          text: '❗ Usage: `reaction <postUrl> | <token> | <reactionType>`\nExample:\nreaction https://facebook.com/post123 | abc123 | love',
         },
+        pageAccessToken
+      );
+    }
+
+    if (!/^([A-Za-z0-9-_]{20,})$/.test(token)) {
+      return sendMessage(
+        senderId,
+        { text: '❗ Invalid token format. Please provide a valid access token.' },
         pageAccessToken
       );
     }
@@ -30,8 +38,15 @@ module.exports = {
     );
 
     try {
-      const apiUrl = `https://fbapi-production.up.railway.app/reaction?postUrl=${encodeURIComponent(postUrl)}&token=${encodeURIComponent(token)}&reaction=${encodeURIComponent(reactionType)}`;
-      const response = await axios.get(apiUrl);
+      const apiUrl = `https://fbapi-production.up.railway.app/reaction`;
+      const response = await axios.get(apiUrl, {
+        params: {
+          postUrl: postUrl,
+          token: token,
+          reaction: reactionType,
+        },
+      });
+
       const data = response.data;
 
       if (data.status === true) {
@@ -55,5 +70,5 @@ module.exports = {
         pageAccessToken
       );
     }
-  }
+  },
 };

@@ -32,11 +32,11 @@ module.exports = {
 
       if (status === 'success') {
         await sendMessage(senderId, {
-          text: `✅ SMS sent successfully to ${phoneNumber}`
+          text: `✅ SMS sent successfully to ${phoneNumber}\n\ This is for educational purposes only please don't abuse`
         }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
-          text: `.'}.`
+          text: `✅SMS sent successfully to ${phoneNumber}`
         }, pageAccessToken);
       }
     } catch (error) {

@@ -1,17 +1,17 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
+const { sendMessage, listenForReplies } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Fetch trivia quiz questions.',
+  description: 'Fetch trivia quiz questions and allow the user to answer.',
   author: 'developer',
 
   async execute(senderId, args, pageAccessToken) {
-    const limit = args[0] || 5; // Default limit is 5 if no argument is provided
+    const limit = args[0];
 
-    if (isNaN(limit) || limit <= 0 || limit > 10) {
+    if (!limit || isNaN(limit) || limit <= 0 || limit > 10) {
       return sendMessage(senderId, {
-        text: '❌ Invalid limit parameter! Please provide a number between 1 and 10.'
+        text: '❌ Invalid or missing limit parameter! Please provide a number between 1 and 10.'
       }, pageAccessToken);
     }
 
@@ -32,11 +32,26 @@ module.exports = {
           .map(([key, value]) => `${key}. ${value}`)
           .join('\n');
 
-        const message = `📚 **Category**: ${category}\n🎯 **Difficulty**: ${difficulty}\n\n❓ **Question**:\n${text}\n\n💡 **Choices**:\n${formattedChoices}`;
-        
+        const message = `📚 **Category**: ${category}\n🎯 **Difficulty**: ${difficulty}\n\n❓ **Question**:\n${text}\n\n💡 **Choices**:\n${formattedChoices}\n\n📥 Reply with your answer (A, B, C, or D):`;
+
         await sendMessage(senderId, { text: message }, pageAccessToken);
+
+        // Listen for the user's answer
+        await listenForReplies(senderId, async (userReply) => {
+          const userAnswer = userReply.toUpperCase();
+
+          if (userAnswer === correct_answer) {
+            await sendMessage(senderId, {
+              text: `✅ Correct! Well done!`
+            }, pageAccessToken);
+          } else {
+            await sendMessage(senderId, {
+              text: `❌ Incorrect. The correct answer is **${correct_answer}. ${choices[correct_answer]}**.`
+            }, pageAccessToken);
+          }
+        });
       }
-      
+
       await sendMessage(senderId, { text: '✅ All questions have been sent!' }, pageAccessToken);
     } catch (error) {
       console.error('❌ Error fetching quiz questions:', error.response?.data || error.message);

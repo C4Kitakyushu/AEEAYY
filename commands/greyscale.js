@@ -24,9 +24,7 @@ module.exports = {
     );
 
     try {
-      const greyFilterUrl = `https://hazeyyyy-rest-apis.onrender.com/api/grey?image=${encodeURIComponent(
-        imageUrl
-      )}`;
+      const greyFilterUrl = `https://hazeyyyy-rest-apis.onrender.com/api/grey?image=${encodeURIComponent(imageUrl)}`;
 
       await sendMessage(
         senderId,

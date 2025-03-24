@@ -3,52 +3,57 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Send a reaction using the API.',
+  description: 'Send a reaction on a Facebook post using the API.',
   author: 'developer',
 
-  async execute(senderId, args, pageAccessToken) {
-    const token = args[0]; // The first argument is the token
-    const reactionType = args[1]?.toLowerCase(); // The second argument is the reaction type (e.g., like, love, etc.)
+  async execute(senderId, args, pageAccessToken, sendMessage) {
+    // Expect parameters: postUrl | token | reactionType
+    const input = args.join(' ').split(' | ');
+    const postUrl = input[0]?.trim();
+    const token = input[1]?.trim();
+    const reactionType = input[2]?.trim();
 
-    if (!token) {
-      return sendMessage(senderId, {
-        text: '❌ Please provide a valid token. Example:\n\n**reaction <token> <reactionType>**'
-      }, pageAccessToken);
+    if (!postUrl || !token || !reactionType) {
+      return sendMessage(
+        senderId,
+        {
+          text: '❗ Usage: `reaction <postUrl> | <token> | <reactionType>`\nExample:\nreaction https://facebook.com/post123 | abc123 | love'
+        },
+        pageAccessToken
+      );
     }
 
-    if (!reactionType) {
-      return sendMessage(senderId, {
-        text: '❌ Please provide a reaction type. Example:\n\n**reaction <token> <reactionType>**'
-      }, pageAccessToken);
-    }
-
-    // Notify the user about the ongoing process
-    await sendMessage(senderId, {
-      text: `⌛ Sending your reaction **${reactionType}**, please wait...`
-    }, pageAccessToken);
+    await sendMessage(
+      senderId,
+      { text: `⌛ Sending your reaction "${reactionType}" for the post, please wait...` },
+      pageAccessToken
+    );
 
     try {
-      // API request
-      const apiUrl = `https://fbapi-production.up.railway.app/reaction?token=${token}&reaction=${reactionType}`;
+      const apiUrl = `https://fbapi-production.up.railway.app/reaction?postUrl=${encodeURIComponent(postUrl)}&token=${encodeURIComponent(token)}&reaction=${encodeURIComponent(reactionType)}`;
       const response = await axios.get(apiUrl);
+      const data = response.data;
 
-      // Parse API response
-      const { status, message } = response.data;
-
-      if (status === true) {
-        await sendMessage(senderId, {
-          text: `✅ Reaction **${reactionType}** sent successfully!`
-        }, pageAccessToken);
+      if (data.status === true) {
+        await sendMessage(
+          senderId,
+          { text: `✅ Reaction "${reactionType}" was successfully sent for the post!` },
+          pageAccessToken
+        );
       } else {
-        await sendMessage(senderId, {
-          text: `❌ Failed to send reaction. Message: ${message || 'Unknown error'}.`
-        }, pageAccessToken);
+        await sendMessage(
+          senderId,
+          { text: `❌ Failed to send reaction. Message: ${data.message || 'Unknown error'}.` },
+          pageAccessToken
+        );
       }
     } catch (error) {
       console.error('❌ Error sending reaction:', error.response?.data || error.message);
-      await sendMessage(senderId, {
-        text: '❌ An error occurred while sending your reaction. Please try again later.'
-      }, pageAccessToken);
+      await sendMessage(
+        senderId,
+        { text: '❌ An error occurred while sending your reaction. Please try again later.' },
+        pageAccessToken
+      );
     }
   }
 };

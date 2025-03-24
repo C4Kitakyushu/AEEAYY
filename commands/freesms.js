@@ -19,7 +19,7 @@ module.exports = {
 
     // Notify the user about the ongoing process
     await sendMessage(senderId, {
-      text: '⌛ Sending your sms to ${phoneNumber}, please wait...'
+      text: '⌛ Sending your message , please wait...'
     }, pageAccessToken);
 
     try {
@@ -36,7 +36,7 @@ module.exports = {
         }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
-          text: `❌ Failed to send SMS. Message: ${message || 'Unknown error'}.`
+          text: `.'}.`
         }, pageAccessToken);
       }
     } catch (error) {

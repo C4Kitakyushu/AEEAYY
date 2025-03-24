@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'freesms',
-  description: 'send free message from lbc (please don't abuse, autoblock🫵😾🫵).',
+  description: 'send free message from lbc (please dont abuse).',
   author: 'developer',
 
   async execute(senderId, args, pageAccessToken) {

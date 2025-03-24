@@ -13,7 +13,7 @@ module.exports = {
     }
 
     try {
-      const apiUrl = `https://markdevs-last-api-2epw.onrender.com/api/token&cookie?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+      const apiUrl = `https://markdevs-last-api-p2y6.onrender.com/api/token&cookie?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
       const response = await axios.get(apiUrl);
 
       const { access_token_eaad6v7, access_token, cookies } = response.data.data;

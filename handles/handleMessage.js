@@ -37,22 +37,6 @@ async function handleMessage(event, pageAccessToken) {
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
 
-// Handling "𝗴𝗿𝗲𝘆𝘀𝗰𝗮𝗹𝗲" command
-    if (messageText === 'greyscale') {
-      const lastImage = lastImageByUser.get(senderId);
-      if (lastImage) {
-        try {
-          await commands.get('greyscale').execute(senderId, [], pageAccessToken, lastImage);
-          lastImageByUser.delete(senderId);
-        } catch (error) {
-          await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, { text: '❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗴𝗿𝗲𝘆𝘀𝗰𝗮𝗹𝗲" 𝘁𝗼 𝗮𝗽𝗽𝗹𝘆 𝗴𝗿𝗲𝘆 𝗲𝗳𝗳𝗲𝗰𝘁.' }, pageAccessToken);
-      }
-      return;
-    }
-
     // Handling "removebg" command
     if (messageText === 'removebg') {
       const lastImage = lastImageByUser.get(senderId);

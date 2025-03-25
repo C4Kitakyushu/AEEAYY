@@ -3,66 +3,98 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Fetch word definitions using Merriam API.',
+  description: 'Perform Facebook-related tools like server status check and boosting shares.',
   author: 'developer',
 
   async execute(senderId, args, pageAccessToken) {
-    const word = args.join(' ').trim();
+    const command = args[0]?.toLowerCase();
+    const input = args.slice(1).join(' ').split('|');
 
-    if (!word) {
+    if (!command) {
       return sendMessage(senderId, {
-        text: '❌ Please provide a word to define. Example:\n\n**define dangerous**'
+        text: '❌ Please specify a command: **status** or **boost**.\n\nFormat:\n**fbtools <command> | [parameters]**'
       }, pageAccessToken);
     }
 
-    // Notify the user about the ongoing process
-    await sendMessage(senderId, {
-      text: '⌛ Searching for the definition, please wait...'
-    }, pageAccessToken);
+    // Server status check command
+    if (command === 'status') {
+      const servers = {
+        server1: 'https://server1-url.com',
+        server2: 'https://server2-url.com',
+        server3: 'https://server3-url.com',
+      };
 
-    try {
-      // API request
-      const apiUrl = `https://jerome-web.gleeze.com/service/api/merriam?word=${encodeURIComponent(word)}`;
-      const response = await axios.get(apiUrl);
+      await sendMessage(senderId, {
+        text: '⌛ Checking server statuses, please wait...'
+      }, pageAccessToken);
 
-      // Parse API response
-      const { word: fetchedWord, results } = response.data;
+      let statusMessage = '';
+      for (const [key, url] of Object.entries(servers)) {
+        try {
+          const response = await axios.get(url);
+          statusMessage += `✅ **${key}** is active.\n`;
+        } catch {
+          statusMessage += `❌ **${key}** is down.\n`;
+        }
+      }
 
-      if (!results || results.length === 0) {
+      await sendMessage(senderId, {
+        text: statusMessage.trim()
+      }, pageAccessToken);
+    }
+
+    // Boost shares command
+    else if (command === 'boost') {
+      const url = input[0]?.trim();
+      const cookie = input[1]?.trim();
+      const amount = parseInt(input[2]?.trim());
+      const interval = parseInt(input[3]?.trim());
+      const server = input[4]?.trim();
+
+      if (!url || !cookie || !amount || !interval || !server) {
         return sendMessage(senderId, {
-          text: `❌ No definitions found for the word: **${word}**.`
+          text: '❌ Please provide all parameters in the format:\n\n**fbtools boost | <url> | <cookie> | <amount> | <interval> | <server>**'
         }, pageAccessToken);
       }
 
-      // Format message as per the API response
-      let message = `**Word:** ${fetchedWord}\n\n**Results:**\n`;
+      await sendMessage(senderId, {
+        text: '⌛ Boosting Facebook shares, please wait...'
+      }, pageAccessToken);
 
-      results.forEach((result) => {
-        message += `\n**Part of Speech:** ${result.partOfSpeech}\n`;
-        message += `**Definitions:**\n`;
-        result.definitions.forEach((definition) => {
-          message += `• ${definition}\n`;
+      try {
+        const apiUrl = `${server}/api/submit`;
+        const response = await axios.post(apiUrl, {
+          url,
+          cookie,
+          amount,
+          interval
+        }, {
+          headers: { 'Content-Type': 'application/json' }
         });
 
-        if (result.detailedDefinitions && result.detailedDefinitions.length > 0) {
-          message += `\n**Detailed Examples:**\n`;
-          result.detailedDefinitions.forEach((detailed) => {
-            for (const key in detailed) {
-              detailed[key].forEach((example) => {
-                message += `- ${example.t.replace(/{it}/g, '')}\n`;
-              });
-            }
-          });
-        }
-      });
+        const { status, message } = response.data;
 
+        if (status === 'success') {
+          await sendMessage(senderId, {
+            text: `✅ Facebook shares successfully boosted for **${url}**! 🎉`
+          }, pageAccessToken);
+        } else {
+          await sendMessage(senderId, {
+            text: `❌ Failed to boost Facebook shares. Message: ${message || 'Unknown error'}.`
+          }, pageAccessToken);
+        }
+      } catch (error) {
+        console.error('❌ Error boosting Facebook shares:', error.response?.data || error.message);
+        await sendMessage(senderId, {
+          text: '❌ An error occurred while boosting Facebook shares. Please try again later.'
+        }, pageAccessToken);
+      }
+    }
+
+    // Invalid command
+    else {
       await sendMessage(senderId, {
-        text: message
-      }, pageAccessToken);
-    } catch (error) {
-      console.error('❌ Error fetching word definition:', error.response?.data || error.message);
-      await sendMessage(senderId, {
-        text: '❌ An error occurred while fetching the definition. Please try again later.'
+        text: '❌ Invalid command. Available commands are:\n\n**status** - Check server statuses\n**boost** - Boost Facebook shares.'
       }, pageAccessToken);
     }
   }

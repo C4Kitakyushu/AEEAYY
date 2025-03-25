@@ -11,7 +11,7 @@ module.exports = {
 
     if (!lawNumber) {
       return sendMessage(senderId, {
-        text: 'Usage: law <number>\n\nExample\n\nlaw 5'
+        text: 'Usage: law <number> (1-48)\n\nExample\n\nlaw 5'
       }, pageAccessToken);
     }
 

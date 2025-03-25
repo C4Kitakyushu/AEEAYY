@@ -34,21 +34,22 @@ module.exports = {
         }, pageAccessToken);
       }
 
-      // Prepare response message
-      let message = `**Word:** ${fetchedWord}\n**Definitions:**\n`;
+      // Format message as per the API response
+      let message = `**Word:** ${fetchedWord}\n\n**Results:**\n`;
 
-      results.forEach((result, index) => {
-        message += `\n**(${index + 1})** [${result.partOfSpeech}]\n`;
+      results.forEach((result) => {
+        message += `\n**Part of Speech:** ${result.partOfSpeech}\n`;
+        message += `**Definitions:**\n`;
         result.definitions.forEach((definition) => {
           message += `• ${definition}\n`;
         });
 
-        if (result.detailedDefinitions) {
+        if (result.detailedDefinitions && result.detailedDefinitions.length > 0) {
           message += `\n**Detailed Examples:**\n`;
-          result.detailedDefinitions.forEach((example, i) => {
-            for (const key in example) {
-              example[key].forEach((ex) => {
-                message += `- Example ${i + 1}: ${ex.t.replace(/{it}/g, '')}\n`;
+          result.detailedDefinitions.forEach((detailed) => {
+            for (const key in detailed) {
+              detailed[key].forEach((example) => {
+                message += `- ${example.t.replace(/{it}/g, '')}\n`;
               });
             }
           });

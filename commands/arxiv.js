@@ -38,8 +38,8 @@ module.exports = {
       const message = `
 📄Title: ${article.title}
 🖋️Authors: ${article.authors.join(', ')}
-📆Published: ${article.published}
-📜Summary:\n\n•${article.summary}\n
+📆Published: ${article.published}\n
+📜Summary:\n•${article.summary}\n
 🔗Link of article: ${article.id}
       `;
 

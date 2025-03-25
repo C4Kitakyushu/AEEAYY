@@ -36,11 +36,11 @@ module.exports = {
 
       // Prepare response message
       const message = `
-**Title:** ${article.title}
-**Authors:** ${article.authors.join(', ')}
-**Published:** ${article.published}
-**Summary:** ${article.summary}
-**Link:** ${article.id}
+📄Title: ${article.title}
+🖋️Authors: ${article.authors.join(', ')}
+📆Published: ${article.published}
+📜Summary:\n\n•${article.summary}\n
+🔗Link of article: ${article.id}
       `;
 
       await sendMessage(senderId, {

@@ -34,7 +34,7 @@ module.exports = {
         }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
-          text: `❌ Failed to fetch the law. Message: ${message || 'Unknown error'}.`
+          text: `❌ Failed to fetch the law. Message: ${message || '1 to 48 only'}.`
         }, pageAccessToken);
       }
     } catch (error) {

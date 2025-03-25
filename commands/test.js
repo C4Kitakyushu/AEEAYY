@@ -41,4 +41,10 @@ module.exports = {
         }, pageAccessToken);
       }
     } catch (error) {
-      console.error('
+      console.error('❌ Error adding reaction:', error.response?.data || error.message);
+      await sendMessage(senderId, {
+        text: '❌ An error occurred while processing your reaction. Please try again later.'
+      }, pageAccessToken);
+    }
+  }
+};

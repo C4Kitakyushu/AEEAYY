@@ -3,53 +3,65 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Fetch article details from the arXiv API based on a query.',
+  description: 'Fetch word definitions using Merriam API.',
   author: 'developer',
 
   async execute(senderId, args, pageAccessToken) {
-    const query = args.join(' ');
+    const word = args.join(' ').trim();
 
-    if (!query) {
+    if (!word) {
       return sendMessage(senderId, {
-        text: '❌ Please provide a search query. Example:\n\n**arxiv love**'
+        text: '❌ Please provide a word to define. Example:\n\n**define dangerous**'
       }, pageAccessToken);
     }
 
     // Notify the user about the ongoing process
     await sendMessage(senderId, {
-      text: '⌛ Searching for articles, please wait...'
+      text: '⌛ Searching for the definition, please wait...'
     }, pageAccessToken);
 
     try {
       // API request
-      const apiUrl = `https://jerome-web.gleeze.com/service/api/arxiv?query=${encodeURIComponent(query)}`;
+      const apiUrl = `https://jerome-web.gleeze.com/service/api/merriam?word=${encodeURIComponent(word)}`;
       const response = await axios.get(apiUrl);
 
       // Parse API response
-      const { query_info, article } = response.data;
+      const { word: fetchedWord, results } = response.data;
 
-      if (!article) {
+      if (!results || results.length === 0) {
         return sendMessage(senderId, {
-          text: `❌ No articles found for the query: **${query}**.`
+          text: `❌ No definitions found for the word: **${word}**.`
         }, pageAccessToken);
       }
 
       // Prepare response message
-      const message = `
-📄Title: ${article.title}
-🖋️Authors: ${article.authors.join(', ')}
-📆Published: ${article.published}
-📜Summary:\n\n•${article.summary}\n
-🔗Link of article: ${article.id}
-      `;
+      let message = `**Word:** ${fetchedWord}\n**Definitions:**\n`;
+
+      results.forEach((result, index) => {
+        message += `\n**(${index + 1})** [${result.partOfSpeech}]\n`;
+        result.definitions.forEach((definition) => {
+          message += `• ${definition}\n`;
+        });
+
+        if (result.detailedDefinitions) {
+          message += `\n**Detailed Examples:**\n`;
+          result.detailedDefinitions.forEach((example, i) => {
+            for (const key in example) {
+              example[key].forEach((ex) => {
+                message += `- Example ${i + 1}: ${ex.t.replace(/{it}/g, '')}\n`;
+              });
+            }
+          });
+        }
+      });
 
       await sendMessage(senderId, {
         text: message
       }, pageAccessToken);
     } catch (error) {
-      console.error('❌ Error fetching article:', error.response?.data || error.message);
+      console.error('❌ Error fetching word definition:', error.response?.data || error.message);
       await sendMessage(senderId, {
-        text: '❌ An error occurred while fetching the article. Please try again later.'
+        text: '❌ An error occurred while fetching the definition. Please try again later.'
       }, pageAccessToken);
     }
   }

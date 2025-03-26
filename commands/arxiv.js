@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'arxiv',
-  description: 'Fetch article details from the arXiv API based on a query.',
+  description: 'fetch article from arxiv.',
   author: 'developer',
 
   async execute(senderId, args, pageAccessToken) {
@@ -11,7 +11,7 @@ module.exports = {
 
     if (!query) {
       return sendMessage(senderId, {
-        text: '❌ Please provide a search query. Example:\n\n**arxiv love**'
+        text: '❌ Usage: provide words\n\nExample: arxiv love'
       }, pageAccessToken);
     }
 

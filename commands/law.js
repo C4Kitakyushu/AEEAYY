@@ -30,7 +30,7 @@ module.exports = {
 
       if (status) {
         await sendMessage(senderId, {
-          text: `📄 Title:${title}\n\n📑Law:${law}`
+          text: `📄Title:${title}\n\n📑Law:${law}`
         }, pageAccessToken);
       } else {
         await sendMessage(senderId, {

@@ -4,7 +4,7 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   name: 'test',
   description: 'Fetch a recipe based on ingredients.',
-  author: 'developer',
+  author: 'kaizenji',
 
   async execute(senderId, args, pageAccessToken) {
     const ingredients = args.join(' ').trim();
@@ -25,14 +25,11 @@ module.exports = {
       const apiUrl = `https://kaiz-apis.gleeze.com/api/recipe?ingredients=${encodeURIComponent(ingredients)}`;
       const response = await axios.get(apiUrl);
 
-      const { status, data } = response.data;
+      const { author, recipe } = response.data;
 
-      if (status === 'success' && data && data.length > 0) {
-        // Format recipes into a readable list
-        const recipes = data.map((recipe, index) => `**${index + 1}. ${recipe.name}**\n${recipe.instructions}`).join('\n\n');
-
+      if (recipe) {
         await sendMessage(senderId, {
-          text: `✅ Here are some recipes for **${ingredients}**:\n\n${recipes}`
+          text: `✅ Recipe found for **${ingredients}**:\n\n**Author**: ${author}\n\n**Recipe**:\n${recipe}`
         }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
@@ -40,9 +37,9 @@ module.exports = {
         }, pageAccessToken);
       }
     } catch (error) {
-      console.error('❌ Error fetching recipes:', error.response?.data || error.message);
+      console.error('❌ Error fetching recipe:', error.response?.data || error.message);
       await sendMessage(senderId, {
-        text: '❌ An error occurred while fetching recipes. Please try again later.'
+        text: '❌ An error occurred while fetching the recipe. Please try again later.'
       }, pageAccessToken);
     }
   }

@@ -3,43 +3,46 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Fetch a recipe based on ingredients.',
-  author: 'kaizenji',
+  description: 'Perform basic math operations using Jerome\'s Advanced Math Calculator.',
+  author: 'Jerome',
 
   async execute(senderId, args, pageAccessToken) {
-    const ingredients = args.join(' ').trim();
+    const input = args.join(' ').split('|');
+    const operation = input[0]?.trim()?.toLowerCase();
+    const num1 = parseFloat(input[1]?.trim());
+    const num2 = parseFloat(input[2]?.trim());
 
-    if (!ingredients) {
+    if (!operation || isNaN(num1) || isNaN(num2)) {
       return sendMessage(senderId, {
-        text: '❌ Please provide ingredients to search for a recipe.\n\nFormat:\n**recipe <ingredients>**'
+        text: '❌ Invalid format! Please use the format:\n\n**mathcalc <operation> | <num1> | <num2>**\n\nAvailable operations: add, subtract, multiply, divide'
       }, pageAccessToken);
     }
 
     // Notify the user about the ongoing process
     await sendMessage(senderId, {
-      text: `⌛ Searching for recipes with **${ingredients}**, please wait...`
+      text: `⌛ Calculating **${operation}** for ${num1} and ${num2}, please wait...`
     }, pageAccessToken);
 
     try {
       // API request
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/recipe?ingredients=${encodeURIComponent(ingredients)}`;
+      const apiUrl = `https://jerome-web.gleeze.com/service/api/math?operation=${encodeURIComponent(operation)}&num1=${num1}&num2=${num2}`;
       const response = await axios.get(apiUrl);
 
-      const { author, recipe } = response.data;
+      const { metadata, result } = response.data;
 
-      if (recipe) {
+      if (result !== undefined) {
         await sendMessage(senderId, {
-          text: `✅ Recipe found for **${ingredients}**:\n\n**Author**: ${author}\n\n**Recipe**:\n${recipe}`
+          text: `✅ **${metadata.name}**\n\n**Author**: ${metadata.author}\n**Description**: ${metadata.description}\n\n**Operation**: ${operation}\n**Result**: ${result}`
         }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
-          text: `❌ No recipes found for **${ingredients}**. Try different ingredients.`
+          text: '❌ Unable to calculate the result. Please check your inputs and try again.'
         }, pageAccessToken);
       }
     } catch (error) {
-      console.error('❌ Error fetching recipe:', error.response?.data || error.message);
+      console.error('❌ Error performing calculation:', error.response?.data || error.message);
       await sendMessage(senderId, {
-        text: '❌ An error occurred while fetching the recipe. Please try again later.'
+        text: '❌ An error occurred while performing the calculation. Please try again later.'
       }, pageAccessToken);
     }
   }

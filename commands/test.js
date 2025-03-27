@@ -1,72 +1,60 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+// Read the token once at the top level
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
   name: 'test',
-  description: 'Fetch the latest news based on a query, including images.',
-  author: 'Elevnnnx',
+  description: 'Search and download songs from SoundCloud.',
+  usage: 'soundcloud <song title>',
+  author: 'dev',
 
-  async execute(senderId, args, pageAccessToken) {
-    const query = args.join(' ').trim();
+  async execute(senderId, args) {
+    const pageAccessToken = token;
 
-    if (!query) {
-      return sendMessage(senderId, {
-        text: '❌ Please provide a search query to fetch news. Example:\n\n**newsfetch Rodrigo Duterte**'
-      }, pageAccessToken);
+    if (!Array.isArray(args) || args.length === 0) {
+      return await sendError(senderId, 'Error: Please provide a song title.', pageAccessToken);
     }
 
-    // Notify the user about the ongoing process
-    await sendMessage(senderId, {
-      text: `⌛ Fetching news for **${query}**, please wait...`
-    }, pageAccessToken);
+    const searchQuery = args.join(' ').trim();
+    await handleSoundCloudSearch(senderId, searchQuery, pageAccessToken);
+  },
+};
 
-    try {
-      // API request
-      const apiUrl = `https://elevnnnx-rest-api.onrender.com/api/news?query=${encodeURIComponent(query)}`;
-      const response = await axios.get(apiUrl);
+// Function to search for a SoundCloud track
+const handleSoundCloudSearch = async (senderId, searchQuery, pageAccessToken) => {
+  try {
+    const apiUrl = `https://haji-mix.up.railway.app/api/soundcloud?title=${encodeURIComponent(searchQuery)}`;
+    const { data } = await axios.get(apiUrl, { responseType: 'stream' });
 
-      const { status, articles } = response.data;
-
-      if (status === 'success' && articles.length > 0) {
-        // Prepare news details
-        const newsMessages = articles
-          .slice(0, 5) // Limit to 5 articles
-          .map((article, index) => {
-            const title = article.title || 'No title available';
-            const author = article.author || 'Unknown Author';
-            const source = article.source || 'Unknown Source';
-            const time = article.time || 'Unknown time';
-            const link = article.link || 'No link available';
-            const imageUrl = article.imageUrl || null;
-
-            return {
-              text: `**${index + 1}. ${title}**\nAuthor: ${author}\nSource: ${source}\nTime: ${time}\n[Read more](${link})`,
-              imageUrl,
-            };
-          });
-
-        // Send messages for each news article
-        for (const news of newsMessages) {
-          await sendMessage(senderId, {
-            text: news.text,
-            attachment: news.imageUrl
-              ? {
-                  type: 'image',
-                  payload: { url: news.imageUrl, is_reusable: true },
-                }
-              : undefined,
-          }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, {
-          text: '❌ No news articles found for your query. Please try again with a different keyword.'
-        }, pageAccessToken);
-      }
-    } catch (error) {
-      console.error('❌ Error fetching news:', error.response?.data || error.message);
-      await sendMessage(senderId, {
-        text: '❌ An error occurred while fetching news. Please try again later.'
-      }, pageAccessToken);
+    if (!data) {
+      return await sendError(senderId, 'Error: No results found.', pageAccessToken);
     }
+
+    // Send the audio
+    const message = `🎶 | Now Playing\n━━━━━━━━━━━━━━━\n🎧 Track: ${searchQuery}\n━━━━━━━━━━━━━━━`;
+    await sendMessage(senderId, { text: message }, pageAccessToken);
+
+    const audioPayload = getAttachmentPayload('audio', apiUrl);
+    await sendMessage(senderId, { attachment: audioPayload }, pageAccessToken);
+  } catch (error) {
+    console.error('Error fetching SoundCloud track:', error);
+    await sendError(senderId, 'Error: An unexpected error occurred. Please try again.', pageAccessToken);
   }
+};
+
+// Function to get attachment payload based on type
+const getAttachmentPayload = (type, url) => {
+  const supportedTypes = {
+    audio: { type: 'audio', payload: { url } },
+  };
+
+  return supportedTypes[type] || null;
+};
+
+// Centralized error handler for sending error messages
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
 };

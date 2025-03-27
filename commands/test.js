@@ -1,39 +1,43 @@
-const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
+const axios = require("axios");
+const { sendMessage } = require("../handles/sendMessage");
+
+const token = "your_token_here";
 
 module.exports = {
-  name: 'test',
-  description: 'Generate an image with Flux AI based on a prompt.',
-  author: 'dev',
+  name: "test',
+  description: "Interact with Deepseek AI",
+  author: "developer",
 
-  async execute(senderId, args, pageAccessToken) {
-    if (!args || !Array.isArray(args) || args.length === 0) {
-      await sendMessage(senderId, { text: 'Please provide a prompt for image generation.\nUsage: /flux <prompt>' }, pageAccessToken);
-      return;
-    }
+  async execute(senderId, args) {
+    const pageAccessToken = token;
+    const userPrompt = (args.join(" ") || "Hello").trim();
 
-    const prompt = args.join(' ');
-    const apiUrl = `https://kaiz-apis.gleeze.com/api/flux`;
-
-    try {
-      // Send request to the Flux API
-      const { data } = await axios.get(apiUrl, {
-        responseType: 'stream',
-        params: { prompt },
-      });
-
-      // Send the generated image
-      await sendMessage(
+    if (!userPrompt) {
+      return sendMessage(
         senderId,
-        {
-          text: `Here is your generated image for: "${prompt}"`,
-          attachment: { type: 'image', payload: { url: data } },
-        },
+        { text: "Please provide a question." },
         pageAccessToken
       );
-    } catch (error) {
-      console.error('Error generating image:', error);
-      await sendMessage(senderId, { text: 'Error: Could not generate image. Please try again later.' }, pageAccessToken);
     }
+
+    await handleDeepseekResponse(senderId, userPrompt, pageAccessToken);
   },
+};
+
+const handleDeepseekResponse = async (senderId, input, pageAccessToken) => {
+  const userID = senderId || Math.floor(Math.random() * 10000);
+  const apiUrl = `https://kaiz-apis.gleeze.com/api/deepseek-v3?ask=${encodeURIComponent(input)}&uid=${userID}`;
+
+  try {
+    const { data } = await axios.get(apiUrl);
+    const responseText = data.response || "I couldn't understand your question.";
+    await sendMessage(senderId, { text: responseText }, pageAccessToken);
+  } catch (error) {
+    console.error("Error in Deepseek AI command:", error);
+    await sendError(senderId, "❌ Deepseek AI is unavailable.", pageAccessToken);
+  }
+};
+
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
 };

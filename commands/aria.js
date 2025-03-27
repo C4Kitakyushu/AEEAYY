@@ -13,7 +13,7 @@ module.exports = {
       return sendMessage(
         senderId,
         {
-          text: `❌ Please provide a prompt for Aria AI to respond to.`
+          text: `Please provide aquestion. `
         },
         pageAccessToken
       );

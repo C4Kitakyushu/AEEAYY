@@ -2,7 +2,7 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'mathcalc',
+  name: 'math',
   description: 'perform basic operation using math advance calculator .',
   author: 'developer',
 
@@ -14,7 +14,7 @@ module.exports = {
 
     if (!operation || isNaN(num1) || isNaN(num2)) {
       return sendMessage(senderId, {
-        text: 'Usage: math <operation> | <num1> | <num2>\n\nAvailable operations: add, subtract, multiply, divide\n\example: math add | 30 | 20'
+        text: 'Usage: math <operation> | <num1> | <num2>\n\nAvailable operations: add, subtract, multiply, divide\n\nexample: math add | 30 | 20'
       }, pageAccessToken);
     }
 
@@ -32,7 +32,7 @@ module.exports = {
 
       if (result !== undefined) {
         await sendMessage(senderId, {
-          text: `${metadata.name} 🔣\n\n𝗢𝗽𝗲𝗿𝗮𝘁𝗶𝗼𝗻 𝗼𝗽𝘁𝗶𝗼𝗻: ${operation}\n𝗥𝗲𝘀𝘂𝗹𝘁: ${result}`
+          text: `${metadata.name} 🔣\n\n𝗢𝗽𝗲𝗿𝗮𝘁𝗶𝗼𝗻: ${operation}\n𝗥𝗲𝘀𝘂𝗹𝘁: ${result}`
         }, pageAccessToken);
       } else {
         await sendMessage(senderId, {

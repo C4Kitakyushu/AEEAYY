@@ -3,46 +3,69 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'test',
-  description: 'Perform basic math operations using Jerome\'s Advanced Math Calculator.',
-  author: 'Jerome',
+  description: 'Fetch the latest news based on a query, including images.',
+  author: 'Elevnnnx',
 
   async execute(senderId, args, pageAccessToken) {
-    const input = args.join(' ').split('|');
-    const operation = input[0]?.trim()?.toLowerCase();
-    const num1 = parseFloat(input[1]?.trim());
-    const num2 = parseFloat(input[2]?.trim());
+    const query = args.join(' ').trim();
 
-    if (!operation || isNaN(num1) || isNaN(num2)) {
+    if (!query) {
       return sendMessage(senderId, {
-        text: '❌ Invalid format! Please use the format:\n\n**mathcalc <operation> | <num1> | <num2>**\n\nAvailable operations: add, subtract, multiply, divide'
+        text: '❌ Please provide a search query to fetch news. Example:\n\n**newsfetch Rodrigo Duterte**'
       }, pageAccessToken);
     }
 
     // Notify the user about the ongoing process
     await sendMessage(senderId, {
-      text: `⌛ Calculating **${operation}** for ${num1} and ${num2}, please wait...`
+      text: `⌛ Fetching news for **${query}**, please wait...`
     }, pageAccessToken);
 
     try {
       // API request
-      const apiUrl = `https://jerome-web.gleeze.com/service/api/math?operation=${encodeURIComponent(operation)}&num1=${num1}&num2=${num2}`;
+      const apiUrl = `https://elevnnnx-rest-api.onrender.com/api/news?query=${encodeURIComponent(query)}`;
       const response = await axios.get(apiUrl);
 
-      const { metadata, result } = response.data;
+      const { status, articles } = response.data;
 
-      if (result !== undefined) {
-        await sendMessage(senderId, {
-          text: `✅ **${metadata.name}**\n\n**Author**: ${metadata.author}\n**Description**: ${metadata.description}\n\n**Operation**: ${operation}\n**Result**: ${result}`
-        }, pageAccessToken);
+      if (status === 'success' && articles.length > 0) {
+        // Prepare news details
+        const newsMessages = articles
+          .slice(0, 5) // Limit to 5 articles
+          .map((article, index) => {
+            const title = article.title || 'No title available';
+            const author = article.author || 'Unknown Author';
+            const source = article.source || 'Unknown Source';
+            const time = article.time || 'Unknown time';
+            const link = article.link || 'No link available';
+            const imageUrl = article.imageUrl || null;
+
+            return {
+              text: `**${index + 1}. ${title}**\nAuthor: ${author}\nSource: ${source}\nTime: ${time}\n[Read more](${link})`,
+              imageUrl,
+            };
+          });
+
+        // Send messages for each news article
+        for (const news of newsMessages) {
+          await sendMessage(senderId, {
+            text: news.text,
+            attachment: news.imageUrl
+              ? {
+                  type: 'image',
+                  payload: { url: news.imageUrl, is_reusable: true },
+                }
+              : undefined,
+          }, pageAccessToken);
+        }
       } else {
         await sendMessage(senderId, {
-          text: '❌ Unable to calculate the result. Please check your inputs and try again.'
+          text: '❌ No news articles found for your query. Please try again with a different keyword.'
         }, pageAccessToken);
       }
     } catch (error) {
-      console.error('❌ Error performing calculation:', error.response?.data || error.message);
+      console.error('❌ Error fetching news:', error.response?.data || error.message);
       await sendMessage(senderId, {
-        text: '❌ An error occurred while performing the calculation. Please try again later.'
+        text: '❌ An error occurred while fetching news. Please try again later.'
       }, pageAccessToken);
     }
   }

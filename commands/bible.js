@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: "📖 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗕𝗶𝗯𝗹𝗲 𝘃𝗲𝗿𝘀𝗲..." }, pageAccessToken);
 
     try {
-      const response = await axios.get('https://elevnnnx-rest-api.onrender.com/api/bibleverse', {
+      const response = await axios.get('https://beta.ourmanna.com/api/v1/get/?', {
         params: {
           text: "Many are the plans in a person’s heart, but it is the Lord’s purpose that prevails. - Proverbs 19:21 (NIV)\n"
         }

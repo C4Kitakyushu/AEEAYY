@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'removebgv2',
-  description: 'Remove the background of an image.',
+  description: 'remove the background of an image.',
   author: 'dev',
 
   async execute(senderId, args, pageAccessToken, imageUrl) {

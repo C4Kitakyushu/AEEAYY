@@ -15,7 +15,7 @@ module.exports = {
     const pageAccessToken = token;
 
     if (!Array.isArray(args) || args.length === 0) {
-      return await sendError(senderId, 'Usage: fbuid [Facebook profile URL]', pageAccessToken);
+      return await sendError(senderId, 'Usage: uid [Facebook profile URL]', pageAccessToken);
     }
 
     const profileUrl = args.join(' ').trim();

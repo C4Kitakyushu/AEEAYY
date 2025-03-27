@@ -41,7 +41,7 @@ async function handleDeepseekRequest(apiUrl, query, senderId) {
   const { data } = await axios.get(apiUrl, {
     params: {
       ask: query,
-      uid: senderId || "4",
+      uid: senderId || senderId,
     },
   });
 

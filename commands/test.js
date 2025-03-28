@@ -3,45 +3,53 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "test",
-  description: "Interact with Deepseek AI",
+  description: "Interact with Meta AI (Llama)",
   author: "developer",
 
-  async execute(senderId, args, pageAccessToken, event) {
+  async execute(senderId, args, pageAccessToken) {
     const userPrompt = args.join(" ").trim();
 
     if (!userPrompt) {
       return sendMessage(
         senderId,
         {
-          text: `❌ Please provide a question for Deepseek AI to respond to.`
+          text: `❌ Please enter a prompt. Example: metaai Tell me a story.`,
         },
         pageAccessToken
       );
     }
 
     try {
-      const apiUrl = "https://kaiz-apis.gleeze.com/api/deepseek-v3";
-      const response = await handleDeepseekRequest(apiUrl, userPrompt, senderId);
+      // Notify user of processing
+      await sendMessage(
+        senderId,
+        { text: `[ Meta AI (Llama) ]\n\nPlease wait...` },
+        pageAccessToken
+      );
 
-      const result = response.response || "No response from Deepseek AI.";
+      // Fetch response from the API
+      const apiUrl = "https://zen-api.up.railway.app/api/metaai";
+      const response = await handleMetaAIRequest(apiUrl, userPrompt);
 
+      const result = response.response || "No response from Meta AI.";
+
+      // Send the response back to the user
       await sendConcatenatedMessage(senderId, result, pageAccessToken);
     } catch (error) {
-      console.error("Error in Deepseek command:", error);
+      console.error("Error in Meta AI command:", error);
       sendMessage(
         senderId,
-        { text: `❌ Error: ${error.message || "Something went wrong."}` },
+        { text: `❌ Failed to fetch data. Please try again later.\n\nError: ${error.message}` },
         pageAccessToken
       );
     }
   },
 };
 
-async function handleDeepseekRequest(apiUrl, query, senderId) {
+async function handleMetaAIRequest(apiUrl, prompt) {
   const { data } = await axios.get(apiUrl, {
     params: {
-      ask: query,
-      uid: senderId || senderId,
+      prompt: prompt,
     },
   });
 

@@ -1,55 +1,80 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
 
-const token = fs.readFileSync('token.txt', 'utf8');
+// Helper function to split text into chunks
+function chunkText(text, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < text.length; i += chunkSize) {
+    chunks.push(text.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
 
 module.exports = {
   name: 'test',
-  description: 'generate an image using the SD model based on a prompt.',
-  usage: 'sd <prompt>',
-  author: 'redwan',
+  description: 'Fetch a poem by title, author, or randomly.',
+  author: 'developer',
 
-  execute: async (senderId, args) => {
-    const pageAccessToken = token;
+  async execute(senderId, args, pageAccessToken) {
+    const query = args.join(' ');
 
-    // Validate user input
-    if (!args[0]) {
-      return sendError(senderId, '❌ Error: Please provide a prompt for the image generation (e.g., sd sunset).', pageAccessToken);
+    if (!query) {
+      return sendMessage(senderId, {
+        text: '❌ Usage: provide a type and optionally a title or author\n\nExample: poetry title love\nExample: poetry author william\nExample: poetry random'
+      }, pageAccessToken);
     }
 
-    const prompt = args.join(' ');
-    const apiUrl = `https://global-redwans-apis.onrender.com/api/sd?prompt=${encodeURIComponent(prompt)}`;
-
-    // Notify user that the image is being generated
-    await sendMessage(senderId, { text: '🔄 Generating your image, please wait...' }, pageAccessToken);
+    // Notify the user about the ongoing process
+    await sendMessage(senderId, {
+      text: '⌛ Searching for poems, please wait...'
+    }, pageAccessToken);
 
     try {
-      const { data } = await axios.get(apiUrl, { responseType: 'json' });
+      // Extract type and optional title/author
+      const [type, ...rest] = args;
+      const titleOrAuthor = rest.join(' ');
 
-      // Validate response payload
-      if (!data || !data.imageUrl) {
-        return sendError(senderId, '❌ Error: Failed to generate an image. Please try again.', pageAccessToken);
+      // Validate type
+      if (!['title', 'author', 'random'].includes(type.toLowerCase())) {
+        return sendMessage(senderId, {
+          text: '❌ Invalid type. Use one of the following:\n• title\n• author\n• random'
+        }, pageAccessToken);
       }
 
-      // Send the generated image using its URL payload
-      await sendMessage(
-        senderId,
-        {
-          attachment: {
-            type: 'image',
-            payload: { url: data.imageUrl },
-          },
-        },
-        pageAccessToken
-      );
-    } catch (error) {
-      console.error('Error generating image:', error);
-      sendError(senderId, '❌ Error: An error occurred while generating the image. Please try again later.', pageAccessToken);
-    }
-  },
-};
+      // API request
+      const apiUrl = `https://jerome-web.gleeze.com/service/api/poetry?type=${encodeURIComponent(type)}${titleOrAuthor ? `&titleorauthor=${encodeURIComponent(titleOrAuthor)}` : ''}`;
+      const response = await axios.get(apiUrl);
 
-const sendError = async (senderId, errorMessage, pageAccessToken) => {
-  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+      // Parse API response
+      const { data } = response.data;
+
+      if (!data || data.length === 0) {
+        return sendMessage(senderId, {
+          text: `❌ No poems found for the query: **${titleOrAuthor}**.`
+        }, pageAccessToken);
+      }
+
+      // Prepare response message for the first poem
+      const poem = data[0];
+      const poemText = poem.lines.join('\n');
+      const chunks = chunkText(poemText, 500); // Chunk text into 500-character parts
+
+      // Send poem details
+      await sendMessage(senderId, {
+        text: `📜Title: ${poem.title}\n🖋️Author: ${poem.author}\n\n📄Poem:`
+      }, pageAccessToken);
+
+      // Send chunks sequentially
+      for (const chunk of chunks) {
+        await sendMessage(senderId, {
+          text: chunk
+        }, pageAccessToken);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching poem:', error.response?.data || error.message);
+      await sendMessage(senderId, {
+        text: '❌ An error occurred while fetching the poem. Please try again later.'
+      }, pageAccessToken);
+    }
+  }
 };

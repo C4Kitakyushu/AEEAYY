@@ -1,80 +1,55 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const fs = require('fs');
+
+const token = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: "test",
-  description: "Interact with Meta AI (Llama)",
-  author: "developer",
+  name: 'test',
+  description: 'generate an image using the SD model based on a prompt.',
+  usage: 'sd <prompt>',
+  author: 'redwan',
 
-  async execute(senderId, args, pageAccessToken) {
-    const userPrompt = args.join(" ").trim();
+  execute: async (senderId, args) => {
+    const pageAccessToken = token;
 
-    if (!userPrompt) {
-      return sendMessage(
+    // Validate user input
+    if (!args[0]) {
+      return sendError(senderId, '❌ Error: Please provide a prompt for the image generation (e.g., sd sunset).', pageAccessToken);
+    }
+
+    const prompt = args.join(' ');
+    const apiUrl = `https://global-redwans-apis.onrender.com/api/sd?prompt=${encodeURIComponent(prompt)}`;
+
+    // Notify user that the image is being generated
+    await sendMessage(senderId, { text: '🔄 Generating your image, please wait...' }, pageAccessToken);
+
+    try {
+      const { data } = await axios.get(apiUrl, { responseType: 'json' });
+
+      // Validate response payload
+      if (!data || !data.imageUrl) {
+        return sendError(senderId, '❌ Error: Failed to generate an image. Please try again.', pageAccessToken);
+      }
+
+      // Send the generated image using its URL payload
+      await sendMessage(
         senderId,
         {
-          text: `❌ Please enter a prompt. Example: metaai Tell me a story.`,
+          attachment: {
+            type: 'image',
+            payload: { url: data.imageUrl },
+          },
         },
         pageAccessToken
       );
-    }
-
-    try {
-      // Notify user of processing
-      await sendMessage(
-        senderId,
-        { text: `[ Meta AI (Llama) ]\n\nPlease wait...` },
-        pageAccessToken
-      );
-
-      // Fetch response from the API
-      const apiUrl = "https://zen-api.up.railway.app/api/metaai";
-      const response = await handleMetaAIRequest(apiUrl, userPrompt);
-
-      const result = response.response || "No response from Meta AI.";
-
-      // Send the response back to the user
-      await sendConcatenatedMessage(senderId, result, pageAccessToken);
     } catch (error) {
-      console.error("Error in Meta AI command:", error);
-      sendMessage(
-        senderId,
-        { text: `❌ Failed to fetch data. Please try again later.\n\nError: ${error.message}` },
-        pageAccessToken
-      );
+      console.error('Error generating image:', error);
+      sendError(senderId, '❌ Error: An error occurred while generating the image. Please try again later.', pageAccessToken);
     }
   },
 };
 
-async function handleMetaAIRequest(apiUrl, prompt) {
-  const { data } = await axios.get(apiUrl, {
-    params: {
-      prompt: prompt,
-    },
-  });
-
-  return data;
-}
-
-async function sendConcatenatedMessage(senderId, text, pageAccessToken) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await sendMessage(senderId, { text: message }, pageAccessToken);
-    }
-  } else {
-    await sendMessage(senderId, { text }, pageAccessToken);
-  }
-}
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}
+const sendError = async (senderId, errorMessage, pageAccessToken) => {
+  await sendMessage(senderId, { text: errorMessage }, pageAccessToken);
+};

@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'remini',
-  description: 'upscale an image .',
+  description: 'enhance an image using remini.',
   author: 'dev',
 
   async execute(senderId, args, pageAccessToken, imageUrl) {
@@ -16,22 +16,24 @@ module.exports = {
     await sendMessage(senderId, { text: '⌛ 𝗘𝗻𝗵𝗮𝗻𝗰𝗶𝗻𝗴 𝗶𝗺𝗮𝗴𝗲 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
 
     try {
-      const upscaleUrl = `https://kaiz-apis.gleeze.com/api/upscale?imageUrl=${encodeURIComponent(imageUrl)}`;
+      const enhanceUrl = `https://xnilnew404.onrender.com/xnil/remini?imageUrl=${encodeURIComponent(imageUrl)}&method=enhance`;
 
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: upscaleUrl
+            url: enhanceUrl
           }
         }
       }, pageAccessToken);
 
     } catch (error) {
-      console.error('Error upscaling image:', error);
+      console.error('Error enhancing image:', error);
       await sendMessage(senderId, {
-        text: 'An error occurred while processing the image. Please try again later.'
+        text: '❌ An error occurred while processing the image. Please try again later.'
       }, pageAccessToken);
     }
   }
 };
+
+

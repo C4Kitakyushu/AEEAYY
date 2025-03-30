@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: "⌛ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗿𝗮𝗻𝗱𝗼𝗺 𝗰𝗼𝗿𝗻𝘆 𝗷𝗼𝗸𝗲𝘀 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁..." }, pageAccessToken);
 
     try {
-      const apiUrl = 'https://aryanchauhanapi2.onrender.com/api/joke';
+      const apiUrl = 'https://kaiz-apis.gleeze.com/api/joke';
       const response = await axios.get(apiUrl);
       const joke = response.data.joke;
 

@@ -8,7 +8,7 @@ module.exports = {
     sendMessage(senderId, { text: "⚙ 𝗙𝗲𝘁𝗰𝗵𝗶𝗻𝗴 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗾𝘂𝗼𝘁𝗲..." }, pageAccessToken);
 
     try {
-      const response = await axios.get('https://rest-api.joshuaapostol.site/quote');
+      const response = await axios.get('https://aryanchauhanapi2.onrender.com/api/quote');
       const { quote } = response.data;
 
       if (!quote) {

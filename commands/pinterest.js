@@ -25,7 +25,7 @@ module.exports = {
 
       // Parse the number of images and check that it’s within a valid range (1-10)
       const numOfImages = parseInt(count) || 5;
-      if (isNaN(numOfImages) || numOfImages < 1 || numOfImages > 10) {
+      if (isNaN(numOfImages) || numOfImages < 1 || numOfImages > 20) {
         return sendMessage(senderId, {
           text: "Usage: pinterest [search term] - [number of images]\nexample: pinterest dog - 10"
         }, pageAccessToken);

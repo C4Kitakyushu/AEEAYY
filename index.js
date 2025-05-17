@@ -54,7 +54,7 @@ const sendMessengerProfileRequest = async (method, url, data = null) => {
   try {
     const response = await axios({
       method,
-      url: `https://graph.facebook.com/v21.0${url}?access_token=${PAGE_ACCESS_TOKEN}`,
+      url: `https://graph.facebook.com/v22.0${url}?access_token=${PAGE_ACCESS_TOKEN}`,
       headers: { 'Content-Type': 'application/json' },
       data
     });
@@ -102,7 +102,6 @@ fs.watch(COMMANDS_PATH, (eventType, filename) => {
     });
   }
 });
-  
 
 // Server initialization
 const PORT = process.env.PORT || 3000;

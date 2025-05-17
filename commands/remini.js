@@ -16,7 +16,7 @@ module.exports = {
     await sendMessage(senderId, { text: '⌛ 𝗘𝗻𝗵𝗮𝗻𝗰𝗶𝗻𝗴 𝗶𝗺𝗮𝗴𝗲 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...' }, pageAccessToken);
 
     try {
-      const enhanceUrl = `https://xnilnew404.onrender.com/xnil/remini?imageUrl=${encodeURIComponent(imageUrl)}&method=enhance`;
+      const enhanceUrl = `https://kaiz.apis.gleeze.com/api/upscale?imageUrl=${encodeURIComponent(imageUrl)}`;
 
       await sendMessage(senderId, {
         attachment: {
